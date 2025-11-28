@@ -57,6 +57,7 @@ PRICE_PER_SHARE_SELECTOR = '0x99530b06'
 DECIMALS_SELECTOR = '0x313ce567'
 
 price_per_share_cache: Dict[int, int] = {}
+block_timestamp_cache: Dict[int, datetime.datetime] = {}
 
 
 @dataclass
@@ -153,20 +154,25 @@ def get_price_per_share_at_block(block_number: int) -> int:
 
 
 def get_block_timestamp(block_number: int) -> datetime.datetime:
+    if block_number in block_timestamp_cache:
+        return block_timestamp_cache[block_number]
+
     try:
         block = rpc_call('eth_getBlockByNumber', [f'0x{block_number:x}', False])
         timestamp = int(block['timestamp'], 16)
-        return datetime.datetime.utcfromtimestamp(timestamp)
+        result = datetime.datetime.fromtimestamp(timestamp, datetime.timezone.utc)
     except Exception:
         try:
             current_block_hex = rpc_call('eth_blockNumber', [])
             current_block = int(current_block_hex, 16)
-            current_time = datetime.datetime.utcnow()
+            current_time = datetime.datetime.now(datetime.timezone.utc)
             block_diff = current_block - block_number
-            estimated = current_time - datetime.timedelta(seconds=block_diff * 12)
-            return estimated
+            result = current_time - datetime.timedelta(seconds=block_diff * 12)
         except Exception:
-            return datetime.datetime.utcnow()
+            result = datetime.datetime.now(datetime.timezone.utc)
+
+    block_timestamp_cache[block_number] = result
+    return result
 
 
 def format_date(value: datetime.datetime) -> str:
@@ -362,14 +368,41 @@ def calculate_position(events: List[Event], depositor_address: str) -> PositionR
     )
 
 
-def calculate_weighted_average_entry_pps(deposits: List[DepositEvent]) -> int:
+def calculate_weighted_average_entry_pps(events: List[Event], decimals: int) -> int:
+    scale = 10 ** decimals
     total_assets = 0
     total_shares = 0
-    for deposit in deposits:
-        total_assets += int(deposit.assets)
-        total_shares += int(deposit.shares)
+
+    for event in events:
+        if event.type == 'deposit':
+            shares = int(event.data['shares'])
+            assets = int(event.data['assets'])
+            total_shares += shares
+            total_assets += assets
+        elif event.type == 'withdraw':
+            shares = int(event.data['shares'])
+            if total_shares > 0:
+                remove_shares = min(shares, total_shares)
+                removed_assets = (total_assets * remove_shares) // total_shares
+                total_shares -= remove_shares
+                total_assets -= removed_assets
+        elif event.type == 'transfer_in':
+            shares = int(event.data['value'])
+            pps = get_price_per_share_at_block(event.block_number)
+            assets = shares * pps // scale
+            total_shares += shares
+            total_assets += assets
+        elif event.type == 'transfer_out':
+            shares = int(event.data['value'])
+            if total_shares > 0:
+                remove_shares = min(shares, total_shares)
+                removed_assets = (total_assets * remove_shares) // total_shares
+                total_shares -= remove_shares
+                total_assets -= removed_assets
+
     if total_shares == 0:
         return 0
+
     return total_assets * 1000000 // total_shares
 
 
@@ -483,11 +516,39 @@ def plot_balance_profit(snapshots: List[PositionSnapshot], decimals: int) -> Non
     profits = [point['profit'] / (10 ** decimals) for point in graph_series]
 
     fig, ax = plt.subplots(figsize=(10, 4))
-    shares_line, = ax.plot(blocks, shares, label='Share balance', color='tab:blue')
+    try:
+        fig.canvas.manager.set_window_title('Balance and profit over time')
+    except AttributeError:
+        try:
+            fig.canvas.set_window_title('Balance and profit over time')
+        except AttributeError:
+            pass
+    # Use a step chart so balances stay flat between on-chain events and only jump at the event block.
+    shares_line, = ax.step(blocks, shares, label='Share balance', color='tab:blue', where='post')
     ax.set_xlabel('Block')
     ax.set_ylabel('Shares (USDC share units)', color='tab:blue')
     ax.tick_params(axis='y', labelcolor='tab:blue')
     ax.grid(alpha=0.3)
+
+    dates = [get_block_timestamp(block) for block in blocks]
+    year_ticks: List[Tuple[int, int]] = []
+    current_year: Optional[int] = None
+    for block, date in zip(blocks, dates):
+        year = date.year
+        if current_year is None or year != current_year:
+            year_ticks.append((block, year))
+            current_year = year
+
+    if year_ticks:
+        ax_dates = ax.twiny()
+        ax_dates.set_xlim(ax.get_xlim())
+        ax_dates.set_xticks([block for block, _ in year_ticks])
+        ax_dates.set_xticklabels([str(year) for _, year in year_ticks])
+        ax_dates.set_xlabel('Year')
+        ax_dates.xaxis.set_label_position('top')
+        ax_dates.xaxis.set_ticks_position('top')
+        ax_dates.spines['top'].set_position(('outward', 36))
+        ax_dates.tick_params(axis='x', labelrotation=0)
 
     ax2 = ax.twinx()
     profit_line, = ax2.plot(blocks, profits, label='Incremental profit (USDC)', color='tab:green')
@@ -529,7 +590,6 @@ def format_output(
     transfers_in = [t for t in transfers if t.receiver.lower() == depositor_address.lower()]
     transfers_out = [t for t in transfers if t.sender.lower() == depositor_address.lower()]
     net_transferred_shares = sum(int(t.value) for t in transfers_in) - sum(int(t.value) for t in transfers_out)
-    has_significant_transfers = bool(transfers_in or transfers_out)
 
     print('\n' + '=' * 80)
     print('YEARN V3 DEPOSITOR FEE & PROFIT ANALYSIS')
@@ -577,14 +637,6 @@ def format_output(
 
     print('\n📈 PROFIT/LOSS (Price Per Share Method)')
     print('-' * 80)
-    if has_significant_transfers:
-        print('⚠️  WARNING: This address has share transfers!')
-        print(f'    Shares transferred IN:  {format_units(sum(int(t.value) for t in transfers_in), 6)}')
-        print(f'    Shares transferred OUT: {format_units(sum(int(t.value) for t in transfers_out), 6)}')
-        print(f'    Net shares transferred: {format_units(net_transferred_shares, 6)}')
-        print('\n    Profit calculation below is based on deposited shares only.')
-        print('    Transferred shares may have different cost basis.')
-
     net_profit_sign = '+' if net_profit >= 0 else ''
     gross_profit_sign = '+' if gross_profit >= 0 else ''
     print(f'Gross Profit (before fees): {gross_profit_sign}{format_units(gross_profit, 6)} USDC')
@@ -602,7 +654,7 @@ def format_output(
         print(f'Fees as % of Gross:     {fee_percentage / 100:.2f}%')
 
     print('\nCalculation Method:')
-    print('  • Weighted average entry PPS calculated from all deposits')
+    print('  • Weighted average entry PPS calculated from deposits and incoming transfers (transfers valued at the block PPS)')
     print('  • Net profit = (Current PPS - Entry PPS) × Current Shares')
     print('  • Gross profit = Net profit / (1 - Fee Rate)')
     print('  • Fees = Gross profit - Net profit')
@@ -614,41 +666,27 @@ def format_output(
     print(f'Total Transfers:    {len(transfers)} (excluding mint/burn)')
     print(f'  - Transfers IN:   {len(transfers_in)}')
     print(f'  - Transfers OUT:  {len(transfers_out)}')
+    print(f'Total Events Processed: {len(position.user_events)}')
 
-    if deposits:
-        print('\n  Deposits:')
-        for index, deposit in enumerate(deposits, start=1):
-            block, _ = parse_event_id(deposit.id)
-            print(f'    {index}. Block {block}: {format_units(int(deposit.assets), 6)} USDC → {format_units(int(deposit.shares), 6)} shares')
-
-    if withdrawals:
-        print('\n  Withdrawals:')
-        for index, withdrawal in enumerate(withdrawals, start=1):
-            block, _ = parse_event_id(withdrawal.id)
-            print(f'    {index}. Block {block}: {format_units(int(withdrawal.shares), 6)} shares → {format_units(int(withdrawal.assets), 6)} USDC')
-
-    if transfers:
-        print('\n  Transfers:')
-        for index, transfer in enumerate(transfers, start=1):
-            block, _ = parse_event_id(transfer.id)
-            direction = 'OUT' if transfer.sender.lower() == depositor_address.lower() else 'IN'
-            print(f'    {index}. Block {block}: {direction} {format_units(int(transfer.value), 6)} shares')
-
-    print('\n🐛 DEBUGGING INFO')
-    print('-' * 80)
-    print(f'Total Events Processed:     {len(position.user_events)}')
-    print(f'Position Snapshots:         {len(position.snapshots)}')
-
-    print('\n📅 COMPLETE EVENT TIMELINE')
-    print('-' * 80)
     all_events = build_event_timeline(deposits, withdrawals, transfers, depositor_address)
-    print(f'Total events: {len(all_events)}')
     if all_events:
-        print('\n  First 10 events:')
-        for idx, event in enumerate(all_events[:10], start=1):
-            print(f'    {idx}. Block {event.block_number} [{event.type}]')
-        if len(all_events) > 10:
-            print(f'    ... and {len(all_events) - 10} more events')
+        print('\n  Events:')
+        for index, event in enumerate(all_events, start=1):
+            block = event.block_number
+            if event.type == 'deposit':
+                assets = int(event.data['assets'])
+                shares = int(event.data['shares'])
+                print(f'    {index}. Block {block}: Deposit {format_units(assets, 6)} USDC → {format_units(shares, 6)} shares')
+            elif event.type == 'withdraw':
+                assets = int(event.data['assets'])
+                shares = int(event.data['shares'])
+                print(f'    {index}. Block {block}: Withdraw {format_units(shares, 6)} shares → {format_units(assets, 6)} USDC')
+            elif event.type == 'transfer_in':
+                value = int(event.data['value'])
+                print(f'    {index}. Block {block}: Transfer IN {format_units(value, 6)} shares')
+            elif event.type == 'transfer_out':
+                value = int(event.data['value'])
+                print(f'    {index}. Block {block}: Transfer OUT {format_units(value, 6)} shares')
 
     print('\n' + '=' * 80)
 
@@ -686,7 +724,7 @@ def main() -> None:
 
     print('Fetching performance fee rate...')
     performance_fee_bps = get_performance_fee_rate(VAULT_ADDRESS)
-    weighted_avg_entry_pps = calculate_weighted_average_entry_pps(deposits)
+    weighted_avg_entry_pps = calculate_weighted_average_entry_pps(position.user_events, decimals)
     profit_and_fees = calculate_incremental_profit_and_fees(
         position.snapshots,
         performance_fee_bps,

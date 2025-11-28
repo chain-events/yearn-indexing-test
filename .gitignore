@@ -31,5 +31,16 @@ artifacts
 cache
 *.res.js
 *.res.mjs
-generated
 .env
+.env.local
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+.mypy_cache/
+.pytest_cache/
+.venv/
+venv/

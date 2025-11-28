@@ -38,19 +38,15 @@ Visit http://localhost:8080 to see the GraphQL Playground, local password is `te
 
 ### Calculate Depositor Fees
 
-Once the indexer is running, you can calculate fees and profit for any depositor:
+Once the indexer is running, use the Python calculator to analyze any depositor:
 
 ```bash
-# Using pnpm script
-pnpm calc-fees <depositor-address>
-
-# Or directly with tsx
-tsx src/calculate-depositor-fees.ts <depositor-address>
+python3 scripts/calc_depositor_fees.py <depositor-address>
 ```
 
 **Example:**
 ```bash
-pnpm calc-fees 0x1234567890123456789012345678901234567890
+python3 scripts/calc_depositor_fees.py 0x93A62dA5a14C80f265DAbC077fCEE437B1a0Efde
 ```
 
 **Output includes:**
