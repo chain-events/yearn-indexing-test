@@ -1,0 +1,122 @@
+type Deposit {
+  id: ID!
+  sender: String!
+  owner: String!
+  assets: BigInt!
+  shares: BigInt!
+}
+
+type Withdraw {
+  id: ID!
+  sender: String!
+  receiver: String!
+  owner: String!
+  assets: BigInt!
+  shares: BigInt!
+}
+
+type Transfer {
+  id: ID!
+  sender: String!
+  receiver: String!
+  value: BigInt!
+}
+
+type Approval {
+  id: ID!
+  owner: String!
+  spender: String!
+  value: BigInt!
+}
+
+type StrategyChanged {
+  id: ID!
+  strategy: String!
+  change_type: BigInt!
+}
+
+type StrategyReported {
+  id: ID!
+  strategy: String!
+  gain: BigInt!
+  loss: BigInt!
+  current_debt: BigInt!
+  protocol_fees: BigInt!
+  total_fees: BigInt!
+  total_refunds: BigInt!
+}
+
+type DebtUpdated {
+  id: ID!
+  strategy: String!
+  current_debt: BigInt!
+  new_debt: BigInt!
+}
+
+type RoleSet {
+  id: ID!
+  account: String!
+  role: BigInt!
+}
+
+type UpdateRoleManager {
+  id: ID!
+  role_manager: String!
+}
+
+type UpdateAccountant {
+  id: ID!
+  accountant: String!
+}
+
+type UpdateDepositLimitModule {
+  id: ID!
+  deposit_limit_module: String!
+}
+
+type UpdateWithdrawLimitModule {
+  id: ID!
+  withdraw_limit_module: String!
+}
+
+type UpdateDefaultQueue {
+  id: ID!
+  new_default_queue: [String!]!
+}
+
+type UpdateUseDefaultQueue {
+  id: ID!
+  use_default_queue: Boolean!
+}
+
+type UpdatedMaxDebtForStrategy {
+  id: ID!
+  sender: String!
+  strategy: String!
+  new_debt: BigInt!
+}
+
+type UpdateDepositLimit {
+  id: ID!
+  deposit_limit: BigInt!
+}
+
+type UpdateMinimumTotalIdle {
+  id: ID!
+  minimum_total_idle: BigInt!
+}
+
+type UpdateProfitMaxUnlockTime {
+  id: ID!
+  profit_max_unlock_time: BigInt!
+}
+
+type DebtPurchased {
+  id: ID!
+  strategy: String!
+  amount: BigInt!
+}
+
+type Shutdown {
+  id: ID!
+}
