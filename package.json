@@ -24,7 +24,7 @@
   },
   "dependencies": {
     "envio": "2.32.2",
-    "viem": "^2.41.2"
+    "viem": "^2.42.1"
   },
   "optionalDependencies": {
     "generated": "link:generated"
