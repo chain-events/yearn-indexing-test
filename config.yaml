@@ -8,33 +8,16 @@ networks:
       - name: YearnV3Vault
         address:
           - "0xBe53A109B494E5c9f97b9Cd39Fe969BE68BF6204" # USDC
-          # - "0x028eC7330ff87667b6dfb0D94b954c820195336c" # DAI
-          # - "0x310B7Ea7475A0B449Cfd73bE81522F1B88eFAFaa" # USDT
-          # - "0x182863131F9a4630fF9E27830d945B1413e347E8" # USDS
-          # - "0xBF319dDC2Edc1Eb6FDf9910E39b37Be221C8805F" # CRVUSD
-          # - "0xc56413869c6CDf96496f2b1eF801fEDBdFA7dDB0" # WETH
+          - "0x028eC7330ff87667b6dfb0D94b954c820195336c" # DAI
+          - "0x310B7Ea7475A0B449Cfd73bE81522F1B88eFAFaa" # USDT
+          - "0x182863131F9a4630fF9E27830d945B1413e347E8" # USDS
+          - "0xBF319dDC2Edc1Eb6FDf9910E39b37Be221C8805F" # CRVUSD
+          - "0xc56413869c6CDf96496f2b1eF801fEDBdFA7dDB0" # WETH
         handler: src/EventHandlers.ts
         events:
           - event: "Deposit(address indexed sender, address indexed owner, uint256 assets, uint256 shares)"
           - event: "Withdraw(address indexed sender, address indexed receiver, address indexed owner, uint256 assets, uint256 shares)"
           - event: "Transfer(address indexed sender, address indexed receiver, uint256 value)"
-          - event: "Approval(address indexed owner, address indexed spender, uint256 value)"
-          - event: "StrategyChanged(address indexed strategy, uint256 indexed change_type)"
-          - event: "StrategyReported(address indexed strategy, uint256 gain, uint256 loss, uint256 current_debt, uint256 protocol_fees, uint256 total_fees, uint256 total_refunds)"
-          - event: "DebtUpdated(address indexed strategy, uint256 current_debt, uint256 new_debt)"
-          - event: "RoleSet(address indexed account, uint256 indexed role)"
-          - event: "UpdateRoleManager(address indexed role_manager)"
-          - event: "UpdateAccountant(address indexed accountant)"
-          - event: "UpdateDepositLimitModule(address indexed deposit_limit_module)"
-          - event: "UpdateWithdrawLimitModule(address indexed withdraw_limit_module)"
-          - event: "UpdateDefaultQueue(address[] new_default_queue)"
-          - event: "UpdateUseDefaultQueue(bool use_default_queue)"
-          - event: "UpdatedMaxDebtForStrategy(address indexed sender, address indexed strategy, uint256 new_debt)"
-          - event: "UpdateDepositLimit(uint256 deposit_limit)"
-          - event: "UpdateMinimumTotalIdle(uint256 minimum_total_idle)"
-          - event: "UpdateProfitMaxUnlockTime(uint256 profit_max_unlock_time)"
-          - event: "DebtPurchased(address indexed strategy, uint256 amount)"
-          - event: "Shutdown()"
 unordered_multichain_mode: true
 preload_handlers: true
 address_format: lowercase

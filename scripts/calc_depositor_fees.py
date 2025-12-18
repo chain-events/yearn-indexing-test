@@ -49,10 +49,10 @@ def load_local_env(file_path: str) -> None:
 DOTENV_FILE = os.path.join(os.getcwd(), '.env.local')
 load_local_env(DOTENV_FILE)
 
-ENVIO_GRAPHQL_URL = os.environ.get('ENVIO_GRAPHQL_URL', 'http://localhost:8080/v1/graphql')
+ENVIO_GRAPHQL_URL = os.environ.get('ENVIO_GRAPHQL_URL', 'https://indexer.hyperindex.xyz/65e29bb/v1/graphql')
 ENVIO_PASSWORD = os.environ.get('ENVIO_PASSWORD', 'testing')
 VAULT_ADDRESS = '0xBe53A109B494E5c9f97b9Cd39Fe969BE68BF6204'
-RPC_URL = os.environ.get('RPC_URL', 'https://eth.merkle.io')
+RPC_URL = os.environ.get('RPC_URL', 'https://muddy-multi-dust.base-mainnet.quiknode.pro/62a123e649c9e265678ce409a54081ab67855bf1')
 PRICE_PER_SHARE_SELECTOR = '0x99530b06'
 DECIMALS_SELECTOR = '0x313ce567'
 
@@ -212,79 +212,163 @@ def query_envio_graphql(query: str, variables: Dict[str, Any]) -> Dict[str, Any]
     return result.get('data', {})
 
 
-def get_deposit_events(depositor_address: str) -> List[DepositEvent]:
-    query = textwrap.dedent('''
-        query GetDepositorDeposits($depositorAddress: String!) {
-          Deposit(
-            where: { owner: { _eq: $depositorAddress } }
-            order_by: { id: asc }
-          ) {
-            id
-            sender
-            owner
-            assets
-            shares
-          }
-        }
-    ''')
-    data = query_envio_graphql(query, {'depositorAddress': depositor_address.lower()})
+def get_deposit_events(depositor_address: str, vault_address: Optional[str] = None) -> List[DepositEvent]:
+    if vault_address:
+        query = textwrap.dedent('''
+            query GetDepositorDeposits($depositorAddress: String!, $vaultAddress: String!) {
+              Deposit(
+                where: {
+                  owner: { _eq: $depositorAddress }
+                  vaultAddress: { _eq: $vaultAddress }
+                }
+                order_by: { id: asc }
+              ) {
+                id
+                sender
+                owner
+                assets
+                shares
+              }
+            }
+        ''')
+        data = query_envio_graphql(query, {
+            'depositorAddress': depositor_address.lower(),
+            'vaultAddress': vault_address.lower(),
+        })
+    else:
+        query = textwrap.dedent('''
+            query GetDepositorDeposits($depositorAddress: String!) {
+              Deposit(
+                where: { owner: { _eq: $depositorAddress } }
+                order_by: { id: asc }
+              ) {
+                id
+                sender
+                owner
+                assets
+                shares
+              }
+            }
+        ''')
+        data = query_envio_graphql(query, {'depositorAddress': depositor_address.lower()})
     return [DepositEvent(**entry) for entry in data.get('Deposit', [])]
 
 
-def get_withdraw_events(depositor_address: str) -> List[WithdrawEvent]:
-    query = textwrap.dedent('''
-        query GetDepositorWithdrawals($depositorAddress: String!) {
-          Withdraw(
-            where: { owner: { _eq: $depositorAddress } }
-            order_by: { id: asc }
-          ) {
-            id
-            sender
-            receiver
-            owner
-            assets
-            shares
-          }
-        }
-    ''')
-    data = query_envio_graphql(query, {'depositorAddress': depositor_address.lower()})
+def get_withdraw_events(depositor_address: str, vault_address: Optional[str] = None) -> List[WithdrawEvent]:
+    if vault_address:
+        query = textwrap.dedent('''
+            query GetDepositorWithdrawals($depositorAddress: String!, $vaultAddress: String!) {
+              Withdraw(
+                where: {
+                  owner: { _eq: $depositorAddress }
+                  vaultAddress: { _eq: $vaultAddress }
+                }
+                order_by: { id: asc }
+              ) {
+                id
+                sender
+                receiver
+                owner
+                assets
+                shares
+              }
+            }
+        ''')
+        data = query_envio_graphql(query, {
+            'depositorAddress': depositor_address.lower(),
+            'vaultAddress': vault_address.lower(),
+        })
+    else:
+        query = textwrap.dedent('''
+            query GetDepositorWithdrawals($depositorAddress: String!) {
+              Withdraw(
+                where: { owner: { _eq: $depositorAddress } }
+                order_by: { id: asc }
+              ) {
+                id
+                sender
+                receiver
+                owner
+                assets
+                shares
+              }
+            }
+        ''')
+        data = query_envio_graphql(query, {'depositorAddress': depositor_address.lower()})
     return [WithdrawEvent(**entry) for entry in data.get('Withdraw', [])]
 
 
-def get_transfer_events(depositor_address: str) -> List[TransferEvent]:
+def get_transfer_events(depositor_address: str, vault_address: Optional[str] = None) -> List[TransferEvent]:
     zero_address = '0x' + '0' * 40
-    query = textwrap.dedent('''
-        query GetDepositorTransfers($depositorAddress: String!, $zeroAddress: String!) {
-          transfersFrom: Transfer(
-            where: {
-              sender: { _eq: $depositorAddress }
-              receiver: { _neq: $zeroAddress }
+    if vault_address:
+        query = textwrap.dedent('''
+            query GetDepositorTransfers($depositorAddress: String!, $zeroAddress: String!, $vaultAddress: String!) {
+              transfersFrom: Transfer(
+                where: {
+                  sender: { _eq: $depositorAddress }
+                  receiver: { _neq: $zeroAddress }
+                  vaultAddress: { _eq: $vaultAddress }
+                }
+                order_by: { id: asc }
+              ) {
+                id
+                sender
+                receiver
+                value
+              }
+              transfersTo: Transfer(
+                where: {
+                  receiver: { _eq: $depositorAddress }
+                  sender: { _neq: $zeroAddress }
+                  vaultAddress: { _eq: $vaultAddress }
+                }
+                order_by: { id: asc }
+              ) {
+                id
+                sender
+                receiver
+                value
+              }
             }
-            order_by: { id: asc }
-          ) {
-            id
-            sender
-            receiver
-            value
-          }
-          transfersTo: Transfer(
-            where: {
-              receiver: { _eq: $depositorAddress }
-              sender: { _neq: $zeroAddress }
+        ''')
+        data = query_envio_graphql(query, {
+            'depositorAddress': depositor_address.lower(),
+            'zeroAddress': zero_address.lower(),
+            'vaultAddress': vault_address.lower(),
+        })
+    else:
+        query = textwrap.dedent('''
+            query GetDepositorTransfers($depositorAddress: String!, $zeroAddress: String!) {
+              transfersFrom: Transfer(
+                where: {
+                  sender: { _eq: $depositorAddress }
+                  receiver: { _neq: $zeroAddress }
+                }
+                order_by: { id: asc }
+              ) {
+                id
+                sender
+                receiver
+                value
+              }
+              transfersTo: Transfer(
+                where: {
+                  receiver: { _eq: $depositorAddress }
+                  sender: { _neq: $zeroAddress }
+                }
+                order_by: { id: asc }
+              ) {
+                id
+                sender
+                receiver
+                value
+              }
             }
-            order_by: { id: asc }
-          ) {
-            id
-            sender
-            receiver
-            value
-          }
-        }
-    ''')
-    data = query_envio_graphql(query, {
-        'depositorAddress': depositor_address.lower(),
-        'zeroAddress': zero_address.lower(),
-    })
+        ''')
+        data = query_envio_graphql(query, {
+            'depositorAddress': depositor_address.lower(),
+            'zeroAddress': zero_address.lower(),
+        })
     return [TransferEvent(**entry) for entry in data.get('transfersFrom', []) + data.get('transfersTo', [])]
 
 
@@ -820,9 +904,9 @@ def main() -> None:
         sys.exit(1)
 
     print('Fetching data from Envio indexer...')
-    deposits = get_deposit_events(depositor_address)
-    withdrawals = get_withdraw_events(depositor_address)
-    transfers = get_transfer_events(depositor_address)
+    deposits = get_deposit_events(depositor_address, VAULT_ADDRESS)
+    withdrawals = get_withdraw_events(depositor_address, VAULT_ADDRESS)
+    transfers = get_transfer_events(depositor_address, VAULT_ADDRESS)
 
     print('Building position timeline...')
     position = calculate_position(
