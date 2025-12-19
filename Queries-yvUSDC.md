@@ -104,4 +104,139 @@ query GetUniqueDepositors {
   }
 ```
 
+To filter by time range (deposits after a specific timestamp):
+```
+query GetRecentDeposits {
+  Deposit(
+    where: {
+      blockTimestamp: { _gte: 1700000000 }
+    }
+    order_by: { blockTimestamp: desc }
+  ) {
+    id
+    vaultAddress
+    chainId
+    owner
+    assets
+    shares
+    pricePerShare
+    blockNumber
+    blockTimestamp
+    transactionFrom
+  }
+}
+```
+
+To filter by transaction initiator (EOA):
+```
+query GetDepositsFromUser {
+  Deposit(
+    where: {
+      transactionFrom: { _eq: "0x..." }
+    }
+    order_by: { blockNumber: desc }
+  ) {
+    id
+    vaultAddress
+    owner
+    assets
+    shares
+    pricePerShare
+    blockNumber
+    blockTimestamp
+    transactionHash
+  }
+}
+```
+
+To get deposits with price per share for profit calculations:
+```
+query GetDepositWithPriceData {
+  Deposit(
+    where: {
+      owner: { _eq: "0x..." }
+    }
+    order_by: { blockNumber: asc }
+  ) {
+    id
+    owner
+    assets
+    shares
+    pricePerShare
+    blockNumber
+    blockTimestamp
+  }
+}
+```
+
+To get deposits within a block range:
+```
+query GetDepositsByBlockRange {
+  Deposit(
+    where: {
+      blockNumber: { _gte: 18000000, _lte: 19000000 }
+    }
+    order_by: { blockNumber: asc }
+  ) {
+    id
+    vaultAddress
+    owner
+    assets
+    blockNumber
+    blockTimestamp
+    transactionHash
+  }
+}
+```
+
+To get all events in a specific transaction:
+```
+query GetTransactionEvents {
+  Deposit(
+    where: {
+      transactionHash: { _eq: "0x..." }
+    }
+  ) {
+    id
+    vaultAddress
+    owner
+    assets
+    shares
+    blockNumber
+    blockTimestamp
+    transactionHash
+  }
+
+  Withdraw(
+    where: {
+      transactionHash: { _eq: "0x..." }
+    }
+  ) {
+    id
+    vaultAddress
+    owner
+    assets
+    shares
+    blockNumber
+    blockTimestamp
+    transactionHash
+  }
+
+  Transfer(
+    where: {
+      transactionHash: { _eq: "0x..." }
+    }
+  ) {
+    id
+    vaultAddress
+    sender
+    receiver
+    value
+    blockNumber
+    blockTimestamp
+    transactionHash
+  }
+}
+```
+
 

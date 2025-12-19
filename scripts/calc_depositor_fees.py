@@ -49,10 +49,10 @@ def load_local_env(file_path: str) -> None:
 DOTENV_FILE = os.path.join(os.getcwd(), '.env.local')
 load_local_env(DOTENV_FILE)
 
-ENVIO_GRAPHQL_URL = os.environ.get('ENVIO_GRAPHQL_URL', 'https://indexer.hyperindex.xyz/65e29bb/v1/graphql')
+ENVIO_GRAPHQL_URL = os.environ.get('ENVIO_GRAPHQL_URL', 'https://indexer.hyperindex.xyz/3fec0a4/v1/graphql')
 ENVIO_PASSWORD = os.environ.get('ENVIO_PASSWORD', 'testing')
 VAULT_ADDRESS = '0xBe53A109B494E5c9f97b9Cd39Fe969BE68BF6204'
-RPC_URL = os.environ.get('RPC_URL', 'https://muddy-multi-dust.base-mainnet.quiknode.pro/62a123e649c9e265678ce409a54081ab67855bf1')
+RPC_URL = os.environ.get('RPC_URL', 'https://erpc-production-494d.up.railway.app/mainnet/evm/1')
 PRICE_PER_SHARE_SELECTOR = '0x99530b06'
 DECIMALS_SELECTOR = '0x313ce567'
 

@@ -1,8 +1,16 @@
 type Deposit {
   id: ID!
   vaultAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionFrom: String! @index
+  logIndex: Int!
+  pricePerShare: BigInt!
   sender: String!
-  owner: String!
+  owner: String! @index
   assets: BigInt!
   shares: BigInt!
 }
@@ -10,9 +18,17 @@ type Deposit {
 type Withdraw {
   id: ID!
   vaultAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionFrom: String! @index
+  logIndex: Int!
+  pricePerShare: BigInt!
   sender: String!
   receiver: String!
-  owner: String!
+  owner: String! @index
   assets: BigInt!
   shares: BigInt!
 }
@@ -20,6 +36,13 @@ type Withdraw {
 type Transfer {
   id: ID!
   vaultAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionFrom: String! @index
+  logIndex: Int!
   sender: String!
   receiver: String!
   value: BigInt!
