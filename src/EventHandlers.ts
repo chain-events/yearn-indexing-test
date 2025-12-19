@@ -1,16 +1,11 @@
 import {
   YearnV3Vault,
-  YearnV3VaultContract,
   Deposit,
   Withdraw,
   Transfer,
 } from "generated";
 
 YearnV3Vault.Deposit.handler(async ({ event, context }) => {
-  // Get pricePerShare from the vault contract
-  const vaultContract = YearnV3VaultContract.bind(event.srcAddress);
-  const pricePerShare = await vaultContract.pricePerShare();
-
   const entity: Deposit = {
     id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
     vaultAddress: event.srcAddress,
@@ -21,7 +16,6 @@ YearnV3Vault.Deposit.handler(async ({ event, context }) => {
     transactionHash: event.transaction.hash,
     transactionFrom: event.transaction.from,
     logIndex: event.logIndex,
-    pricePerShare: pricePerShare,
     sender: event.params.sender,
     owner: event.params.owner,
     assets: event.params.assets,
@@ -31,10 +25,6 @@ YearnV3Vault.Deposit.handler(async ({ event, context }) => {
 });
 
 YearnV3Vault.Withdraw.handler(async ({ event, context }) => {
-  // Get pricePerShare from the vault contract
-  const vaultContract = YearnV3VaultContract.bind(event.srcAddress);
-  const pricePerShare = await vaultContract.pricePerShare();
-
   const entity: Withdraw = {
     id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
     vaultAddress: event.srcAddress,
@@ -45,7 +35,6 @@ YearnV3Vault.Withdraw.handler(async ({ event, context }) => {
     transactionHash: event.transaction.hash,
     transactionFrom: event.transaction.from,
     logIndex: event.logIndex,
-    pricePerShare: pricePerShare,
     sender: event.params.sender,
     receiver: event.params.receiver,
     owner: event.params.owner,
@@ -72,4 +61,3 @@ YearnV3Vault.Transfer.handler(async ({ event, context }) => {
   };
   context.Transfer.set(entity);
 });
-

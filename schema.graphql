@@ -8,7 +8,6 @@ type Deposit {
   transactionHash: String! @index
   transactionFrom: String! @index
   logIndex: Int!
-  pricePerShare: BigInt!
   sender: String!
   owner: String! @index
   assets: BigInt!
@@ -25,7 +24,6 @@ type Withdraw {
   transactionHash: String! @index
   transactionFrom: String! @index
   logIndex: Int!
-  pricePerShare: BigInt!
   sender: String!
   receiver: String!
   owner: String! @index

@@ -119,7 +119,6 @@ query GetRecentDeposits {
     owner
     assets
     shares
-    pricePerShare
     blockNumber
     blockTimestamp
     transactionFrom
@@ -141,7 +140,6 @@ query GetDepositsFromUser {
     owner
     assets
     shares
-    pricePerShare
     blockNumber
     blockTimestamp
     transactionHash
@@ -149,7 +147,7 @@ query GetDepositsFromUser {
 }
 ```
 
-To get deposits with price per share for profit calculations:
+To get deposits for profit calculations:
 ```
 query GetDepositWithPriceData {
   Deposit(
@@ -162,7 +160,6 @@ query GetDepositWithPriceData {
     owner
     assets
     shares
-    pricePerShare
     blockNumber
     blockTimestamp
   }
@@ -238,5 +235,4 @@ query GetTransactionEvents {
   }
 }
 ```
-
 
