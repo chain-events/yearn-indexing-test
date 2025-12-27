@@ -23,8 +23,8 @@
     "typescript": "5.2.2"
   },
   "dependencies": {
-    "envio": "2.32.2",
-    "viem": "^2.42.1"
+    "envio": "2.32.3",
+    "viem": "^2.43.3"
   },
   "optionalDependencies": {
     "generated": "link:generated"

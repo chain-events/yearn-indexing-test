@@ -45,3 +45,63 @@ type Transfer {
   receiver: String!
   value: BigInt!
 }
+
+type StrategyReported {
+  id: ID!
+  vaultAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionFrom: String @index
+  logIndex: Int!
+  strategy: String! @index
+  gain: BigInt!
+  loss: BigInt!
+  current_debt: BigInt!
+  protocol_fees: BigInt!
+  total_fees: BigInt!
+  total_refunds: BigInt!
+}
+
+type DebtUpdated {
+  id: ID!
+  vaultAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionFrom: String @index
+  logIndex: Int!
+  strategy: String! @index
+  current_debt: BigInt!
+  new_debt: BigInt!
+}
+
+type StrategyChanged {
+  id: ID!
+  vaultAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionFrom: String @index
+  logIndex: Int!
+  strategy: String! @index
+  change_type: BigInt!
+}
+
+type Shutdown {
+  id: ID!
+  vaultAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionFrom: String @index
+  logIndex: Int!
+}
