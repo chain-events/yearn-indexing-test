@@ -22,12 +22,20 @@ networks:
     contracts:
       - name: YearnV3Vault
         address:
-          - "0xBe53A109B494E5c9f97b9Cd39Fe969BE68BF6204" # USDC
-          - "0x028eC7330ff87667b6dfb0D94b954c820195336c" # DAI
-          - "0x310B7Ea7475A0B449Cfd73bE81522F1B88eFAFaa" # USDT
-          - "0x182863131F9a4630fF9E27830d945B1413e347E8" # USDS
-          - "0xBF319dDC2Edc1Eb6FDf9910E39b37Be221C8805F" # CRVUSD
-          - "0xc56413869c6CDf96496f2b1eF801fEDBdFA7dDB0" # WETH
+          - "0xBe53A109B494E5c9f97b9Cd39Fe969BE68BF6204" # USDC-1
+          - "0x028eC7330ff87667b6dfb0D94b954c820195336c" # DAI-1
+          - "0x310B7Ea7475A0B449Cfd73bE81522F1B88eFAFaa" # USDT-1
+          - "0x182863131F9a4630fF9E27830d945B1413e347E8" # USDS-1
+          - "0xBF319dDC2Edc1Eb6FDf9910E39b37Be221C8805F" # CRVUSD-2
+          - "0xc56413869c6CDf96496f2b1eF801fEDBdFA7dDB0" # WETH-1
+          - "0xAc37729B76db6438CE62042AE1270ee574CA7571" # WETH-2
+          - "0x751F0cC6115410A3eE9eC92d08f46Ff6Da98b708" # WBTC-1
+          - "0xAe7d8Db82480E6d8e3873ecbF22cf17b3D8A7308" # USDC-2
+          - "0x92545bCE636E6eE91D88D2D017182cD0bd2fC22e" # DAI-2
+          - "0x9F4330700a36B29952869fac9b33f45EEdd8A3d8" # yBOLD
+          - "0x89E93172AEF8261Db8437b90c3dCb61545a05317" # sUSDaf
+          - "0x1F6f16945e395593d8050d6Cc33e4328a515B648" # yYB
+          - "0xaF71a4f5d93fb88B24C67760BCF9688a6C3A54D4" # SKY
   - id: 8453
     start_block: 0
     contracts:
@@ -37,17 +45,38 @@ networks:
           - "0xc3BD0A2193c8F027B82ddE3611D18589ef3f62a9" # USDC Horizon
           - "0x4d81C7d534D703E0a0AECaDF668C0E0253E1f1C3" # WETH Horizon
           - "0x25f32eC89ce7732A4E9f8F3340a09259F823b7d3" # cbBTC Horizon
-  - id: 747474
-    rpc_config:
-      url: https://katana.drpc.org # RPC URL for that custom network
+          - "0x989381F7eFb45F97E46BE9f390a69c5d94bf9e17" # cbETH Horizon
+  - id: 42161
     start_block: 0
     contracts:
       - name: YearnV3Vault
         address:
-          - "0x80c34BD3A3569E126e7055831036aa7b212cB159" # USDC
-          - "0xE007CA01894c863d7898045ed5A3B4Abf0b18f37" # WETH
-          - "0x9A6bd7B6Fd5C4F87eb66356441502fc7dCdd185B" # USDT
-          - "0xAa0362eCC584B985056E47812931270b99C91f9d" # WBTC
+          - "0x252b965400862d94BDa35FeCF7Ee0f204a53Cc36" # USND
+          - "0x9FA306b1F4a6a83FEC98d8eBbaBEDfF78C407f6B" # USDC.e-2
+          - "0x6FAF8b7fFeE3306EfcFc2BA9Fec912b4d49834C1" # USDC-A
+          - "0xc0ba9bfED28aB46Da48d2B69316A3838698EF3f5" # USDT-A
+          - "0x7DEB119b92b76f78C212bc54FBBb34CEA75f4d4A" # ARB-1
+  - id: 137
+    start_block: 0
+    contracts: 
+      - name: YearnV3Vault
+        address:
+          - "0x34b9421Fe3d52191B64bC32ec1aB764dcBcDbF5e" # USDC
+          - "0xA013Fbd4b711f9ded6fB09C1c0d358E2FbC2EAA0" # USDC.e
+          - "0xBb287E6017d3DEb0e2E65061e8684eab21060123" # USDT
+          - "0x90b2f54C6aDDAD41b8f6c4fCCd555197BC0F773B" # DAI
+          - "0x305F25377d0a39091e99B975558b1bdfC3975654" # WETH
+          - "0x28F53bA70E5c8ce8D03b1FaD41E9dF11Bb646c36" # WMATIC
+          
+  # - id: 747474
+  #   start_block: 0
+  #   contracts:
+  #     - name: YearnV3Vault
+  #       address:
+  #         - "0x80c34BD3A3569E126e7055831036aa7b212cB159" # USDC
+  #         - "0xE007CA01894c863d7898045ed5A3B4Abf0b18f37" # WETH
+  #         - "0x9A6bd7B6Fd5C4F87eb66356441502fc7dCdd185B" # USDT
+  #         - "0xAa0362eCC584B985056E47812931270b99C91f9d" # WBTC
 unordered_multichain_mode: true
 preload_handlers: true
 address_format: lowercase
