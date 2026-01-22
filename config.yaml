@@ -37,15 +37,17 @@ networks:
           - "0xc3BD0A2193c8F027B82ddE3611D18589ef3f62a9" # USDC Horizon
           - "0x4d81C7d534D703E0a0AECaDF668C0E0253E1f1C3" # WETH Horizon
           - "0x25f32eC89ce7732A4E9f8F3340a09259F823b7d3" # cbBTC Horizon
-  # - id: 747474
-  #   start_block: 0
-  #   contracts:
-  #     - name: YearnV3Vault
-  #       address:
-  #         - "0x80c34BD3A3569E126e7055831036aa7b212cB159" # USDC
-  #         - "0xE007CA01894c863d7898045ed5A3B4Abf0b18f37" # WETH
-  #         - "0x9A6bd7B6Fd5C4F87eb66356441502fc7dCdd185B" # USDT
-  #         - "0xAa0362eCC584B985056E47812931270b99C91f9d" # WBTC
+  - id: 747474
+    rpc_config:
+      url: https://katana.drpc.org # RPC URL for that custom network
+    start_block: 0
+    contracts:
+      - name: YearnV3Vault
+        address:
+          - "0x80c34BD3A3569E126e7055831036aa7b212cB159" # USDC
+          - "0xE007CA01894c863d7898045ed5A3B4Abf0b18f37" # WETH
+          - "0x9A6bd7B6Fd5C4F87eb66356441502fc7dCdd185B" # USDT
+          - "0xAa0362eCC584B985056E47812931270b99C91f9d" # WBTC
 unordered_multichain_mode: true
 preload_handlers: true
 address_format: lowercase
