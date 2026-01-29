@@ -36,6 +36,13 @@ pnpm dev
 
 Visit http://localhost:8080 to see the GraphQL Playground, local password is `testing`.
 
+### Environment Variables
+
+Copy `.env.example` to `.env` and fill in values as needed:
+
+- `ENVIO_GRAPHQL_URL`, `ENVIO_PASSWORD`
+- `RPC_URL` (global override), or chain-specific `RPC_URL_ETHEREUM`, `RPC_URL_BASE`, `RPC_URL_ARBITRUM`, `RPC_URL_POLYGON`
+
 ### Calculate Depositor Fees
 
 Once the indexer is running, use the Python calculator to analyze any depositor:
@@ -69,4 +76,3 @@ The script now validates that the performance fee stays constant across the depo
 ```bash
 pnpm codegen
 ```
-

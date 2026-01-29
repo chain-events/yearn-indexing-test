@@ -32,7 +32,8 @@ cache
 *.res.js
 *.res.mjs
 .env
-.env.local
+
+depositor_fees_plot.png
 
 # Python
 __pycache__/
