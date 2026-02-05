@@ -105,3 +105,22 @@ type Shutdown {
   transactionFrom: String @index
   logIndex: Int!
 }
+
+type CallScheduled {
+  id: ID!
+  timelockAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionFrom: String @index
+  logIndex: Int!
+  operationId: String! @index
+  index: BigInt!
+  target: String! @index
+  value: BigInt!
+  data: String!
+  predecessor: String!
+  delay: BigInt!
+}

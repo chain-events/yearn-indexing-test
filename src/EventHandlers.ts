@@ -7,6 +7,8 @@ import {
   DebtUpdated,
   StrategyChanged,
   Shutdown,
+  TimelockController,
+  CallScheduled,
 } from "generated";
 
 YearnV3Vault.Deposit.handler(async ({ event, context }) => {
@@ -136,4 +138,26 @@ YearnV3Vault.Shutdown.handler(async ({ event, context }) => {
     logIndex: event.logIndex,
   };
   context.Shutdown.set(entity);
+});
+
+TimelockController.CallScheduled.handler(async ({ event, context }) => {
+  const entity: CallScheduled = {
+    id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
+    timelockAddress: event.srcAddress,
+    chainId: event.chainId,
+    blockNumber: event.block.number,
+    blockTimestamp: event.block.timestamp,
+    blockHash: event.block.hash,
+    transactionHash: event.transaction.hash,
+    transactionFrom: event.transaction.from,
+    logIndex: event.logIndex,
+    operationId: event.params.id,
+    index: event.params.index,
+    target: event.params.target,
+    value: event.params.value,
+    data: event.params.data,
+    predecessor: event.params.predecessor,
+    delay: event.params.delay,
+  };
+  context.CallScheduled.set(entity);
 });

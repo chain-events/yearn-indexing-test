@@ -16,6 +16,10 @@ contracts:
       - event: "DebtUpdated(address indexed strategy, uint256 current_debt, uint256 new_debt)"
       - event: "StrategyChanged(address indexed strategy, uint256 indexed change_type)"
       - event: "Shutdown()"
+  - name: TimelockController
+    handler: src/EventHandlers.ts
+    events:
+      - event: "CallScheduled(bytes32 indexed id, uint256 indexed index, address target, uint256 value, bytes data, bytes32 predecessor, uint256 delay)"
 networks:
   - id: 1
     start_block: 0
@@ -36,6 +40,15 @@ networks:
           - "0x89E93172AEF8261Db8437b90c3dCb61545a05317" # sUSDaf
           - "0x1F6f16945e395593d8050d6Cc33e4328a515B648" # yYB
           - "0xaF71a4f5d93fb88B24C67760BCF9688a6C3A54D4" # SKY
+      - name: TimelockController
+        address:
+          - "0xd8236031d8279d82e615af2bfab5fc0127a329ab" # CAP TimelockController
+          - "0x5d8a7dc9405f08f14541ba918c1bf7eb2dace556" # ETH+ Timelock
+          - "0x055e84e7fe8955e2781010b866f10ef6e1e77e59" # LombardTimeLock
+          - "0xe1f03b7b0ebf84e9b9f62a1db40f1efb8faa7d22" # Silo TimelockController
+          - "0x81f6e9914136da1a1d3b1efd14f7e0761c3d4cc7" # Renzo(ezETH) TimelockController
+          - "0x9f26d4c958fd811a1f59b01b86be7dffc9d20761" # EtherFiTimelock
+          - "0x49bd9989e31ad35b0a62c20be86335196a3135b1" # KelpDAO(rsETH) Timelock
   - id: 8453
     start_block: 0
     contracts:
@@ -46,6 +59,8 @@ networks:
           - "0x4d81C7d534D703E0a0AECaDF668C0E0253E1f1C3" # WETH Horizon
           - "0x25f32eC89ce7732A4E9f8F3340a09259F823b7d3" # cbBTC Horizon
           - "0x989381F7eFb45F97E46BE9f390a69c5d94bf9e17" # cbETH Horizon
+      - name: TimelockController
+        address: "0xf817cb3092179083c48c014688d98b72fb61464f" # superOETH Timelock
   - id: 42161
     start_block: 0
     contracts:
@@ -58,7 +73,7 @@ networks:
           - "0x7DEB119b92b76f78C212bc54FBBb34CEA75f4d4A" # ARB-1
   - id: 137
     start_block: 0
-    contracts: 
+    contracts:
       - name: YearnV3Vault
         address:
           - "0x34b9421Fe3d52191B64bC32ec1aB764dcBcDbF5e" # USDC
@@ -67,7 +82,6 @@ networks:
           - "0x90b2f54C6aDDAD41b8f6c4fCCd555197BC0F773B" # DAI
           - "0x305F25377d0a39091e99B975558b1bdfC3975654" # WETH
           - "0x28F53bA70E5c8ce8D03b1FaD41E9dF11Bb646c36" # WMATIC
-          
   # - id: 747474
   #   start_block: 0
   #   contracts:
