@@ -80,6 +80,20 @@ type DebtUpdated {
   new_debt: BigInt!
 }
 
+type DebtPurchased {
+  id: ID!
+  vaultAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionFrom: String @index
+  logIndex: Int!
+  strategy: String! @index
+  amount: BigInt!
+}
+
 type StrategyChanged {
   id: ID!
   vaultAddress: String! @index
@@ -92,6 +106,178 @@ type StrategyChanged {
   logIndex: Int!
   strategy: String! @index
   change_type: BigInt!
+}
+
+type UpdatedMaxDebtForStrategy {
+  id: ID!
+  vaultAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionFrom: String @index
+  logIndex: Int!
+  sender: String! @index
+  strategy: String! @index
+  new_debt: BigInt!
+}
+
+type RoleSet {
+  id: ID!
+  vaultAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionFrom: String @index
+  logIndex: Int!
+  account: String! @index
+  role: BigInt! @index
+}
+
+type UpdateFutureRoleManager {
+  id: ID!
+  vaultAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionFrom: String @index
+  logIndex: Int!
+  future_role_manager: String! @index
+}
+
+type UpdateRoleManager {
+  id: ID!
+  vaultAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionFrom: String @index
+  logIndex: Int!
+  role_manager: String! @index
+}
+
+type UpdateAccountant {
+  id: ID!
+  vaultAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionFrom: String @index
+  logIndex: Int!
+  accountant: String! @index
+}
+
+type UpdateDefaultQueue {
+  id: ID!
+  vaultAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionFrom: String @index
+  logIndex: Int!
+  new_default_queue: [String!]!
+}
+
+type UpdateUseDefaultQueue {
+  id: ID!
+  vaultAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionFrom: String @index
+  logIndex: Int!
+  use_default_queue: Boolean!
+}
+
+type UpdateAutoAllocate {
+  id: ID!
+  vaultAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionFrom: String @index
+  logIndex: Int!
+  auto_allocate: Boolean!
+}
+
+type UpdateDepositLimit {
+  id: ID!
+  vaultAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionFrom: String @index
+  logIndex: Int!
+  deposit_limit: BigInt!
+}
+
+type UpdateDepositLimitModule {
+  id: ID!
+  vaultAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionFrom: String @index
+  logIndex: Int!
+  deposit_limit_module: String! @index
+}
+
+type UpdateWithdrawLimitModule {
+  id: ID!
+  vaultAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionFrom: String @index
+  logIndex: Int!
+  withdraw_limit_module: String! @index
+}
+
+type UpdateMinimumTotalIdle {
+  id: ID!
+  vaultAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionFrom: String @index
+  logIndex: Int!
+  minimum_total_idle: BigInt!
+}
+
+type UpdateProfitMaxUnlockTime {
+  id: ID!
+  vaultAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionFrom: String @index
+  logIndex: Int!
+  profit_max_unlock_time: BigInt!
 }
 
 type Shutdown {
