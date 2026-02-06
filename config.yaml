@@ -34,6 +34,22 @@ contracts:
     handler: src/EventHandlers.ts
     events:
       - event: "CallScheduled(bytes32 indexed id, uint256 indexed index, address target, uint256 value, bytes data, bytes32 predecessor, uint256 delay)"
+  - name: AaveTimelock
+    handler: src/EventHandlers.ts
+    events:
+      - event: "ProposalQueued(uint256 indexed proposalId, uint128 votesFor, uint128 votesAgainst)"
+  - name: CompoundTimelock
+    handler: src/EventHandlers.ts
+    events:
+      - event: "QueueTransaction(bytes32 indexed txHash, address indexed target, uint value, string signature, bytes data, uint eta)"
+  - name: PufferTimelock
+    handler: src/EventHandlers.ts
+    events:
+      - event: "TransactionQueued(bytes32 indexed txHash, address indexed target, bytes callData, uint256 indexed operationId, uint256 lockedUntil)"
+  - name: LidoTimelock
+    handler: src/EventHandlers.ts
+    events:
+      - event: "StartVote(uint256 indexed voteId, address indexed creator, string metadata)"
 networks:
   - id: 1
     start_block: 0
@@ -63,6 +79,21 @@ networks:
           - "0x81f6e9914136da1a1d3b1efd14f7e0761c3d4cc7" # Renzo(ezETH) TimelockController
           - "0x9f26d4c958fd811a1f59b01b86be7dffc9d20761" # EtherFiTimelock
           - "0x49bd9989e31ad35b0a62c20be86335196a3135b1" # KelpDAO(rsETH) Timelock
+          - "0x3D18480CC32B6AB3B833dCabD80E76CfD41c48a9" # Infinifi Longtimelock
+          - "0x4B174afbeD7b98BA01F50E36109EEE5e6d327c32" # Infinifi Shorttimelock
+      - name: AaveTimelock
+        address:
+          - "0x404d18b35063275882c568495992440124055207" # Aave Timelock
+      - name: CompoundTimelock
+        address:
+          - "0x6d903f6003cca6255d85cca4d3b5e5146dc33925" # Compound Timelock
+          - "0x2386dc45added673317ef068992f19421b481f4c" # Fluid Timelock
+      - name: PufferTimelock
+        address:
+          - "0x3c28b7c7ba1a1f55c9ce66b263b33b204f2126ea" # Puffer Timelock
+      - name: LidoTimelock
+        address:
+          - "0x2e59a20f205bb85a89c53f1936454680651e618e" # Lido Timelock
   - id: 8453
     start_block: 0
     contracts:
