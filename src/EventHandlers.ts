@@ -22,7 +22,11 @@ import {
   UpdateProfitMaxUnlockTime,
   Shutdown,
   TimelockController,
-  CallScheduled,
+  AaveTimelock,
+  CompoundTimelock,
+  PufferTimelock,
+  LidoTimelock,
+  TimelockEvent,
 } from "generated";
 
 YearnV3Vault.Deposit.handler(async ({ event, context }) => {
@@ -382,10 +386,15 @@ YearnV3Vault.Shutdown.handler(async ({ event, context }) => {
   context.Shutdown.set(entity);
 });
 
+// ─── Unified Timelock Handlers ───────────────────────────────────────────────
+// All timelock events are mapped into a single TimelockEvent entity.
+
 TimelockController.CallScheduled.handler(async ({ event, context }) => {
-  const entity: CallScheduled = {
+  const entity: TimelockEvent = {
     id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
     timelockAddress: event.srcAddress,
+    timelockType: "TimelockController",
+    eventName: "CallScheduled",
     chainId: event.chainId,
     blockNumber: event.block.number,
     blockTimestamp: event.block.timestamp,
@@ -394,12 +403,133 @@ TimelockController.CallScheduled.handler(async ({ event, context }) => {
     transactionFrom: event.transaction.from,
     logIndex: event.logIndex,
     operationId: event.params.id,
-    index: event.params.index,
     target: event.params.target,
     value: event.params.value,
     data: event.params.data,
-    predecessor: event.params.predecessor,
     delay: event.params.delay,
+    predecessor: event.params.predecessor,
+    index: event.params.index,
+    signature: undefined,
+    creator: undefined,
+    metadata: undefined,
+    votesFor: undefined,
+    votesAgainst: undefined,
   };
-  context.CallScheduled.set(entity);
+  context.TimelockEvent.set(entity);
+});
+
+AaveTimelock.ProposalQueued.handler(async ({ event, context }) => {
+  const entity: TimelockEvent = {
+    id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
+    timelockAddress: event.srcAddress,
+    timelockType: "Aave",
+    eventName: "ProposalQueued",
+    chainId: event.chainId,
+    blockNumber: event.block.number,
+    blockTimestamp: event.block.timestamp,
+    blockHash: event.block.hash,
+    transactionHash: event.transaction.hash,
+    transactionFrom: event.transaction.from,
+    logIndex: event.logIndex,
+    operationId: event.params.proposalId.toString(),
+    target: undefined,
+    value: undefined,
+    data: undefined,
+    delay: undefined,
+    predecessor: undefined,
+    index: undefined,
+    signature: undefined,
+    creator: undefined,
+    metadata: undefined,
+    votesFor: event.params.votesFor,
+    votesAgainst: event.params.votesAgainst,
+  };
+  context.TimelockEvent.set(entity);
+});
+
+CompoundTimelock.QueueTransaction.handler(async ({ event, context }) => {
+  const entity: TimelockEvent = {
+    id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
+    timelockAddress: event.srcAddress,
+    timelockType: "Compound",
+    eventName: "QueueTransaction",
+    chainId: event.chainId,
+    blockNumber: event.block.number,
+    blockTimestamp: event.block.timestamp,
+    blockHash: event.block.hash,
+    transactionHash: event.transaction.hash,
+    transactionFrom: event.transaction.from,
+    logIndex: event.logIndex,
+    operationId: event.params.txHash,
+    target: event.params.target,
+    value: event.params.value,
+    data: event.params.data,
+    delay: event.params.eta,
+    predecessor: undefined,
+    index: undefined,
+    signature: event.params.signature,
+    creator: undefined,
+    metadata: undefined,
+    votesFor: undefined,
+    votesAgainst: undefined,
+  };
+  context.TimelockEvent.set(entity);
+});
+
+PufferTimelock.TransactionQueued.handler(async ({ event, context }) => {
+  const entity: TimelockEvent = {
+    id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
+    timelockAddress: event.srcAddress,
+    timelockType: "Puffer",
+    eventName: "TransactionQueued",
+    chainId: event.chainId,
+    blockNumber: event.block.number,
+    blockTimestamp: event.block.timestamp,
+    blockHash: event.block.hash,
+    transactionHash: event.transaction.hash,
+    transactionFrom: event.transaction.from,
+    logIndex: event.logIndex,
+    operationId: event.params.txHash,
+    target: event.params.target,
+    value: undefined,
+    data: event.params.callData,
+    delay: event.params.lockedUntil,
+    predecessor: undefined,
+    index: undefined,
+    signature: undefined,
+    creator: undefined,
+    metadata: undefined,
+    votesFor: undefined,
+    votesAgainst: undefined,
+  };
+  context.TimelockEvent.set(entity);
+});
+
+LidoTimelock.StartVote.handler(async ({ event, context }) => {
+  const entity: TimelockEvent = {
+    id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
+    timelockAddress: event.srcAddress,
+    timelockType: "Lido",
+    eventName: "StartVote",
+    chainId: event.chainId,
+    blockNumber: event.block.number,
+    blockTimestamp: event.block.timestamp,
+    blockHash: event.block.hash,
+    transactionHash: event.transaction.hash,
+    transactionFrom: event.transaction.from,
+    logIndex: event.logIndex,
+    operationId: event.params.voteId.toString(),
+    target: undefined,
+    value: undefined,
+    data: undefined,
+    delay: undefined,
+    predecessor: undefined,
+    index: undefined,
+    signature: undefined,
+    creator: event.params.creator,
+    metadata: event.params.metadata,
+    votesFor: undefined,
+    votesAgainst: undefined,
+  };
+  context.TimelockEvent.set(entity);
 });

@@ -292,9 +292,11 @@ type Shutdown {
   logIndex: Int!
 }
 
-type CallScheduled {
+type TimelockEvent {
   id: ID!
   timelockAddress: String! @index
+  timelockType: String! @index
+  eventName: String! @index
   chainId: Int! @index
   blockNumber: Int! @index
   blockTimestamp: Int! @index
@@ -302,11 +304,16 @@ type CallScheduled {
   transactionHash: String! @index
   transactionFrom: String @index
   logIndex: Int!
-  operationId: String! @index
-  index: BigInt!
-  target: String! @index
-  value: BigInt!
-  data: String!
-  predecessor: String!
-  delay: BigInt!
+  operationId: String @index
+  target: String @index
+  value: BigInt
+  data: String
+  delay: BigInt
+  predecessor: String
+  index: BigInt
+  signature: String
+  creator: String @index
+  metadata: String
+  votesFor: BigInt
+  votesAgainst: BigInt
 }
