@@ -27,6 +27,8 @@ import {
   PufferTimelock,
   LidoTimelock,
   TimelockEvent,
+  YearnReferralWrapper,
+  ReferralDeposit,
 } from "generated";
 
 YearnV3Vault.Deposit.handler(async ({ event, context }) => {
@@ -384,6 +386,28 @@ YearnV3Vault.Shutdown.handler(async ({ event, context }) => {
     logIndex: event.logIndex,
   };
   context.Shutdown.set(entity);
+});
+
+// ─── YearnReferralWrapper Handlers ───────────────────────────────────────────
+
+YearnReferralWrapper.ReferralDeposit.handler(async ({ event, context }) => {
+  const entity: ReferralDeposit = {
+    id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
+    contractAddress: event.srcAddress,
+    chainId: event.chainId,
+    blockNumber: event.block.number,
+    blockTimestamp: event.block.timestamp,
+    blockHash: event.block.hash,
+    transactionHash: event.transaction.hash,
+    transactionFrom: event.transaction.from,
+    logIndex: event.logIndex,
+    receiver: event.params.receiver,
+    referrer: event.params.referrer,
+    vault: event.params.vault,
+    assets: event.params.assets,
+    shares: event.params.shares,
+  };
+  context.ReferralDeposit.set(entity);
 });
 
 // ─── Unified Timelock Handlers ───────────────────────────────────────────────

@@ -50,6 +50,10 @@ contracts:
     handler: src/EventHandlers.ts
     events:
       - event: "StartVote(uint256 indexed voteId, address indexed creator, string metadata)"
+  - name: YearnReferralWrapper
+    handler: src/EventHandlers.ts
+    events:
+      - event: "ReferralDeposit(address receiver, address indexed referrer, address indexed vault, uint256 assets, uint256 shares)"
 networks:
   - id: 1
     start_block: 0
@@ -94,6 +98,9 @@ networks:
       - name: LidoTimelock
         address:
           - "0x2e59a20f205bb85a89c53f1936454680651e618e" # Lido Timelock
+      - name: YearnReferralWrapper
+        address:
+          - "0x3744Df2673097d738aCaa3E463E6D638867757f2"
   - id: 8453
     start_block: 0
     contracts:
@@ -106,6 +113,9 @@ networks:
           - "0x989381F7eFb45F97E46BE9f390a69c5d94bf9e17" # cbETH Horizon
       - name: TimelockController
         address: "0xf817cb3092179083c48c014688d98b72fb61464f" # superOETH Timelock
+      - name: YearnReferralWrapper
+        address:
+          - "0x3744Df2673097d738aCaa3E463E6D638867757f2"
   - id: 42161
     start_block: 0
     contracts:
@@ -116,6 +126,9 @@ networks:
           - "0x6FAF8b7fFeE3306EfcFc2BA9Fec912b4d49834C1" # USDC-A
           - "0xc0ba9bfED28aB46Da48d2B69316A3838698EF3f5" # USDT-A
           - "0x7DEB119b92b76f78C212bc54FBBb34CEA75f4d4A" # ARB-1
+      - name: YearnReferralWrapper
+        address:
+          - "0x3744Df2673097d738aCaa3E463E6D638867757f2"
   - id: 137
     start_block: 0
     contracts:
@@ -136,6 +149,9 @@ networks:
   #         - "0xE007CA01894c863d7898045ed5A3B4Abf0b18f37" # WETH
   #         - "0x9A6bd7B6Fd5C4F87eb66356441502fc7dCdd185B" # USDT
   #         - "0xAa0362eCC584B985056E47812931270b99C91f9d" # WBTC
+  #     - name: YearnReferralWrapper
+  #       address:
+  #         - "0x3744Df2673097d738aCaa3E463E6D638867757f2"
 unordered_multichain_mode: true
 preload_handlers: true
 address_format: lowercase

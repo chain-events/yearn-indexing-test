@@ -292,6 +292,23 @@ type Shutdown {
   logIndex: Int!
 }
 
+type ReferralDeposit {
+  id: ID!
+  contractAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionFrom: String @index
+  logIndex: Int!
+  receiver: String!
+  referrer: String! @index
+  vault: String! @index
+  assets: BigInt!
+  shares: BigInt!
+}
+
 type TimelockEvent {
   id: ID!
   timelockAddress: String! @index
