@@ -6,9 +6,9 @@
     "build": "tsc --build",
     "watch": "tsc --watch",
     "mocha": "ts-mocha test/**/*.ts",
-    "codegen": "envio codegen",
-    "dev": "envio dev",
-    "start": "envio start",
+    "codegen": "PNPM_CONFIG_CONFIRM_MODULES_PURGE=false envio codegen",
+    "dev": "PNPM_CONFIG_CONFIRM_MODULES_PURGE=false envio dev",
+    "start": "PNPM_CONFIG_CONFIRM_MODULES_PURGE=false envio start",
     "test": "pnpm mocha",
     "calc-fees": "tsc -p tsconfig.calc.json && node build/calc/calculate-depositor-fees.js"
   },
