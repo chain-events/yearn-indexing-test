@@ -83,7 +83,7 @@ networks:
           - "0x4B174afbeD7b98BA01F50E36109EEE5e6d327c32" # Infinifi Shorttimelock
       - name: AaveTimelock
         address:
-          - "0x404d18b35063275882c568495992440124055207" # Aave Timelock
+          - "0x9aee0b04504cef83a65ac3f0e838d0593bcb2bc7" # Aave Timelock
       - name: CompoundTimelock
         address:
           - "0x6d903f6003cca6255d85cca4d3b5e5146dc33925" # Compound Timelock
