@@ -1,6 +1,6 @@
-## Yearn V3 Vault Indexer
+## Yearn V3 Vault Indexer (and Timelocks too)
 
-This repository contains an Envio indexer for Yearn V3 vaults and a fee calculator script to analyze depositor positions.
+This repository contains an Envio indexer for Yearn V3 vaults and a fee calculator script to analyze depositor positions. Timelock contracts have also been added to reduce dependency on Tenderly alert monitoring (and reduce Tenderly RPC consumption/costs).
 
 *Please refer to the [documentation website](https://docs.envio.dev) for a thorough guide on all [Envio](https://envio.dev) indexer features*
 
