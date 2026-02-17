@@ -48,3 +48,5 @@ venv/
 
 # envio
 generated/
+
+.env.local
