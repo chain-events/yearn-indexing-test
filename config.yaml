@@ -54,6 +54,22 @@ contracts:
     handler: src/EventHandlers.ts
     events:
       - event: "ReferralDeposit(address receiver, address indexed referrer, address indexed vault, uint256 assets, uint256 shares)"
+  - name: YearnV2Vault
+    handler: src/EventHandlers.ts
+    events:
+      - event: "Transfer(address indexed sender, address indexed receiver, uint256 value)"
+      - event: "Deposit(address indexed recipient, uint256 shares, uint256 amount)"
+      - event: "Withdraw(address indexed recipient, uint256 shares, uint256 amount)"
+      - event: "StrategyReported(address indexed strategy, uint256 gain, uint256 loss, uint256 debtPaid, uint256 totalGain, uint256 totalLoss, uint256 totalDebt, uint256 debtAdded, uint256 debtRatio)"
+      - event: "UpdateManagement(address management)"
+      - event: "UpdateGovernance(address governance)"
+      - event: "UpdateGuardian(address guardian)"
+      - event: "UpdateDepositLimit(uint256 depositLimit)"
+      - event: "UpdatePerformanceFee(uint256 performanceFee)"
+      - event: "UpdateManagementFee(uint256 managementFee)"
+      - event: "StrategyAdded(address indexed strategy, uint256 debtRatio, uint256 minDebtPerHarvest, uint256 maxDebtPerHarvest, uint256 performanceFee)"
+      - event: "StrategyRevoked(address indexed strategy)"
+      - event: "EmergencyShutdown(bool active)"
 networks:
   - id: 1
     start_block: 0
@@ -101,6 +117,124 @@ networks:
       - name: YearnReferralWrapper
         address:
           - "0x3744Df2673097d738aCaa3E463E6D638867757f2"
+      - name: YearnV2Vault
+        address:
+          # Active V2 vaults from Kong API (78 vaults, TVL >= $1K)
+          - "0x1fc80cfcf5b345b904a0fb36d4222196ed9eb8a5" # yvCurve-DOLA-sUSDe-f (DOLA-sUSDe) v0.4.6 - TVL: $12.7M
+          - "0x27b5739e22ad9033bcbf192059122d163b60349d" # yvyCRV (yCRV) v0.4.3 - TVL: $7.3M
+          - "0x5b8c556b8b2a78696f0b9b830b3d67623122e270" # yvCurve-stETH-f (steCRV) v0.4.5 - TVL: $6.2M
+          - "0xf165a634296800812b8b0607a75deddcd4d3cc88" # yvCurve-reUSD-scrvUSD-f v0.4.6 - TVL: $1.8M
+          - "0x6e9455d109202b426169f0d8f01a3332dae160f3" # lp-yCRVv2 (yCRV-f) v0.4.6 - TVL: $1.1M
+          - "0x4282b8f159ee677559dc6a20cd478dd0bde75ff2" # yvCurve-frxUSD-crvUSD-f v0.4.6 - TVL: $1M
+          - "0x8770d076dc2db46f368bdc8eaae3b7164e59267b" # yvCurve-USD3-sUSDe-f v0.4.6 - TVL: $701K
+          - "0xad2f9a55518dba12e8ab069502820923351667c5" # yvCurve-msETH-f v0.4.6 - TVL: $650K
+          - "0xaa379c2aa72529d5ec0da8a41e2f41ed7fe4b48c" # yvCurve-3CryptoUSDC-f v0.4.6 - TVL: $572K
+          - "0xbfbc4acae2cec91a5bc80eca1c9290f92959f7c3" # yvCurve-eUSD-USDC-f v0.4.6 - TVL: $513K
+          - "0x342d24f2a3233f7ac8a7347fa239187bfd186066" # yvCurve-DOLA-sUSDS-f v0.4.6 - TVL: $506K
+          - "0xa540744dedbda9ef64cf753f0e851efe4a419ea9" # yvCurve-MIM-f v0.4.5 - TVL: $481K
+          - "0xe0287ca62fe23f4ffab827d5448d68afe6dd9fd7" # yvCurve-msUSD-frxUSD-f v0.4.6 - TVL: $461K
+          - "0xdb25ca703181e7484a155dd612b06f57e12be5f0" # yvYFI (YFI) v0.4.3 - TVL: $438K
+          - "0xc9e146b126f4ca0aa8eda3bdbcd76a960b4dcba7" # yvCurve-USD3-sUSDS-f v0.4.6 - TVL: $438K
+          - "0xc952f3028e322da48e239a077b810a24556f36f1" # yvCurve-pmUSD-frxUSD-f v0.4.6 - TVL: $379K
+          - "0x75a291f0232add37d72dd1dcff55b715755ecdee" # yvCurve-CVX-ETH-f v0.4.5 - TVL: $372K
+          - "0xad86df2e8f989c828b25a7da5eb1ec363283fa3f" # yvCurve-LUSD-f v0.4.5 - TVL: $274K
+          - "0x790a60024bc3aea28385b60480f15a0771f26d09" # yvCurve-YFIETH v0.4.3 - TVL: $264K
+          - "0xd2433ec6de2a932ab7bc1a0080676333aef8b546" # yvCurve-reUSD-sfrxUSD-f v0.4.6 - TVL: $247K
+          - "0x8078198fc424986ae89ce4a910fc109587b6abf3" # yvCurve-3Crypto-f v0.4.5 - TVL: $241K
+          - "0x241add131b9aaa7527132b752252b99420937adc" # yvCurve-USDT-crvUSD-f v0.4.6 - TVL: $218K
+          - "0x7788a5492bc948e1d8c2caa53b2e0a60ed5403b0" # yvCurve-OHM-FRAXBP-f v0.4.6 - TVL: $205K
+          - "0xdb26d8815eda864dfa43306766f2f8ca50c03f9e" # yvCurve-msUSD-FRAXBP-f v0.4.6 - TVL: $189K
+          - "0x8017b5d498f75d12da6a857e867699fb07de41a4" # yvCurve-RSUP-WETH-f v0.4.6 - TVL: $176K
+          - "0x7ca00559b978cfde81297849be6151d3ccb408a9" # yvCurve-USDC-crvUSD-f v0.4.6 - TVL: $167K
+          - "0x04c8bfe2eb09a1e2e9fa97a2fd970e06d87b43de" # yvCurve-GEAR-ETH-f v0.4.5 - TVL: $165K
+          - "0x6f9a3ab8aea89892b4157643a6e75d8e6ff2291d" # yvCurve-USDf-USDC-f v0.4.6 - TVL: $156K
+          - "0xb37094c1b5614bd6ece40afb295c26f4377069d3" # yvCurve-FRAX-f v0.4.5 - TVL: $139K
+          - "0x4cbb6a5ec00ceec252a7091559484f7adb83165f" # yvCurve-alUSD-f v0.4.5 - TVL: $135K
+          - "0xc8b38d661794d8847961baf40db92b76f2ebf30d" # yvCurve-MUSD/2pool-f v0.4.6 - TVL: $91K
+          - "0x5591ac6cc8cdee5d47e553a8c3543ef5ea808919" # yvCurve-OUSD-frxUSD-f v0.4.6 - TVL: $88K
+          - "0x321d570790fd2f109fe4e55aa419adf2fce0c842" # yvCurve-agEUR-EUROC-f v0.4.5 - TVL: $80K
+          - "0x944d749017053e0d37ec206c9898716a21e0b2e2" # yvCurve-mUSD-f v0.4.6 - TVL: $79K
+          - "0x849dc56ceca7cf55abf5ec87910da21c5c7da581" # yvCurve-ETH+-f v0.4.6 - TVL: $59K
+          - "0x2c8a33c66c00264316ea4e4433e86a386eb6ecbf" # yvCurve-pxETH-stETH-f v0.4.6 - TVL: $53K
+          - "0x0844c227b892be5d7c837000c096f64bfc316c2d" # yvCurve-yYB-f v0.4.6 - TVL: $43K
+          - "0xf70b3f1ea3bfc659ffb8b27e84fae7ef38b5bd3b" # yvCurve-dYFI-ETH-f v0.4.6 - TVL: $35K
+          - "0x57a2c7925baa1894a939f9f6721ea33f2ecfd0e2" # yvCurve-DOLA-USR-f v0.4.6 - TVL: $30K
+          - "0x3f34a7ef4f17528cbffb7817060941bcdac924fa" # yvCurve-TriCRV-f v0.4.6 - TVL: $29K
+          - "0x08c0833af1331831759b8e0bfef1bc5738436325" # yvCurve-sDOLA-scrvUSD-f v0.4.6 - TVL: $29K
+          - "0xa669d6c2df33f41940c2646a9bf3031e2524d515" # yvCurve-sdCRVv2-f v0.4.6 - TVL: $28K
+          - "0x77e829fff18c14ad9bb88963acb0010a0506de88" # yvCurve-StaFi-rETH-f v0.4.6 - TVL: $27K
+          - "0x7845ebf66c9575fc5f5a0dbb9a34a706ad997a3f" # yvCurve-3CryptoUSDT-f v0.4.6 - TVL: $26K
+          - "0x5f208d3a8b13062ade45a33ca9bc8de64d520cb9" # yvCurve-stETHv2-f v0.4.6 - TVL: $26K
+          - "0xbce40f1840a449caaaf374df0a1fee1e212784cb" # yvCurve-DOLA-scrvUSD-f v0.4.6 - TVL: $25K
+          - "0x6949145469362f9eeab3c96ea41b51d9b4cc2b21" # yvCurve-TriCryptoINV-f v0.4.6 - TVL: $23K
+          - "0x5ffd0c196838aa5e700657c1f6fd8a87f5d80ed2" # yvCurve-OETHAstETH-f v0.4.6 - TVL: $20K
+          - "0xd02b103f7f5dba89ad316e2b3fe247f280cce5b2" # yvCurve-xETH-f v0.4.6 - TVL: $15K
+          - "0x18f85861488380a7577c73b25df1c4458e5191f8" # yvCurve-GHO-USR-f v0.4.6 - TVL: $15K
+          - "0x150f76e1339a918baa38338ed9bd695bd0924bcf" # yvCurve-alETH-frxETH-f v0.4.6 - TVL: $13K
+          - "0xfb5137aa9e079db4b7c2929229caf503d0f6da96" # yvCurve-DOLA-crvUSD-f v0.4.6 - TVL: $11K
+          - "0xae6ed98b1bd9aadd3185160324e0e011159b61d3" # yvCurve-Compound-f v0.4.6 - TVL: $11K
+          - "0xa8ef50905352acd611f53640b001e48f2ea31d63" # yvCurve-cvxCRVv2-f v0.4.6 - TVL: $10K
+          - "0x6a5694c1b37ffa30690b6b60d8cf89c937d408ad" # yvCurve-coveYFI-f v0.4.6 - TVL: $10K
+          - "0x6a7a0481e476827857704b87bdee7922d058cbe4" # yvCurve-hyUSD-eUSD-f v0.4.6 - TVL: $9K
+          - "0x823976da34ac45c23a8dfea51b3ff1ae0d980213" # yvCurve-ynETH-LSD-f v0.4.6 - TVL: $8K
+          - "0x8a5f20da6b393fe25acf1522c828166d22ef8321" # yvCurve-DOLA-wstUSR-f v0.4.6 - TVL: $8K
+          - "0xe3bf2d04cd3b6e74613d36368c7d21b2d6c26d72" # yvCurve-USDaf-scrvUSD-f v0.4.6 - TVL: $7K
+          - "0x3a51269e0707a3416044bad5066858a12198fcf5" # yvCurve-CLEV-ETH-f v0.4.6 - TVL: $7K
+          - "0xe5f625e8f4d2a038ae9583da254945285e5a77a4" # yvCurve-DOLA-FRXBP-f v0.4.5 - TVL: $7K
+          - "0xcc2efb8bedb6ed69adee0c3762470c38d4730c50" # yvCurve-DOLA-FRAXPYUSD-f v0.4.6 - TVL: $7K
+          - "0xe2cad35cfd1a9b5acd557558f44b096ef8340c1b" # yvCurve-TriCryptoLLAMA-f v0.4.6 - TVL: $7K
+          - "0x774b4cbc2703ce83fb3b828b7c782d1cd983b04a" # yvCurve-ankrETH-f v0.4.6 - TVL: $7K
+          - "0x63bd3bbb6c5cb6e457c3f3cbb2d8aa2536e319f1" # yvCurve-GUSD-f v0.4.6 - TVL: $5K
+          - "0xabd64d5ab5a4b129df4f6f37a8d461c2510b5503" # yvCurve-3Crv-f v0.4.6 - TVL: $5K
+          - "0xb512d68a3194ba294a5b8146fa9becd6a5fea137" # yvCurve-sUSD-crvUSD-f v0.4.6 - TVL: $4K
+          - "0x7c439df9ade8831180ea4d546c1e910d4ba71a86" # yvCurve-reUSD-sDOLA-f v0.4.6 - TVL: $4K
+          - "0xbf2bd27f8c4b38abdcad6d3e37445343cb0630ef" # yvCurve-TriCryptoGHO-f v0.4.6 - TVL: $3K
+          - "0x91ae8feabe09182fe5f91fc273040b7d8f7aefe7" # yvCurve-USDP-f v0.4.6 - TVL: $2K
+          - "0xb7b1c394b3f82091988a1e400c6499178ee64b99" # yvCurve-alUSD-sDOLA-f v0.4.6 - TVL: $2K
+          - "0x93cf0b02d0a2b61551d107378aff60ceae40c342" # yvCurve-sdYFIv2-f v0.4.6 - TVL: $2K
+          - "0xe2277cc76f806925dc6c9a5e4e5933605f43c3c4" # yvCurve-LUSD-crvUSD-f v0.4.6 - TVL: $2K
+          - "0xfca9ab2996e7b010516adcc575eb63de4f4fa47a" # yvCurve-upYFI-f v0.4.6 - TVL: $2K
+          - "0x9289d26fd70867af2f4523ebada69a0d0deec6c3" # yvCurve-USDf-frxUSD-f v0.4.6 - TVL: $1K
+          - "0xce2f57252644db26c76011ad490553d88c3b9030" # yvCurve-lvlUSD-USDC-f v0.4.6 - TVL: $1K
+          - "0x8072b1d66389a1aa039e21aac35a92464005baf5" # yvCurve-rETH-frxETH-f v0.4.6 - TVL: $1K
+          - "0xfbd4d8bf19c67582168059332c46567563d0d75f" # yvCurve-USDC-USDT-f v0.4.6 - TVL: $1K
+  - id: 10  # Optimism
+    start_block: 0
+    contracts:
+      - name: YearnV2Vault
+        address:
+          # Active V2 vaults on Optimism (31 vaults)
+          - "0xf7d66b41cd4241eae450fd9d2d6995754634d9f3" # yvVelo-alETH-WETH-f v0.4.6 - TVL: $1.2M
+          - "0xd0d2ac44cc842079e978bb11b094764f7d0dec6a" # yvVelo-msETH-WETH-f v0.4.6 - TVL: $137K
+          - "0x7e1d451799af57ea5570d1015c342c12a918a30b" # yvVelo-alETH-frxETH-f v0.4.6 - TVL: $44K
+          - "0x8e8d635e28bb8774fd23107cc1d9b6d30ad5d0b9" # yvVelo-IB-WETH-f v0.4.6 - TVL: $33K
+          - "0x3b141bd7d6e1d67e2101a08e4dd849a8408d91aa" # yvVelo-alUSD-USDC.e-f v0.4.6 - TVL: $30K
+          - "0x65bab5c963aec5bfc72986c2a4c468c190d6de96" # yvVelo-STG-USDC-f v0.4.6 - TVL: $27K
+          - "0xbc61b71562b01a3a4808d3b9291a3bf743ab3361" # yvVelo-LUSD-WETH-f v0.4.6 - TVL: $13K
+          - "0xfa3c6122906f2a2d644409dbb507db1060d10b3a" # yvVelo-RED-OP-f v0.4.6 - TVL: $13K
+          - "0xd3668ca9df5d1bba8d264b8d10dd2f0c5962cc4c" # yvVelo-ERN-WETH-f v0.4.6 - TVL: $9K
+          - "0x88b429359665b8685b7431f5a0f6e8c719bf49aa" # yvVelo-VELO-USDC.e-f v0.4.6 - TVL: $7K
+          - "0x83b8391b9efbc5b5a38777fb22a4968c622a405a" # yvVelo-BLU-USDC.e-f v0.4.6 - TVL: $7K
+          - "0xdddcaee873f2d9df0e18a80709ef2b396d4a6ea5" # yvVelo-OP-WETH-f v0.4.6 - TVL: $6K
+          - "0xd7ee0e2d232bcbefa74ef36a439d0de880c6ece5" # yvVelo-RED-VELO-f v0.4.6 - TVL: $6K
+          - "0x906122ac1b55b71248abfa552fdc6abd3356884a" # yvVelo-MTA-USDC.e-f v0.4.6 - TVL: $5K
+          - "0x6ec9d003f0e5184ee54c1d899b414322a0f0dc07" # yvVelo-wstETH-WETH-f v0.4.6 - TVL: $4K
+          - "0x00a2faf97cc2b985b29a0a0eaa6e0d8033dc0ea1" # yvVelo-tBTC-WETH-f v0.4.6 - TVL: $4K
+          - "0xa3d57625b9a6284d1265d76294443b1e39a18007" # yvVelo-ERN-USDC-f v0.4.6 - TVL: $4K
+          - "0x7bdea31f968089f93a548ddec8bb74036e8ac6e0" # yvVelo-ERN-LUSD-f v0.4.6 - TVL: $3K
+          - "0x3f14df340498f3eaa2894bfc19789dd592dc062d" # yvVelo-FRAX-DOLA-f v0.4.6 - TVL: $2K
+          - "0x9056b19fde674b5ad8397e7ed3e25a1bccef0c27" # yvVelo-alUSD-FRAX-f v0.4.6 - TVL: $2K
+          - "0xa7b550b3a80361d8e47e07616dc42f04c655881b" # yvVelo-stERN-ERN-f v0.4.6 - TVL: $2K
+          - "0x50032be2b2c7e8a6a6bc241e3aebef21497a3cf0" # yvVelo-ERN-DOLA-f v0.4.6 - TVL: $2K
+          - "0x39f60710a27a87332d10e3333c2eff41eec911ee" # yvVelo-DOLA-USDC.e-f v0.4.6 - TVL: $1K
+          - "0xc86b70e2c16c5fb5315e4663737e0e077abfc395" # yvVelo-OP-VELO-f v0.4.6 - TVL: $1K
+          - "0xc009d857bfa8ae8d43ddf2ddbe1686063fc73799" # yvVelo-DOLA-USDC-f v0.4.6 - TVL: $1K
+          - "0x3ad9566b15aacdd26d8a220ca8635f925ea7a3f6" # yvVelo-OP-USDC.e-f v0.4.6 - TVL: $1K
+          - "0x01c77e8a099e97b7b0dca2f987d9bd1911cdde50" # yvVelo-SNX-USDC.e-f v0.4.6 - TVL: $1K
+          - "0x1d49ab5b03268e329fc7d2111e5364e63b36a3ce" # yvVelo-MAI-USDC.e-f v0.4.6 - TVL: $1K
+          - "0x36baf52bc8a2db4450500c1a6c78f10f6d0e1c3b" # yvVelo-TAROT-USDC.e-f v0.4.6 - TVL: $1K
+          - "0x507343bad3a1ee0b67c3b1712133290ded43980d" # yvVelo-LDO-wstETH-f v0.4.6 - TVL: $1K
+          - "0x830cb4aabf786b9349d9701dd8ee073215d95174" # yvVelo-wstETH-OP-f v0.4.6 - TVL: $1K
   - id: 8453
     start_block: 0
     contracts:

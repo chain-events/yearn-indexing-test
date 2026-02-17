@@ -29,6 +29,19 @@ import {
   TimelockEvent,
   YearnReferralWrapper,
   ReferralDeposit,
+  YearnV2Vault,
+  V2Deposit,
+  V2Withdraw,
+  V2StrategyReported,
+  V2StrategyAdded,
+  V2StrategyRevoked,
+  V2UpdateManagement,
+  V2UpdateGovernance,
+  V2UpdateGuardian,
+  V2UpdateDepositLimit,
+  V2UpdatePerformanceFee,
+  V2UpdateManagementFee,
+  V2EmergencyShutdown,
 } from "generated";
 
 YearnV3Vault.Deposit.handler(async ({ event, context }) => {
@@ -556,4 +569,232 @@ LidoTimelock.StartVote.handler(async ({ event, context }) => {
     votesAgainst: undefined,
   };
   context.TimelockEvent.set(entity);
+});
+
+// ─── YearnV2Vault Handlers ──────────────────────────────────────────────────
+
+YearnV2Vault.Transfer.handler(async ({ event, context }) => {
+  const entity: Transfer = {
+    id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
+    vaultAddress: event.srcAddress,
+    chainId: event.chainId,
+    blockNumber: event.block.number,
+    blockTimestamp: event.block.timestamp,
+    blockHash: event.block.hash,
+    transactionHash: event.transaction.hash,
+    transactionFrom: event.transaction.from ?? event.params.sender,
+    logIndex: event.logIndex,
+    sender: event.params.sender,
+    receiver: event.params.receiver,
+    value: event.params.value,
+  };
+  context.Transfer.set(entity);
+});
+
+YearnV2Vault.Deposit.handler(async ({ event, context }) => {
+  const entity: V2Deposit = {
+    id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
+    vaultAddress: event.srcAddress,
+    chainId: event.chainId,
+    blockNumber: event.block.number,
+    blockTimestamp: event.block.timestamp,
+    blockHash: event.block.hash,
+    transactionHash: event.transaction.hash,
+    transactionFrom: event.transaction.from,
+    logIndex: event.logIndex,
+    recipient: event.params.recipient,
+    shares: event.params.shares,
+    amount: event.params.amount,
+  };
+  context.V2Deposit.set(entity);
+});
+
+YearnV2Vault.Withdraw.handler(async ({ event, context }) => {
+  const entity: V2Withdraw = {
+    id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
+    vaultAddress: event.srcAddress,
+    chainId: event.chainId,
+    blockNumber: event.block.number,
+    blockTimestamp: event.block.timestamp,
+    blockHash: event.block.hash,
+    transactionHash: event.transaction.hash,
+    transactionFrom: event.transaction.from,
+    logIndex: event.logIndex,
+    recipient: event.params.recipient,
+    shares: event.params.shares,
+    amount: event.params.amount,
+  };
+  context.V2Withdraw.set(entity);
+});
+
+YearnV2Vault.StrategyReported.handler(async ({ event, context }) => {
+  const entity: V2StrategyReported = {
+    id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
+    vaultAddress: event.srcAddress,
+    chainId: event.chainId,
+    blockNumber: event.block.number,
+    blockTimestamp: event.block.timestamp,
+    blockHash: event.block.hash,
+    transactionHash: event.transaction.hash,
+    transactionFrom: event.transaction.from,
+    logIndex: event.logIndex,
+    strategy: event.params.strategy,
+    gain: event.params.gain,
+    loss: event.params.loss,
+    debtPaid: event.params.debtPaid,
+    totalGain: event.params.totalGain,
+    totalLoss: event.params.totalLoss,
+    totalDebt: event.params.totalDebt,
+    debtAdded: event.params.debtAdded,
+    debtRatio: event.params.debtRatio,
+  };
+  context.V2StrategyReported.set(entity);
+});
+
+YearnV2Vault.StrategyAdded.handler(async ({ event, context }) => {
+  const entity: V2StrategyAdded = {
+    id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
+    vaultAddress: event.srcAddress,
+    chainId: event.chainId,
+    blockNumber: event.block.number,
+    blockTimestamp: event.block.timestamp,
+    blockHash: event.block.hash,
+    transactionHash: event.transaction.hash,
+    transactionFrom: event.transaction.from,
+    logIndex: event.logIndex,
+    strategy: event.params.strategy,
+    debtRatio: event.params.debtRatio,
+    minDebtPerHarvest: event.params.minDebtPerHarvest,
+    maxDebtPerHarvest: event.params.maxDebtPerHarvest,
+    performanceFee: event.params.performanceFee,
+  };
+  context.V2StrategyAdded.set(entity);
+});
+
+YearnV2Vault.StrategyRevoked.handler(async ({ event, context }) => {
+  const entity: V2StrategyRevoked = {
+    id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
+    vaultAddress: event.srcAddress,
+    chainId: event.chainId,
+    blockNumber: event.block.number,
+    blockTimestamp: event.block.timestamp,
+    blockHash: event.block.hash,
+    transactionHash: event.transaction.hash,
+    transactionFrom: event.transaction.from,
+    logIndex: event.logIndex,
+    strategy: event.params.strategy,
+  };
+  context.V2StrategyRevoked.set(entity);
+});
+
+YearnV2Vault.UpdateManagement.handler(async ({ event, context }) => {
+  const entity: V2UpdateManagement = {
+    id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
+    vaultAddress: event.srcAddress,
+    chainId: event.chainId,
+    blockNumber: event.block.number,
+    blockTimestamp: event.block.timestamp,
+    blockHash: event.block.hash,
+    transactionHash: event.transaction.hash,
+    transactionFrom: event.transaction.from,
+    logIndex: event.logIndex,
+    management: event.params.management,
+  };
+  context.V2UpdateManagement.set(entity);
+});
+
+YearnV2Vault.UpdateGovernance.handler(async ({ event, context }) => {
+  const entity: V2UpdateGovernance = {
+    id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
+    vaultAddress: event.srcAddress,
+    chainId: event.chainId,
+    blockNumber: event.block.number,
+    blockTimestamp: event.block.timestamp,
+    blockHash: event.block.hash,
+    transactionHash: event.transaction.hash,
+    transactionFrom: event.transaction.from,
+    logIndex: event.logIndex,
+    governance: event.params.governance,
+  };
+  context.V2UpdateGovernance.set(entity);
+});
+
+YearnV2Vault.UpdateGuardian.handler(async ({ event, context }) => {
+  const entity: V2UpdateGuardian = {
+    id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
+    vaultAddress: event.srcAddress,
+    chainId: event.chainId,
+    blockNumber: event.block.number,
+    blockTimestamp: event.block.timestamp,
+    blockHash: event.block.hash,
+    transactionHash: event.transaction.hash,
+    transactionFrom: event.transaction.from,
+    logIndex: event.logIndex,
+    guardian: event.params.guardian,
+  };
+  context.V2UpdateGuardian.set(entity);
+});
+
+YearnV2Vault.UpdateDepositLimit.handler(async ({ event, context }) => {
+  const entity: V2UpdateDepositLimit = {
+    id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
+    vaultAddress: event.srcAddress,
+    chainId: event.chainId,
+    blockNumber: event.block.number,
+    blockTimestamp: event.block.timestamp,
+    blockHash: event.block.hash,
+    transactionHash: event.transaction.hash,
+    transactionFrom: event.transaction.from,
+    logIndex: event.logIndex,
+    depositLimit: event.params.depositLimit,
+  };
+  context.V2UpdateDepositLimit.set(entity);
+});
+
+YearnV2Vault.UpdatePerformanceFee.handler(async ({ event, context }) => {
+  const entity: V2UpdatePerformanceFee = {
+    id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
+    vaultAddress: event.srcAddress,
+    chainId: event.chainId,
+    blockNumber: event.block.number,
+    blockTimestamp: event.block.timestamp,
+    blockHash: event.block.hash,
+    transactionHash: event.transaction.hash,
+    transactionFrom: event.transaction.from,
+    logIndex: event.logIndex,
+    performanceFee: event.params.performanceFee,
+  };
+  context.V2UpdatePerformanceFee.set(entity);
+});
+
+YearnV2Vault.UpdateManagementFee.handler(async ({ event, context }) => {
+  const entity: V2UpdateManagementFee = {
+    id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
+    vaultAddress: event.srcAddress,
+    chainId: event.chainId,
+    blockNumber: event.block.number,
+    blockTimestamp: event.block.timestamp,
+    blockHash: event.block.hash,
+    transactionHash: event.transaction.hash,
+    transactionFrom: event.transaction.from,
+    logIndex: event.logIndex,
+    managementFee: event.params.managementFee,
+  };
+  context.V2UpdateManagementFee.set(entity);
+});
+
+YearnV2Vault.EmergencyShutdown.handler(async ({ event, context }) => {
+  const entity: V2EmergencyShutdown = {
+    id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
+    vaultAddress: event.srcAddress,
+    chainId: event.chainId,
+    blockNumber: event.block.number,
+    blockTimestamp: event.block.timestamp,
+    blockHash: event.block.hash,
+    transactionHash: event.transaction.hash,
+    transactionFrom: event.transaction.from,
+    logIndex: event.logIndex,
+    active: event.params.active,
+  };
+  context.V2EmergencyShutdown.set(entity);
 });
