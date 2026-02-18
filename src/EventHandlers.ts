@@ -42,6 +42,7 @@ import {
   V2UpdatePerformanceFee,
   V2UpdateManagementFee,
   V2EmergencyShutdown,
+  YearnGauge,
 } from "generated";
 
 YearnV3Vault.Deposit.handler(async ({ event, context }) => {
@@ -797,4 +798,64 @@ YearnV2Vault.EmergencyShutdown.handler(async ({ event, context }) => {
     active: event.params.active,
   };
   context.V2EmergencyShutdown.set(entity);
+});
+
+// ─── YearnGauge Handlers ────────────────────────────────────────────────────
+// Gauge events use the same structure as V3 vaults
+
+YearnGauge.Deposit.handler(async ({ event, context }) => {
+  const entity: Deposit = {
+    id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
+    vaultAddress: event.srcAddress,
+    chainId: event.chainId,
+    blockNumber: event.block.number,
+    blockTimestamp: event.block.timestamp,
+    blockHash: event.block.hash,
+    transactionHash: event.transaction.hash,
+    transactionFrom: event.transaction.from ?? event.params.sender,
+    logIndex: event.logIndex,
+    sender: event.params.sender,
+    owner: event.params.owner,
+    assets: event.params.assets,
+    shares: event.params.shares,
+  };
+  context.Deposit.set(entity);
+});
+
+YearnGauge.Withdraw.handler(async ({ event, context }) => {
+  const entity: Withdraw = {
+    id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
+    vaultAddress: event.srcAddress,
+    chainId: event.chainId,
+    blockNumber: event.block.number,
+    blockTimestamp: event.block.timestamp,
+    blockHash: event.block.hash,
+    transactionHash: event.transaction.hash,
+    transactionFrom: event.transaction.from ?? event.params.sender,
+    logIndex: event.logIndex,
+    sender: event.params.sender,
+    receiver: event.params.receiver,
+    owner: event.params.owner,
+    assets: event.params.assets,
+    shares: event.params.shares,
+  };
+  context.Withdraw.set(entity);
+});
+
+YearnGauge.Transfer.handler(async ({ event, context }) => {
+  const entity: Transfer = {
+    id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
+    vaultAddress: event.srcAddress,
+    chainId: event.chainId,
+    blockNumber: event.block.number,
+    blockTimestamp: event.block.timestamp,
+    blockHash: event.block.hash,
+    transactionHash: event.transaction.hash,
+    transactionFrom: event.transaction.from ?? event.params.sender,
+    logIndex: event.logIndex,
+    sender: event.params.sender,
+    receiver: event.params.receiver,
+    value: event.params.value,
+  };
+  context.Transfer.set(entity);
 });

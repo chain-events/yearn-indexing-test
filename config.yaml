@@ -70,6 +70,12 @@ contracts:
       - event: "StrategyAdded(address indexed strategy, uint256 debtRatio, uint256 minDebtPerHarvest, uint256 maxDebtPerHarvest, uint256 performanceFee)"
       - event: "StrategyRevoked(address indexed strategy)"
       - event: "EmergencyShutdown(bool active)"
+  - name: YearnGauge
+    handler: src/EventHandlers.ts
+    events:
+      - event: "Deposit(address indexed sender, address indexed owner, uint256 assets, uint256 shares)"
+      - event: "Withdraw(address indexed sender, address indexed receiver, address indexed owner, uint256 assets, uint256 shares)"
+      - event: "Transfer(address indexed sender, address indexed receiver, uint256 value)"
 networks:
   - id: 1
     start_block: 0
@@ -198,6 +204,22 @@ networks:
           - "0xce2f57252644db26c76011ad490553d88c3b9030" # yvCurve-lvlUSD-USDC-f v0.4.6 - TVL: $1K
           - "0x8072b1d66389a1aa039e21aac35a92464005baf5" # yvCurve-rETH-frxETH-f v0.4.6 - TVL: $1K
           - "0xfbd4d8bf19c67582168059332c46567563d0d75f" # yvCurve-USDC-USDT-f v0.4.6 - TVL: $1K
+      - name: YearnGauge
+        address:
+          - "0x7fd8af959b54a677a1d8f92265bd0714274c56a3" # yG-yvCurve-YFIETH
+          - "0x28da6de3e804bddf0ad237cfa6048f2930d0b4dc" # yG-yvCurve-dYFIETH-f-f
+          - "0x107717c98c8125a94d3d2cc82b86a1b705f3a27c" # yG-lp-yCRVv2
+          - "0x81d93531720d86f0491dee7d03f30b3b5ac24e59" # yG-yvCurve-yETH-f
+          - "0xd57aea3686d623da2dcebc87010a4f2f38ac7b15" # yG-yvUSDS-1
+          - "0x622fa41799406b120f9a40da843d358b7b2cfee3" # yG-yvUSDC-1
+          - "0x128e72dfd8b00cbf9d12cb75e846ac87b83ddfc9" # yG-yvDAI-1
+          - "0x5943f7090282eb66575662eadf7c60a717a7ce4d" # yG-yvWETH-1
+          - "0xb61f8fff8dd8c438e0d61c07b5536ce3d728f660" # yG-yvCurve-sdYFIv2-f
+          - "0xf719b2d3925cc445d2bb67fa12963265e224fa11" # yG-yvCurve-upYFI-f
+          - "0x97a597cbca514afcc29cd300f04f98d9dbaa3624" # yG-yvCurve-COVEYFI-f
+          - "0x38e3d865e34f7367a69f096c80a4fc329db38bf4" # yG-yvDAI-2
+          - "0x8e2485942b399ea41f3c910c1bb8567128f79859" # yG-yvWETH-2
+          - "0x71c3223d6f836f84caa7ab5a68aab6ece21a9f3b" # yG-yvcrvUSD-2
   - id: 10  # Optimism
     start_block: 0
     contracts:
