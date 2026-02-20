@@ -50,6 +50,10 @@ contracts:
     handler: src/EventHandlers.ts
     events:
       - event: "StartVote(uint256 indexed voteId, address indexed creator, string metadata)"
+  - name: MapleTimelock
+    handler: src/EventHandlers.ts
+    events:
+      - event: "ProposalScheduled(uint256 indexed proposalId, (bytes32 proposalHash, bool isUnschedulable, uint32 scheduledAt, uint32 delayedUntil, uint32 validUntil) proposal)"
   - name: YearnReferralWrapper
     handler: src/EventHandlers.ts
     events:
@@ -98,6 +102,9 @@ networks:
       - name: LidoTimelock
         address:
           - "0x2e59a20f205bb85a89c53f1936454680651e618e" # Lido Timelock
+      - name: MapleTimelock
+        address:
+          - "0x2efff88747eb5a3ff00d4d8d0f0800e306c0426b" # Maple GovernorTimelock
       - name: YearnReferralWrapper
         address:
           - "0x3744Df2673097d738aCaa3E463E6D638867757f2"
