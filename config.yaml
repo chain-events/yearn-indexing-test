@@ -58,26 +58,71 @@ contracts:
     handler: src/EventHandlers.ts
     events:
       - event: "ReferralDeposit(address receiver, address indexed referrer, address indexed vault, uint256 assets, uint256 shares)"
+  - name: YearnV2Vault
+    handler: src/EventHandlers.ts
+    events:
+      - event: "Transfer(address indexed sender, address indexed receiver, uint256 value)"
+      - event: "Deposit(address indexed recipient, uint256 shares, uint256 amount)"
+      - event: "Withdraw(address indexed recipient, uint256 shares, uint256 amount)"
+      - event: "StrategyReported(address indexed strategy, uint256 gain, uint256 loss, uint256 debtPaid, uint256 totalGain, uint256 totalLoss, uint256 totalDebt, uint256 debtAdded, uint256 debtRatio)"
+      - event: "UpdateManagement(address management)"
+      - event: "UpdateGovernance(address governance)"
+      - event: "UpdateGuardian(address guardian)"
+      - event: "UpdateDepositLimit(uint256 depositLimit)"
+      - event: "UpdatePerformanceFee(uint256 performanceFee)"
+      - event: "UpdateManagementFee(uint256 managementFee)"
+      - event: "StrategyAdded(address indexed strategy, uint256 debtRatio, uint256 minDebtPerHarvest, uint256 maxDebtPerHarvest, uint256 performanceFee)"
+      - event: "StrategyRevoked(address indexed strategy)"
+      - event: "EmergencyShutdown(bool active)"
+  - name: YearnGauge
+    handler: src/EventHandlers.ts
+    events:
+      - event: "Deposit(address indexed sender, address indexed owner, uint256 assets, uint256 shares)"
+      - event: "Withdraw(address indexed sender, address indexed receiver, address indexed owner, uint256 assets, uint256 shares)"
+      - event: "Transfer(address indexed sender, address indexed receiver, uint256 value)"
 networks:
   - id: 1
     start_block: 0
     contracts:
       - name: YearnV3Vault
         address:
-          - "0xBe53A109B494E5c9f97b9Cd39Fe969BE68BF6204" # USDC-1
-          - "0x028eC7330ff87667b6dfb0D94b954c820195336c" # DAI-1
-          - "0x310B7Ea7475A0B449Cfd73bE81522F1B88eFAFaa" # USDT-1
-          - "0x182863131F9a4630fF9E27830d945B1413e347E8" # USDS-1
-          - "0xBF319dDC2Edc1Eb6FDf9910E39b37Be221C8805F" # CRVUSD-2
-          - "0xc56413869c6CDf96496f2b1eF801fEDBdFA7dDB0" # WETH-1
-          - "0xAc37729B76db6438CE62042AE1270ee574CA7571" # WETH-2
-          - "0x751F0cC6115410A3eE9eC92d08f46Ff6Da98b708" # WBTC-1
-          - "0xAe7d8Db82480E6d8e3873ecbF22cf17b3D8A7308" # USDC-2
-          - "0x92545bCE636E6eE91D88D2D017182cD0bd2fC22e" # DAI-2
-          - "0x9F4330700a36B29952869fac9b33f45EEdd8A3d8" # yBOLD
-          - "0x89E93172AEF8261Db8437b90c3dCb61545a05317" # sUSDaf
-          - "0x1F6f16945e395593d8050d6Cc33e4328a515B648" # yYB
-          - "0xaF71a4f5d93fb88B24C67760BCF9688a6C3A54D4" # SKY
+          # V3 vaults from Kong API (TVL >= $100k)
+          - "0x7B5A0182E400b241b317e781a4e9dEdFc1429822" # kpdUSDC - $70.3M (retired)
+          - "0xcc6a16Be713f6a714f68b0E1f4914fD3db15fBeF" # kpdWETH - $37M (retired)
+          - "0x182863131F9a4630fF9E27830d945B1413e347E8" # yvUSDS-1 - $33.9M
+          - "0xBe53A109B494E5c9f97b9Cd39Fe969BE68BF6204" # yvUSDC-1 - $32.8M
+          - "0xc56413869c6CDf96496f2b1eF801fEDBdFA7dDB0" # yvWETH-1 - $19.1M
+          - "0x48c03B6FfD0008460F8657Db1037C7e09dEedfcb" # kpdUSDT - $18M (retired)
+          - "0x028eC7330ff87667b6dfb0D94b954c820195336c" # yvDAI-1 - $12.5M
+          - "0x92C82f5F771F6A44CfA09357DD0575B81BF5F728" # kpdWBTC - $12.2M (retired)
+          - "0xc9f01b5c6048B064E6d925d1c2d7206d4fEeF8a3" # ysUSDS - $8.9M
+          - "0xeEB6Be70fF212238419cD638FAB17910CF61CBE7" # ysWETH - $7.7M
+          - "0xF470EB50B4a60c9b069F7Fd6032532B8F5cC014d" # kpdUSDC - $7.7M (retired)
+          - "0x4Bd05E6ff75b633F504F0fC501c1e257578C8A72" # ysUSDT - $7.3M
+          - "0x310B7Ea7475A0B449Cfd73bE81522F1B88eFAFaa" # yvUSDT-1 - $7.2M
+          - "0xA5DaB32DbE68E6fa784e1e50e4f620a0477D3896" # kpdUSDT - $5.6M (retired)
+          - "0x9F4330700a36B29952869fac9b33f45EEdd8A3d8" # yBOLD - $4.4M
+          - "0x23346B04a7f55b8760E5860AA5A77383D63491cD" # ysyBOLD - $4.4M
+          - "0x074134A2784F4F66b6ceD6f68849382990Ff3215" # ysUSDC - $3.9M
+          - "0x751F0cC6115410A3eE9eC92d08f46Ff6Da98b708" # yvWBTC-1 - $3.2M
+          - "0xBF319dDC2Edc1Eb6FDf9910E39b37Be221C8805F" # yvcrvUSD-2 - $2.4M
+          - "0xe1Ac97e2616Ad80f69f705ff007A4bbb3655544a" # kpdWBTC - $2.2M (retired)
+          - "0xAc37729B76db6438CE62042AE1270ee574CA7571" # yvWETH-2 - $2M
+          - "0x77570CfEcf83bc6bB08E2cD9e8537aeA9F97eA2F" # kpdWETH - $1.9M (retired)
+          - "0xAe7d8Db82480E6d8e3873ecbF22cf17b3D8A7308" # yvUSDC-2 - $1.1M
+          - "0x09AcE8B2f2fE2189A5B37046BBaFa29Dce31c920" # yscrvUSD - $1M
+          - "0x92545bCE636E6eE91D88D2D017182cD0bd2fC22e" # yvDAI-2 - $819K
+          - "0xd9BA99D93ea94a65b5BC838a0106cA3AbC82Ec4F" # ysWETH - $656K
+          - "0x89E93172AEF8261Db8437b90c3dCb61545a05317" # sUSDaf - $513K
+          - "0x0e297dE4005883C757c9F09fdF7cF1363C20e626" # ysUSDC - $509K
+          - "0x0868076663Bbc6638ceDd27704cc8F0Fa53d5b81" # ysUSDS - $335K
+          - "0x1F6f16945e395593d8050d6Cc33e4328a515B648" # yvyYB - $320K
+          - "0x694E47AFD14A64661a04eee674FB331bCDEF3737" # ysUSDC - $289K
+          - "0xC7baE383738274ea8C3292d53AfBB3b42B348DF0" # ysWETH - $202K
+          - "0xaF71a4f5d93fb88B24C67760BCF9688a6C3A54D4" # yvSKY-1 - $154K
+          - "0xA89E83E39c8A1cB173D7a0c0201Cd3956B57db6d" # yv^2WETH-2 - $154K (retired)
+          - "0x00C8a649C9837523ebb406Ceb17a6378Ab5C74cF" # ysUSDC - $148K
+          - "0x564F7b5d8389F5C4c99E50fED5fC95070e697903" # ysPENDLE-LPT - $133K (retired)
       - name: TimelockController
         address:
           - "0xd8236031d8279d82e615af2bfab5fc0127a329ab" # CAP TimelockController
@@ -108,13 +153,103 @@ networks:
       - name: YearnReferralWrapper
         address:
           - "0x3744Df2673097d738aCaa3E463E6D638867757f2"
-  - id: 8453
+      - name: YearnV2Vault
+        address:
+          # V2 vaults from Kong API (TVL >= $100k)
+          - "0xa258C4606Ca8206D8aA700cE2143D7db854D168c" # yvWETH - $25.9M (retired)
+          - "0x1fc80cfcf5b345b904a0fb36d4222196ed9eb8a5" # yvCurve-DOLA-sUSDe-f - $12.7M
+          - "0xdA816459F1AB5631232FE5e97a05BBBb94970c95" # yvDAI - $10M (retired)
+          - "0x27b5739e22ad9033bcbf192059122d163b60349d" # yvyCRV - $7.3M
+          - "0xa354F35829Ae975e850e23e9615b11Da1B3dC4DE" # yvUSDC - $6.6M (retired)
+          - "0x5b8c556b8b2a78696f0b9b830b3d67623122e270" # yvCurve-stETH-f - $6.2M
+          - "0x3B27F92C0e212C671EA351827EDF93DB27cc0c65" # yvUSDT - $4.6M (retired)
+          - "0xdCD90C7f6324cfa40d7169ef80b12031770B4325" # yvCurve-stETH - $4.5M (retired)
+          - "0x7Da96a3891Add058AdA2E826306D812C638D87a7" # yvUSDT - $4.4M (retired)
+          - "0xA696a63cc78DfFa1a63E9E50587C197387FF6C7E" # yvWBTC - $3.2M (retired)
+          - "0x5f18C75AbDAe578b483E5F43f12a39cF75b973a9" # yvUSDC - $2.1M (retired)
+          - "0xf165a634296800812b8b0607a75deddcd4d3cc88" # yvCurve-reUSD-scrvUSD-f - $1.8M
+          - "0x6e9455d109202b426169f0d8f01a3332dae160f3" # lp-yCRVv2 - $1.1M
+          - "0x4282b8f159ee677559dc6a20cd478dd0bde75ff2" # yvCurve-frxUSD-crvUSD-f - $1M
+          - "0x19d3364a399d251e894ac732651be8b0e4e85001" # yvDAI - $886K (retired)
+          - "0x8770d076dc2db46f368bdc8eaae3b7164e59267b" # yvCurve-USD3-sUSDe-f - $701K
+          - "0xaa379c2aa72529d5ec0da8a41e2f41ed7fe4b48c" # yvCurve-3CryptoUSDC-f - $571K
+          - "0xbfbc4acae2cec91a5bc80eca1c9290f92959f7c3" # yvCurve-eUSD-USDC-f - $513K
+          - "0x342d24f2a3233f7ac8a7347fa239187bfd186066" # yvCurve-DOLA-sUSDS-f - $507K
+          - "0xa540744dedbda9ef64cf753f0e851efe4a419ea9" # yvCurve-MIM-f - $484K
+          - "0xad2f9a55518dba12e8ab069502820923351667c5" # yvCurve-msETH-f - $466K
+          - "0xc9e146b126f4ca0aa8eda3bdbcd76a960b4dcba7" # yvCurve-USD3-sUSDS-f - $438K
+          - "0xdb25ca703181e7484a155dd612b06f57e12be5f0" # yvYFI - $430K
+          - "0xa9fE4601811213c340e850ea305481afF02f5b28" # yvWETH - $429K (retired)
+          - "0x25212Df29073FfFA7A67399AcEfC2dd75a831A1A" # yvCurve-EURS - $426K (retired)
+          - "0xe0287ca62fe23f4ffab827d5448d68afe6dd9fd7" # yvCurve-msUSD-frxUSD-f - $420K
+          - "0xc952f3028e322da48e239a077b810a24556f36f1" # yvCurve-pmUSD-frxUSD-f - $414K
+          - "0x75a291f0232add37d72dd1dcff55b715755ecdee" # yvCurve-CVX-ETH-f - $375K
+          - "0x1635b506a88fbf428465ad65d00e8d6b6e5846c3" # yvCurve-CVXETH - $323K (retired)
+          - "0x27b7b1ad7288079a66d12350c828d3c00a6f07d7" # yvCurve-IronBank - $298K (retired)
+          - "0x5fA5B62c8AF877CB37031e0a3B2f34A78e3C56A6" # yvCurve-LUSD - $275K (retired)
+          - "0xad86df2e8f989c828b25a7da5eb1ec363283fa3f" # yvCurve-LUSD-f - $274K
+          - "0x790a60024bc3aea28385b60480f15a0771f26d09" # yvCurve-YFIETH - $261K
+          - "0xd2433ec6de2a932ab7bc1a0080676333aef8b546" # yvCurve-reUSD-sfrxUSD-f - $248K
+          - "0x8078198fc424986ae89ce4a910fc109587b6abf3" # yvCurve-3Crypto-f - $241K
+          - "0x241add131b9aaa7527132b752252b99420937adc" # yvCurve-USDT-crvUSD-f - $218K
+          - "0x7788a5492bc948e1d8c2caa53b2e0a60ed5403b0" # yvCurve-OHM-FRAXBP-f - $206K
+          - "0xdb26d8815eda864dfa43306766f2f8ca50c03f9e" # yvCurve-msUSD-FRAXBP-f - $190K
+          - "0x8017b5d498f75d12da6a857e867699fb07de41a4" # yvCurve-RSUP-WETH-f - $170K
+          - "0x7ca00559b978cfde81297849be6151d3ccb408a9" # yvCurve-USDC-crvUSD-f - $167K
+          - "0x04c8bfe2eb09a1e2e9fa97a2fd970e06d87b43de" # yvCurve-GEAR-ETH-f - $166K
+          - "0xE537B5cc158EB71037D4125BDD7538421981E6AA" # yvCurve-3Crypto - $158K (retired)
+          - "0x84E13785B5a27879921D6F685f041421C7F482dA" # yvCurve-3pool - $157K (retired)
+          - "0x6f9a3ab8aea89892b4157643a6e75d8e6ff2291d" # yvCurve-USDf-USDC-f - $156K
+          - "0xE14d13d8B3b85aF791b2AADD661cDBd5E6097Db1" # yvYFI - $146K (retired)
+          - "0xb37094c1b5614bd6ece40afb295c26f4377069d3" # yvCurve-FRAX-f - $139K
+          - "0xB4AdA607B9d6b2c9Ee07A275e9616B84AC560139" # yvCurve-FRAX - $139K (retired)
+          - "0x4cbb6a5ec00ceec252a7091559484f7adb83165f" # yvCurve-alUSD-f - $135K
+          - "0xA74d4B67b3368E83797a35382AFB776bAAE4F5C8" # yvCurve-alUSD - $135K (retired)
+          - "0x22c64f32b5FeA40D7D387CA875D079d80415F988" # yvCurve-OUSDcrvUSD-f - $111K
+          - "0xc97232527B62eFb0D8ed38CF3EA103A6CcA4037e" # lp-yCRV - $106K (retired)
+      - name: YearnGauge
+        address:
+          - "0x7fd8af959b54a677a1d8f92265bd0714274c56a3" # yG-yvCurve-YFIETH
+          - "0x28da6de3e804bddf0ad237cfa6048f2930d0b4dc" # yG-yvCurve-dYFIETH-f-f
+          - "0x107717c98c8125a94d3d2cc82b86a1b705f3a27c" # yG-lp-yCRVv2
+          - "0x81d93531720d86f0491dee7d03f30b3b5ac24e59" # yG-yvCurve-yETH-f
+          - "0xd57aea3686d623da2dcebc87010a4f2f38ac7b15" # yG-yvUSDS-1
+          - "0x622fa41799406b120f9a40da843d358b7b2cfee3" # yG-yvUSDC-1
+          - "0x128e72dfd8b00cbf9d12cb75e846ac87b83ddfc9" # yG-yvDAI-1
+          - "0x5943f7090282eb66575662eadf7c60a717a7ce4d" # yG-yvWETH-1
+          - "0xb61f8fff8dd8c438e0d61c07b5536ce3d728f660" # yG-yvCurve-sdYFIv2-f
+          - "0xf719b2d3925cc445d2bb67fa12963265e224fa11" # yG-yvCurve-upYFI-f
+          - "0x97a597cbca514afcc29cd300f04f98d9dbaa3624" # yG-yvCurve-COVEYFI-f
+          - "0x38e3d865e34f7367a69f096c80a4fc329db38bf4" # yG-yvDAI-2
+          - "0x8e2485942b399ea41f3c910c1bb8567128f79859" # yG-yvWETH-2
+          - "0x71c3223d6f836f84caa7ab5a68aab6ece21a9f3b" # yG-yvcrvUSD-2
+  - id: 10  # Optimism
+    start_block: 0
+    contracts:
+      - name: YearnV2Vault
+        address:
+          # V2 vaults on Optimism (TVL >= $100k)
+          - "0xf7d66b41cd4241eae450fd9d2d6995754634d9f3" # yvVelo-alETH-WETH-f - $1.2M
+          - "0x5B977577Eb8a480f63e11FC615D6753adB8652Ae" # yvWETH - $160K (retired)
+          - "0xd0d2ac44cc842079e978bb11b094764f7d0dec6a" # yvVelo-msETH-WETH-f - $136K
+  - id: 250  # Fantom
+    start_block: 0
+    contracts:
+      - name: YearnV2Vault
+        address:
+          # V2 vaults on Fantom (TVL >= $100k, all retired)
+          - "0xEF0210eB96c7EB36AF8ed1c20306462764935607" # yvUSDC - $1.8M (retired)
+          - "0xd817A100AB8A29fE3DBd925c2EB489D67F758DA9" # yvWBTC - $768K (retired)
+          - "0x637eC617c86D24E421328e6CAEa1d92114892439" # yvDAI - $410K (retired)
+          - "0xF137D22d7B23eeB1950B3e19d1f578c053ed9715" # yvCurve-Geist - $171K (retired)
+  - id: 8453  # Base
     start_block: 0
     contracts:
       - name: YearnV3Vault
         address:
-          - "0xb13CF163d916917d9cD6E836905cA5f12a1dEF4B" # USDC True Yield
-          - "0xc3BD0A2193c8F027B82ddE3611D18589ef3f62a9" # USDC Horizon
+          # V3 vaults on Base (TVL >= $100k)
+          - "0xb13CF163d916917d9cD6E836905cA5f12a1dEF4B" # TYD (USDC True Yield) - $2.2M
+          - "0xc3BD0A2193c8F027B82ddE3611D18589ef3f62a9" # yvUSDC-H (USDC Horizon) - $914K
           - "0x4d81C7d534D703E0a0AECaDF668C0E0253E1f1C3" # WETH Horizon
           - "0x25f32eC89ce7732A4E9f8F3340a09259F823b7d3" # cbBTC Horizon
           - "0x989381F7eFb45F97E46BE9f390a69c5d94bf9e17" # cbETH Horizon
@@ -123,27 +258,34 @@ networks:
       - name: YearnReferralWrapper
         address:
           - "0x3744Df2673097d738aCaa3E463E6D638867757f2"
-  - id: 42161
+  - id: 42161  # Arbitrum
     start_block: 0
     contracts:
       - name: YearnV3Vault
         address:
-          - "0x252b965400862d94BDa35FeCF7Ee0f204a53Cc36" # USND
-          - "0x9FA306b1F4a6a83FEC98d8eBbaBEDfF78C407f6B" # USDC.e-2
+          # V3 vaults on Arbitrum (TVL >= $100k)
+          - "0x252b965400862d94BDa35FeCF7Ee0f204a53Cc36" # yUSND - $181K
+          - "0xb739AE19620f7ECB4fb84727f205453aa5bc1AD2" # ysUSDC - $137K
+          - "0x9FA306b1F4a6a83FEC98d8eBbaBEDfF78C407f6B" # yvUSDC-2 - $130K
           - "0x6FAF8b7fFeE3306EfcFc2BA9Fec912b4d49834C1" # USDC-A
           - "0xc0ba9bfED28aB46Da48d2B69316A3838698EF3f5" # USDT-A
           - "0x7DEB119b92b76f78C212bc54FBBb34CEA75f4d4A" # ARB-1
       - name: YearnReferralWrapper
         address:
           - "0x3744Df2673097d738aCaa3E463E6D638867757f2"
-  - id: 137
+  - id: 137  # Polygon
     start_block: 0
     contracts:
       - name: YearnV3Vault
         address:
-          - "0x34b9421Fe3d52191B64bC32ec1aB764dcBcDbF5e" # USDC
+          # V3 vaults on Polygon (TVL >= $100k)
+          - "0xD811a47cfD17355F47ac49Be02c4744A926dd16B" # ysUSDC - $309K
+          - "0x34b9421Fe3d52191B64bC32ec1aB764dcBcDbF5e" # USDC-1 - $309K
+          - "0x5BFd56F9BcBDb2be985C64C620ECa7F02Fa7b439" # ysUSDC - $182K
+          - "0xf4F9d5697341B4C9B0Cc8151413e05A90f7dc24F" # ysDAI - $132K
+          - "0xE30461F1270BA52d45DF1e773AEfE594C7E430DC" # ysUSDT0 - $121K
+          - "0xBb287E6017d3DEb0e2E65061e8684eab21060123" # yvUSDT-A - $121K
           - "0xA013Fbd4b711f9ded6fB09C1c0d358E2FbC2EAA0" # USDC.e
-          - "0xBb287E6017d3DEb0e2E65061e8684eab21060123" # USDT
           - "0x90b2f54C6aDDAD41b8f6c4fCCd555197BC0F773B" # DAI
           - "0x305F25377d0a39091e99B975558b1bdfC3975654" # WETH
           - "0x28F53bA70E5c8ce8D03b1FaD41E9dF11Bb646c36" # WMATIC

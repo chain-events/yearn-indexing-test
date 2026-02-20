@@ -309,6 +309,180 @@ type ReferralDeposit {
   shares: BigInt!
 }
 
+# ─── Yearn V2 Vault Events ────────────────────────────────────────────────────
+
+type V2Deposit {
+  id: ID!
+  vaultAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionFrom: String @index
+  logIndex: Int!
+  recipient: String! @index
+  shares: BigInt!
+  amount: BigInt!
+}
+
+type V2Withdraw {
+  id: ID!
+  vaultAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionFrom: String @index
+  logIndex: Int!
+  recipient: String! @index
+  shares: BigInt!
+  amount: BigInt!
+}
+
+type V2StrategyReported {
+  id: ID!
+  vaultAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionFrom: String @index
+  logIndex: Int!
+  strategy: String! @index
+  gain: BigInt!
+  loss: BigInt!
+  debtPaid: BigInt!
+  totalGain: BigInt!
+  totalLoss: BigInt!
+  totalDebt: BigInt!
+  debtAdded: BigInt!
+  debtRatio: BigInt!
+}
+
+type V2StrategyAdded {
+  id: ID!
+  vaultAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionFrom: String @index
+  logIndex: Int!
+  strategy: String! @index
+  debtRatio: BigInt!
+  minDebtPerHarvest: BigInt!
+  maxDebtPerHarvest: BigInt!
+  performanceFee: BigInt!
+}
+
+type V2StrategyRevoked {
+  id: ID!
+  vaultAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionFrom: String @index
+  logIndex: Int!
+  strategy: String! @index
+}
+
+type V2UpdateManagement {
+  id: ID!
+  vaultAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionFrom: String @index
+  logIndex: Int!
+  management: String! @index
+}
+
+type V2UpdateGovernance {
+  id: ID!
+  vaultAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionFrom: String @index
+  logIndex: Int!
+  governance: String! @index
+}
+
+type V2UpdateGuardian {
+  id: ID!
+  vaultAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionFrom: String @index
+  logIndex: Int!
+  guardian: String! @index
+}
+
+type V2UpdateDepositLimit {
+  id: ID!
+  vaultAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionFrom: String @index
+  logIndex: Int!
+  depositLimit: BigInt!
+}
+
+type V2UpdatePerformanceFee {
+  id: ID!
+  vaultAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionFrom: String @index
+  logIndex: Int!
+  performanceFee: BigInt!
+}
+
+type V2UpdateManagementFee {
+  id: ID!
+  vaultAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionFrom: String @index
+  logIndex: Int!
+  managementFee: BigInt!
+}
+
+type V2EmergencyShutdown {
+  id: ID!
+  vaultAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionFrom: String @index
+  logIndex: Int!
+  active: Boolean!
+}
+
 type TimelockEvent {
   id: ID!
   timelockAddress: String! @index
