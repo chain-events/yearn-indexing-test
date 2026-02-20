@@ -126,7 +126,7 @@ networks:
           - "0x3744Df2673097d738aCaa3E463E6D638867757f2"
       - name: YearnV2Vault
         address:
-          # Active V2 vaults from Kong API (78 vaults, TVL >= $1K)
+          # V2 vaults from Kong API (78 vaults, TVL >= $1K)
           - "0x1fc80cfcf5b345b904a0fb36d4222196ed9eb8a5" # yvCurve-DOLA-sUSDe-f (DOLA-sUSDe) v0.4.6 - TVL: $12.7M
           - "0x27b5739e22ad9033bcbf192059122d163b60349d" # yvyCRV (yCRV) v0.4.3 - TVL: $7.3M
           - "0x5b8c556b8b2a78696f0b9b830b3d67623122e270" # yvCurve-stETH-f (steCRV) v0.4.5 - TVL: $6.2M
@@ -144,6 +144,7 @@ networks:
           - "0xc9e146b126f4ca0aa8eda3bdbcd76a960b4dcba7" # yvCurve-USD3-sUSDS-f v0.4.6 - TVL: $438K
           - "0xc952f3028e322da48e239a077b810a24556f36f1" # yvCurve-pmUSD-frxUSD-f v0.4.6 - TVL: $379K
           - "0x75a291f0232add37d72dd1dcff55b715755ecdee" # yvCurve-CVX-ETH-f v0.4.5 - TVL: $372K
+          - "0x1635b506a88fbf428465ad65d00e8d6b6e5846c3" # yvCurve-CVXETH - TVL: $363K
           - "0xad86df2e8f989c828b25a7da5eb1ec363283fa3f" # yvCurve-LUSD-f v0.4.5 - TVL: $274K
           - "0x790a60024bc3aea28385b60480f15a0771f26d09" # yvCurve-YFIETH v0.4.3 - TVL: $264K
           - "0xd2433ec6de2a932ab7bc1a0080676333aef8b546" # yvCurve-reUSD-sfrxUSD-f v0.4.6 - TVL: $247K
