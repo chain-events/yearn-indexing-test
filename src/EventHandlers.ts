@@ -26,6 +26,7 @@ import {
   CompoundTimelock,
   PufferTimelock,
   LidoTimelock,
+  MapleTimelock,
   TimelockEvent,
   YearnReferralWrapper,
   ReferralDeposit,
@@ -858,4 +859,33 @@ YearnGauge.Transfer.handler(async ({ event, context }) => {
     value: event.params.value,
   };
   context.Transfer.set(entity);
+});
+
+MapleTimelock.ProposalScheduled.handler(async ({ event, context }) => {
+  const entity: TimelockEvent = {
+    id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
+    timelockAddress: event.srcAddress,
+    timelockType: "Maple",
+    eventName: "ProposalScheduled",
+    chainId: event.chainId,
+    blockNumber: event.block.number,
+    blockTimestamp: event.block.timestamp,
+    blockHash: event.block.hash,
+    transactionHash: event.transaction.hash,
+    transactionFrom: event.transaction.from,
+    logIndex: event.logIndex,
+    operationId: event.params.proposalId.toString(),
+    target: undefined,
+    value: undefined,
+    data: undefined,
+    delay: event.params.proposal[3], // delayedUntil (absolute timestamp)
+    predecessor: undefined,
+    index: undefined,
+    signature: undefined,
+    creator: undefined,
+    metadata: undefined,
+    votesFor: undefined,
+    votesAgainst: undefined,
+  };
+  context.TimelockEvent.set(entity);
 });
