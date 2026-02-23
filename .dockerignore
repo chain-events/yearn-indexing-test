@@ -1,0 +1,15 @@
+node_modules/
+build/
+generated/
+.env
+.env.local
+.git/
+.vscode/
+*.md
+scripts/
+__pycache__/
+.mypy_cache/
+.pytest_cache/
+.venv/
+venv/
+depositor_fees_plot.png
