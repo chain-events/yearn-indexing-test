@@ -53,7 +53,7 @@ contracts:
   - name: MapleTimelock
     handler: src/EventHandlers.ts
     events:
-      - event: "ProposalScheduled(uint256 indexed proposalId, (bytes32 proposalHash, bool isUnschedulable, uint32 scheduledAt, uint32 delayedUntil, uint32 validUntil) proposal)"
+      - event: "ProposalScheduled(uint256 indexed proposalId, (bytes32, bool, uint32, uint32, uint32) proposal)"
   - name: YearnReferralWrapper
     handler: src/EventHandlers.ts
     events:
