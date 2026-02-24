@@ -7,7 +7,7 @@ services:
     runtime: image
     image:
       url: postgres:17.5
-    plan: starter
+    plan: standard
     envVars:
       - key: POSTGRES_USER
         value: "envio_ix_7f3a"
