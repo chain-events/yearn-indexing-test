@@ -1,13 +1,21 @@
 previewsEnabled: false
 
-databases:
-  - name: envio-postgres
-    plan: standard
-    databaseName: envio_dev
-    user: envio
-    postgresMajorVersion: "17"
-
 services:
+  # PostgreSQL - ephemeral container (data lost on deploy/restart)
+  - type: pserv
+    name: envio-postgres
+    runtime: image
+    image:
+      url: postgres:17.5
+    plan: starter
+    envVars:
+      - key: POSTGRES_USER
+        value: "envio_ix_7f3a"
+      - key: POSTGRES_PASSWORD
+        value: "xK9mQ2vLpR4wZjN8bT6y"
+      - key: POSTGRES_DB
+        value: "envio_indexer"
+
   # Hasura GraphQL Engine - public-facing GraphQL API
   - type: web
     name: graphql-engine
@@ -17,9 +25,7 @@ services:
     plan: standard
     envVars:
       - key: HASURA_GRAPHQL_DATABASE_URL
-        fromDatabase:
-          name: envio-postgres
-          property: connectionString
+        value: "postgres://envio_ix_7f3a:xK9mQ2vLpR4wZjN8bT6y@envio-postgres:5432/envio_indexer"
       - key: HASURA_GRAPHQL_ENABLE_CONSOLE
         value: "true"
       - key: HASURA_GRAPHQL_ENABLED_LOG_TYPES
@@ -45,25 +51,15 @@ services:
       - key: ENVIO_API_TOKEN
         sync: false
       - key: ENVIO_PG_HOST
-        fromDatabase:
-          name: envio-postgres
-          property: host
+        value: "envio-postgres"
       - key: ENVIO_PG_PORT
-        fromDatabase:
-          name: envio-postgres
-          property: port
+        value: "5432"
       - key: ENVIO_PG_USER
-        fromDatabase:
-          name: envio-postgres
-          property: user
+        value: "envio_ix_7f3a"
       - key: ENVIO_PG_PASSWORD
-        fromDatabase:
-          name: envio-postgres
-          property: password
+        value: "xK9mQ2vLpR4wZjN8bT6y"
       - key: ENVIO_PG_DATABASE
-        fromDatabase:
-          name: envio-postgres
-          property: database
+        value: "envio_indexer"
       - key: ENVIO_PG_PUBLIC_SCHEMA
         value: "envio"
       - key: ENVIO_INDEXER_HOST
