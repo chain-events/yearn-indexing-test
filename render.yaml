@@ -1,5 +1,12 @@
 previewsEnabled: false
 
+databases:
+  - name: envio-postgres
+    plan: standard
+    databaseName: envio_dev
+    user: envio
+    postgresMajorVersion: "17"
+
 services:
   # Hasura GraphQL Engine - public-facing GraphQL API
   - type: web
@@ -10,7 +17,9 @@ services:
     plan: standard
     envVars:
       - key: HASURA_GRAPHQL_DATABASE_URL
-        sync: false
+        fromDatabase:
+          name: envio-postgres
+          property: connectionString
       - key: HASURA_GRAPHQL_ENABLE_CONSOLE
         value: "true"
       - key: HASURA_GRAPHQL_ENABLED_LOG_TYPES
@@ -36,15 +45,25 @@ services:
       - key: ENVIO_API_TOKEN
         sync: false
       - key: ENVIO_PG_HOST
-        sync: false
+        fromDatabase:
+          name: envio-postgres
+          property: host
       - key: ENVIO_PG_PORT
-        sync: false
+        fromDatabase:
+          name: envio-postgres
+          property: port
       - key: ENVIO_PG_USER
-        sync: false
+        fromDatabase:
+          name: envio-postgres
+          property: user
       - key: ENVIO_PG_PASSWORD
-        sync: false
+        fromDatabase:
+          name: envio-postgres
+          property: password
       - key: ENVIO_PG_DATABASE
-        sync: false
+        fromDatabase:
+          name: envio-postgres
+          property: database
       - key: ENVIO_PG_PUBLIC_SCHEMA
         value: "envio"
       - key: ENVIO_INDEXER_HOST
