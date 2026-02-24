@@ -1,31 +1,25 @@
 previewsEnabled: false
 
-services:
-  # PostgreSQL - ephemeral container (data lost on deploy/restart)
-  - type: pserv
-    name: envio-postgres
-    runtime: image
-    image:
-      url: postgres:17.5
-    plan: standard
-    envVars:
-      - key: POSTGRES_USER
-        value: "envio_ix_7f3a"
-      - key: POSTGRES_PASSWORD
-        value: "xK9mQ2vLpR4wZjN8bT6y"
-      - key: POSTGRES_DB
-        value: "envio_indexer"
+databases:
+  - name: envio-postgres
+    plan: basic-256mb
+    databaseName: envio_indexer
+    user: envio_ix_7f3a
+    postgresMajorVersion: "17"
 
+services:
   # Hasura GraphQL Engine - public-facing GraphQL API
   - type: web
     name: graphql-engine
     runtime: image
     image:
       url: hasura/graphql-engine:v2.43.0
-    plan: standard
+    plan: starter
     envVars:
       - key: HASURA_GRAPHQL_DATABASE_URL
-        value: "postgres://envio_ix_7f3a:xK9mQ2vLpR4wZjN8bT6y@envio-postgres:5432/envio_indexer"
+        fromDatabase:
+          name: envio-postgres
+          property: connectionString
       - key: HASURA_GRAPHQL_ENABLE_CONSOLE
         value: "true"
       - key: HASURA_GRAPHQL_ENABLED_LOG_TYPES
@@ -46,20 +40,30 @@ services:
     name: envio-indexer
     runtime: docker
     dockerfilePath: ./Dockerfile
-    plan: standard
+    plan: starter
     envVars:
       - key: ENVIO_API_TOKEN
         sync: false
       - key: ENVIO_PG_HOST
-        value: "envio-postgres"
+        fromDatabase:
+          name: envio-postgres
+          property: host
       - key: ENVIO_PG_PORT
-        value: "5432"
+        fromDatabase:
+          name: envio-postgres
+          property: port
       - key: ENVIO_PG_USER
-        value: "envio_ix_7f3a"
+        fromDatabase:
+          name: envio-postgres
+          property: user
       - key: ENVIO_PG_PASSWORD
-        value: "xK9mQ2vLpR4wZjN8bT6y"
+        fromDatabase:
+          name: envio-postgres
+          property: password
       - key: ENVIO_PG_DATABASE
-        value: "envio_indexer"
+        fromDatabase:
+          name: envio-postgres
+          property: database
       - key: ENVIO_PG_PUBLIC_SCHEMA
         value: "envio"
       - key: ENVIO_INDEXER_HOST
