@@ -17,6 +17,7 @@ RUN pnpm install --frozen-lockfile
 
 COPY ./config.yaml ./config.yaml
 COPY ./schema.graphql ./schema.graphql
+COPY ./scripts ./scripts
 
 RUN pnpm envio codegen
 
