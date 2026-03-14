@@ -135,6 +135,7 @@ networks:
           - "0x3D18480CC32B6AB3B833dCabD80E76CfD41c48a9" # Infinifi Longtimelock
           - "0x4B174afbeD7b98BA01F50E36109EEE5e6d327c32" # Infinifi Shorttimelock
           - "0x88Ba032be87d5EF1fbE87336B7090767F367BF73" # Yearn TimelockController
+          - "0x1dccd4628d48a50c1a7adea3848bcc869f08f8c2" # 3Jane TimelockController
       - name: AaveTimelock
         address:
           - "0x9aee0b04504cef83a65ac3f0e838d0593bcb2bc7" # Aave Timelock
