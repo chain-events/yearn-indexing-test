@@ -25,7 +25,7 @@ services:
           name: envio-postgres
           property: connectionString
       - key: HASURA_GRAPHQL_ENABLE_CONSOLE
-        value: "false"
+        value: "true"
       - key: HASURA_GRAPHQL_ENABLED_LOG_TYPES
         value: "startup, http-log, webhook-log, websocket-log, query-log"
       - key: HASURA_GRAPHQL_NO_OF_RETRIES
@@ -45,7 +45,7 @@ services:
     name: envio-indexer
     runtime: node
     region: ohio
-    plan: starter
+    plan: standard
     buildCommand: pnpm install --frozen-lockfile && pnpm envio codegen
     startCommand: export HASURA_GRAPHQL_ENDPOINT="http://${HASURA_SERVICE_HOST}:${HASURA_SERVICE_PORT}/v1/metadata" && pnpm envio start
     envVars:
