@@ -98,5 +98,7 @@ services:
           envVarKey: RENDER_INTERNAL_HOSTNAME
       - key: HASURA_SERVICE_PORT
         value: "8080"
+      - key: ENVIO_RPC_URL_KATANA
+        sync: false
       - key: TUI_OFF
         value: "true"
