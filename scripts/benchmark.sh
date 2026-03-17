@@ -11,8 +11,11 @@
 
 set -euo pipefail
 
-HASURA_URL="${1:?Usage: $0 <hasura-url> <admin-secret>}"
-ADMIN_SECRET="${2:?Usage: $0 <hasura-url> <admin-secret>}"
+HASURA_BASE="${1:?Usage: $0 <hasura-base-url> <admin-secret>}"
+ADMIN_SECRET="${2:?Usage: $0 <hasura-base-url> <admin-secret>}"
+# Strip trailing slash and ensure /v1/graphql suffix
+HASURA_BASE="${HASURA_BASE%/}"
+HASURA_URL="${HASURA_BASE%/v1/graphql}/v1/graphql"
 RESULTS_DIR="benchmark-results"
 mkdir -p "$RESULTS_DIR"
 
@@ -26,7 +29,7 @@ echo "timestamp,query_name,latency_ms,status" > "$QUERY_LOG"
 
 graphql_query() {
   local query="$1"
-  curl -s -w "\n%{time_total}" \
+  curl -s \
     -X POST "$HASURA_URL" \
     -H "Content-Type: application/json" \
     -H "X-Hasura-Admin-Secret: $ADMIN_SECRET" \
@@ -36,10 +39,10 @@ graphql_query() {
 timed_query() {
   local name="$1"
   local query="$2"
-  local start_ms=$(date +%s%3N)
+  local start_ms=$(python3 -c 'import time; print(int(time.time()*1000))')
   local response
   response=$(graphql_query "$query" 2>/dev/null) || true
-  local end_ms=$(date +%s%3N)
+  local end_ms=$(python3 -c 'import time; print(int(time.time()*1000))')
   local latency=$((end_ms - start_ms))
   local status="ok"
   if echo "$response" | grep -q '"errors"'; then
@@ -58,13 +61,13 @@ poll_sync_progress() {
   echo "--- Sync progress snapshot ---"
   # Get chain metadata (adjust table name if different)
   local result
-  result=$(graphql_query "{ chain_metadata { chain_id first_event_block_number latest_processed_block num_events_processed } }" 2>/dev/null) || true
+  result=$(graphql_query "{ envio_chain_metadata { chain_id first_event_block_number latest_processed_block num_events_processed } }" 2>/dev/null) || true
 
-  if echo "$result" | command -v jq > /dev/null 2>&1 && jq -e '.data.chain_metadata' <<< "$result" > /dev/null 2>&1; then
-    echo "$result" | jq -r '.data.chain_metadata[] | [.chain_id, .latest_processed_block, .num_events_processed] | @csv' | while IFS= read -r line; do
+  if jq -e '.data.envio_chain_metadata' <<< "$result" > /dev/null 2>&1; then
+    echo "$result" | jq -r '.data.envio_chain_metadata[] | [.chain_id, .latest_processed_block, .num_events_processed] | @csv' | while IFS= read -r line; do
       echo "$(date -u +%Y-%m-%dT%H:%M:%SZ),$line" >> "$SYNC_LOG"
     done
-    echo "$result" | jq -r '.data.chain_metadata[] | "  Chain \(.chain_id): block \(.latest_processed_block), \(.num_events_processed) events"'
+    echo "$result" | jq -r '.data.envio_chain_metadata[] | "  Chain \(.chain_id): block \(.latest_processed_block), \(.num_events_processed) events"'
   else
     echo "  (chain_metadata not available yet or query failed)"
   fi
@@ -76,27 +79,27 @@ run_query_benchmarks() {
 
   # Simple lookup - single vault events
   timed_query "single_vault_events" \
-    "{ YearnV3Vault_Deposit(limit: 10) { id sender assets shares } }"
+    "{ envio_Deposit(limit: 10) { id sender assets shares } }"
 
   # Filtered list - deposits above threshold
   timed_query "filtered_deposits" \
-    "{ YearnV3Vault_Deposit(limit: 50, order_by: {assets: desc}) { id sender owner assets shares } }"
+    "{ envio_Deposit(limit: 50, order_by: {assets: desc}) { id sender owner assets shares } }"
 
   # Cross-entity - strategy reports
   timed_query "strategy_reports" \
-    "{ YearnV3Vault_StrategyReported(limit: 20, order_by: {db_write_timestamp: desc}) { id strategy gain loss current_debt } }"
+    "{ envio_StrategyReported(limit: 20, order_by: {blockTimestamp: desc}) { id strategy gain loss current_debt } }"
 
   # Transfer lookups
   timed_query "recent_transfers" \
-    "{ YearnV3Vault_Transfer(limit: 50, order_by: {db_write_timestamp: desc}) { id sender receiver value } }"
+    "{ envio_Transfer(limit: 50, order_by: {blockTimestamp: desc}) { id sender receiver value } }"
 
-  # V2 vault data (if indexed)
-  timed_query "v2_deposits" \
-    "{ YearnV2Vault_Deposit(limit: 20) { id recipient shares amount } }"
-
-  # Count query
+  # Aggregate count
   timed_query "event_count" \
-    "{ YearnV3Vault_Deposit_aggregate { aggregate { count } } }"
+    "{ envio_Deposit_aggregate { aggregate { count } } }"
+
+  # Referral deposits
+  timed_query "referral_deposits" \
+    "{ envio_ReferralDeposit(limit: 20) { id receiver referrer vault assets shares } }"
 }
 
 # ---------- Database size ----------
@@ -104,16 +107,19 @@ check_db_size() {
   echo "--- Database size ---"
   # This runs via Hasura's run_sql if enabled, otherwise skip
   local result
-  result=$(curl -s -X POST "${HASURA_URL%/v1/graphql}/v1/query" \
-    -H "Content-Type: application/json" \
-    -H "X-Hasura-Admin-Secret: $ADMIN_SECRET" \
-    -d '{"type":"run_sql","args":{"sql":"SELECT pg_size_pretty(pg_database_size(current_database())) as db_size;"}}' 2>/dev/null) || true
+  # Try v2 API first (Hasura v2.x), then v1 fallback
+  for api_path in "/v2/query" "/v1/query"; do
+    result=$(curl -s -X POST "${HASURA_URL%/v1/graphql}${api_path}" \
+      -H "Content-Type: application/json" \
+      -H "X-Hasura-Admin-Secret: $ADMIN_SECRET" \
+      -d '{"type":"run_sql","args":{"source":"default","sql":"SELECT pg_size_pretty(pg_database_size(current_database())) as db_size;"}}' 2>/dev/null) || true
 
-  if echo "$result" | grep -q "db_size"; then
-    echo "  $(echo "$result" | jq -r '.result[1][0]' 2>/dev/null || echo 'parse error')"
-  else
-    echo "  (run_sql not available — check db size manually)"
-  fi
+    if echo "$result" | grep -q "db_size"; then
+      echo "  $(echo "$result" | jq -r '.result[1][0]' 2>/dev/null || echo 'parse error')"
+      return
+    fi
+  done
+  echo "  (run_sql not available — check db size manually)"
 }
 
 # ---------- Main loop ----------

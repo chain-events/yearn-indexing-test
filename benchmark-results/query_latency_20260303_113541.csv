@@ -1,0 +1,7 @@
+timestamp,query_name,latency_ms,status
+2026-03-03T14:35:42Z,single_vault_events,275,ok
+2026-03-03T14:35:45Z,filtered_deposits,2436,ok
+2026-03-03T14:35:45Z,strategy_reports,359,ok
+2026-03-03T14:35:45Z,recent_transfers,296,ok
+2026-03-03T14:35:46Z,event_count,556,ok
+2026-03-03T14:35:46Z,referral_deposits,298,ok
