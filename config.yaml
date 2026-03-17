@@ -57,7 +57,7 @@ contracts:
   - name: MakerDSPause
     handler: src/EventHandlers.ts
     events:
-      - event: "LogNote(bytes4 indexed sig, address indexed guy, bytes32 indexed foo, bytes32 indexed bar, bytes fax) anonymous"
+      - event: "LogNote(bytes4 indexed sig, address indexed guy, bytes32 indexed foo, bytes32 bar, bytes fax) anonymous"
   - name: YearnReferralWrapper
     handler: src/EventHandlers.ts
     events:
