@@ -7,7 +7,6 @@ databases:
     databaseName: envio_indexer
     user: envio_ix_7f3a
     postgresMajorVersion: "18"
-    expandableStorageEnabled: true
 
 services:
   # Hasura GraphQL Engine - public-facing GraphQL API
