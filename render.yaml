@@ -3,9 +3,11 @@ previewsEnabled: false
 databases:
   - name: envio-postgres
     plan: basic-1gb
+    region: us-east
     databaseName: envio_indexer
     user: envio_ix_7f3a
-    postgresMajorVersion: "17"
+    postgresMajorVersion: "18"
+    expandableStorageEnabled: true
 
 services:
   # Hasura GraphQL Engine - public-facing GraphQL API
@@ -13,6 +15,7 @@ services:
   - type: web
     name: graphql-engine
     runtime: image
+    region: us-east
     image:
       url: hasura/graphql-engine:v2.43.0
     plan: starter
@@ -42,9 +45,10 @@ services:
   - type: worker
     name: envio-indexer
     runtime: node
+    region: us-east
     plan: starter
     buildCommand: pnpm install --frozen-lockfile && pnpm envio codegen
-    startCommand: export HASURA_GRAPHQL_ENDPOINT="http://${HASURA_SERVICE_HOST}:${HASURA_SERVICE_PORT}/v1/metadata" && pnpm envio start
+    startCommand: export HASURA_GRAPHQL_ENDPOINT="http://${HASURA_SERVICE_HOST}:${HASURA_SERVICE_PORT}/v1/metadata" && pnpm envio start --tui-off
     envVars:
       - key: NODE_VERSION
         value: "20"
