@@ -2,26 +2,28 @@ previewsEnabled: false
 
 databases:
   - name: envio-postgres
-    plan: basic-256mb
+    plan: basic-1gb
     databaseName: envio_indexer
     user: envio_ix_7f3a
     postgresMajorVersion: "17"
 
 services:
   # Hasura GraphQL Engine - public-facing GraphQL API
+  # Benchmark: 1% CPU, 50% memory on starter — no upgrade needed
   - type: web
     name: graphql-engine
     runtime: image
     image:
       url: hasura/graphql-engine:v2.43.0
     plan: starter
+    healthCheckPath: /healthz
     envVars:
       - key: HASURA_GRAPHQL_DATABASE_URL
         fromDatabase:
           name: envio-postgres
           property: connectionString
       - key: HASURA_GRAPHQL_ENABLE_CONSOLE
-        value: "true"
+        value: "false"
       - key: HASURA_GRAPHQL_ENABLED_LOG_TYPES
         value: "startup, http-log, webhook-log, websocket-log, query-log"
       - key: HASURA_GRAPHQL_NO_OF_RETRIES
@@ -36,12 +38,16 @@ services:
         value: "public"
 
   # Envio Indexer - blockchain event indexer
+  # Benchmark: 50% CPU, 86% memory on starter — monitor after adding Katana
   - type: worker
     name: envio-indexer
-    runtime: docker
-    dockerfilePath: ./Dockerfile
+    runtime: node
     plan: starter
+    buildCommand: pnpm install --frozen-lockfile && pnpm envio codegen
+    startCommand: pnpm envio start
     envVars:
+      - key: NODE_VERSION
+        value: "20"
       - key: ENVIO_API_TOKEN
         sync: false
       - key: ENVIO_PG_HOST
@@ -73,7 +79,7 @@ services:
       - key: CONFIG_FILE
         value: "config.yaml"
       - key: LOG_LEVEL
-        value: "info"
+        value: "warn"
       - key: LOG_STRATEGY
         value: "console-pretty"
       - key: HASURA_GRAPHQL_ENDPOINT
@@ -81,7 +87,7 @@ services:
           name: graphql-engine
           type: web
           envVarKey: RENDER_INTERNAL_HOSTNAME
-        # Override with actual value after deploy:
+        # After first deploy, override in Render dashboard to:
         # http://<graphql-engine-internal-host>:8080/v1/metadata
       - key: HASURA_GRAPHQL_ADMIN_SECRET
         sync: false

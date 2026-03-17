@@ -289,18 +289,18 @@ networks:
           - "0x90b2f54C6aDDAD41b8f6c4fCCd555197BC0F773B" # DAI
           - "0x305F25377d0a39091e99B975558b1bdfC3975654" # WETH
           - "0x28F53bA70E5c8ce8D03b1FaD41E9dF11Bb646c36" # WMATIC
-  # - id: 747474
-  #   start_block: 0
-  #   contracts:
-  #     - name: YearnV3Vault
-  #       address:
-  #         - "0x80c34BD3A3569E126e7055831036aa7b212cB159" # USDC
-  #         - "0xE007CA01894c863d7898045ed5A3B4Abf0b18f37" # WETH
-  #         - "0x9A6bd7B6Fd5C4F87eb66356441502fc7dCdd185B" # USDT
-  #         - "0xAa0362eCC584B985056E47812931270b99C91f9d" # WBTC
-  #     - name: YearnReferralWrapper
-  #       address:
-  #         - "0x3744Df2673097d738aCaa3E463E6D638867757f2"
+  - id: 747474  # Katana
+    start_block: 0
+    contracts:
+      - name: YearnV3Vault
+        address:
+          - "0x80c34BD3A3569E126e7055831036aa7b212cB159" # USDC
+          - "0xE007CA01894c863d7898045ed5A3B4Abf0b18f37" # WETH
+          - "0x9A6bd7B6Fd5C4F87eb66356441502fc7dCdd185B" # USDT
+          - "0xAa0362eCC584B985056E47812931270b99C91f9d" # WBTC
+      - name: YearnReferralWrapper
+        address:
+          - "0x3744Df2673097d738aCaa3E463E6D638867757f2"
 unordered_multichain_mode: true
 preload_handlers: true
 address_format: lowercase
