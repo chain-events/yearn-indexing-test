@@ -41,7 +41,20 @@ Visit http://localhost:8080 to see the GraphQL Playground, local password is `te
 Copy `.env.example` to `.env` and fill in values as needed:
 
 - `ENVIO_GRAPHQL_URL`, `ENVIO_PASSWORD`
+- `ENVIO_PG_SSL_MODE=false` for local Docker or Render internal Postgres
+- `HASURA_GRAPHQL_ROLE=admin`
+- `ENVIO_THROTTLE_CHAIN_METADATA_INTERVAL_MILLIS=500`
+- `ENVIO_THROTTLE_PRUNE_STALE_DATA_INTERVAL_MILLIS=30000`
+- `ENVIO_THROTTLE_LIVE_METRICS_BENCHMARK_INTERVAL_MILLIS=1000`
+- `ENVIO_THROTTLE_JSON_FILE_BENCHMARK_INTERVAL_MILLIS=500`
 - `RPC_URL` (global override), or chain-specific `RPC_URL_ETHEREUM`, `RPC_URL_BASE`, `RPC_URL_ARBITRUM`, `RPC_URL_POLYGON`
+
+### Render
+
+`render.yaml` now sets the Envio runtime vars that recent Envio versions require in production mode. The indexer also derives `HASURA_GRAPHQL_ENDPOINT` from `HASURA_SERVICE_HOST` and `HASURA_SERVICE_PORT`, so you should not need a manual post-deploy override in Render anymore. The only secrets you still need to provide in the Render dashboard are:
+
+- `ENVIO_API_TOKEN`
+- `HASURA_GRAPHQL_ADMIN_SECRET`
 
 ### Calculate Depositor Fees
 

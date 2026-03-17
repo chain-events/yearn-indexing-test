@@ -50,7 +50,7 @@ We're exceeding the Production Small plan on two hard limits (7 networks vs 5 ca
 
 - **Render managed Postgres** over container-based PG: eliminates data loss on redeploy, includes automated backups
 - **Internal networking** between services: Hasura connects to PG via Render internal hostname, no SSL overhead
-- **`ENVIO_PG_SSL_MODE`**: not needed for Render internal connections; required (`require`) for external PG like Neon
+- **`ENVIO_PG_SSL_MODE=false`**: set explicitly for Render internal Postgres so Envio does not treat it as a missing production env var
 - **`unordered_multichain_mode: true`** in config.yaml: allows parallel chain indexing
 - **`preload_handlers: true`**: preloads event handlers for faster processing
 

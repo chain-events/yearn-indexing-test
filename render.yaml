@@ -44,7 +44,7 @@ services:
     runtime: node
     plan: starter
     buildCommand: pnpm install --frozen-lockfile && pnpm envio codegen
-    startCommand: pnpm envio start
+    startCommand: export HASURA_GRAPHQL_ENDPOINT="http://${HASURA_SERVICE_HOST}:${HASURA_SERVICE_PORT}/v1/metadata" && pnpm envio start
     envVars:
       - key: NODE_VERSION
         value: "20"
@@ -70,6 +70,8 @@ services:
         fromDatabase:
           name: envio-postgres
           property: database
+      - key: ENVIO_PG_SSL_MODE
+        value: "false"
       - key: ENVIO_PG_PUBLIC_SCHEMA
         value: "envio"
       - key: ENVIO_INDEXER_HOST
@@ -82,13 +84,8 @@ services:
         value: "warn"
       - key: LOG_STRATEGY
         value: "console-pretty"
-      - key: HASURA_GRAPHQL_ENDPOINT
-        fromService:
-          name: graphql-engine
-          type: web
-          envVarKey: RENDER_INTERNAL_HOSTNAME
-        # After first deploy, override in Render dashboard to:
-        # http://<graphql-engine-internal-host>:8080/v1/metadata
+      - key: HASURA_GRAPHQL_ROLE
+        value: "admin"
       - key: HASURA_GRAPHQL_ADMIN_SECRET
         sync: false
       - key: HASURA_SERVICE_HOST
@@ -98,6 +95,14 @@ services:
           envVarKey: RENDER_INTERNAL_HOSTNAME
       - key: HASURA_SERVICE_PORT
         value: "8080"
+      - key: ENVIO_THROTTLE_CHAIN_METADATA_INTERVAL_MILLIS
+        value: "500"
+      - key: ENVIO_THROTTLE_PRUNE_STALE_DATA_INTERVAL_MILLIS
+        value: "30000"
+      - key: ENVIO_THROTTLE_LIVE_METRICS_BENCHMARK_INTERVAL_MILLIS
+        value: "1000"
+      - key: ENVIO_THROTTLE_JSON_FILE_BENCHMARK_INTERVAL_MILLIS
+        value: "500"
       - key: ENVIO_RPC_URL_KATANA
         sync: false
       - key: TUI_OFF
