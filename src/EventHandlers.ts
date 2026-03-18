@@ -45,7 +45,18 @@ import {
   V2UpdateManagementFee,
   V2EmergencyShutdown,
   YearnGauge,
+  UserEventCounts,
 } from "generated";
+
+// Helper to get or create UserEventCounts
+const DEFAULT_COUNTS: Omit<UserEventCounts, "id"> = {
+  depositCount: 0,
+  withdrawCount: 0,
+  transferInCount: 0,
+  transferOutCount: 0,
+  v2DepositCount: 0,
+  v2WithdrawCount: 0,
+};
 
 YearnV3Vault.Deposit.handler(async ({ event, context }) => {
   const entity: Deposit = {
@@ -64,6 +75,11 @@ YearnV3Vault.Deposit.handler(async ({ event, context }) => {
     shares: event.params.shares,
   };
   context.Deposit.set(entity);
+
+  // Update user event counts
+  const userId = event.params.owner.toLowerCase();
+  const counts = (await context.UserEventCounts.get(userId)) ?? { id: userId, ...DEFAULT_COUNTS };
+  context.UserEventCounts.set({ ...counts, depositCount: counts.depositCount + 1 });
 });
 
 YearnV3Vault.Withdraw.handler(async ({ event, context }) => {
@@ -84,6 +100,11 @@ YearnV3Vault.Withdraw.handler(async ({ event, context }) => {
     shares: event.params.shares,
   };
   context.Withdraw.set(entity);
+
+  // Update user event counts
+  const userId = event.params.owner.toLowerCase();
+  const counts = (await context.UserEventCounts.get(userId)) ?? { id: userId, ...DEFAULT_COUNTS };
+  context.UserEventCounts.set({ ...counts, withdrawCount: counts.withdrawCount + 1 });
 });
 
 YearnV3Vault.Transfer.handler(async ({ event, context }) => {
@@ -102,6 +123,16 @@ YearnV3Vault.Transfer.handler(async ({ event, context }) => {
     value: event.params.value,
   };
   context.Transfer.set(entity);
+
+  // Update sender's transferOutCount
+  const senderId = event.params.sender.toLowerCase();
+  const senderCounts = (await context.UserEventCounts.get(senderId)) ?? { id: senderId, ...DEFAULT_COUNTS };
+  context.UserEventCounts.set({ ...senderCounts, transferOutCount: senderCounts.transferOutCount + 1 });
+
+  // Update receiver's transferInCount
+  const receiverId = event.params.receiver.toLowerCase();
+  const receiverCounts = (await context.UserEventCounts.get(receiverId)) ?? { id: receiverId, ...DEFAULT_COUNTS };
+  context.UserEventCounts.set({ ...receiverCounts, transferInCount: receiverCounts.transferInCount + 1 });
 });
 
 YearnV3Vault.StrategyReported.handler(async ({ event, context }) => {
@@ -637,6 +668,16 @@ YearnV2Vault.Transfer.handler(async ({ event, context }) => {
     value: event.params.value,
   };
   context.Transfer.set(entity);
+
+  // Update sender's transferOutCount
+  const senderId = event.params.sender.toLowerCase();
+  const senderCounts = (await context.UserEventCounts.get(senderId)) ?? { id: senderId, ...DEFAULT_COUNTS };
+  context.UserEventCounts.set({ ...senderCounts, transferOutCount: senderCounts.transferOutCount + 1 });
+
+  // Update receiver's transferInCount
+  const receiverId = event.params.receiver.toLowerCase();
+  const receiverCounts = (await context.UserEventCounts.get(receiverId)) ?? { id: receiverId, ...DEFAULT_COUNTS };
+  context.UserEventCounts.set({ ...receiverCounts, transferInCount: receiverCounts.transferInCount + 1 });
 });
 
 YearnV2Vault.Deposit.handler(async ({ event, context }) => {
@@ -655,6 +696,11 @@ YearnV2Vault.Deposit.handler(async ({ event, context }) => {
     amount: event.params.amount,
   };
   context.V2Deposit.set(entity);
+
+  // Update user event counts
+  const userId = event.params.recipient.toLowerCase();
+  const counts = (await context.UserEventCounts.get(userId)) ?? { id: userId, ...DEFAULT_COUNTS };
+  context.UserEventCounts.set({ ...counts, v2DepositCount: counts.v2DepositCount + 1 });
 });
 
 YearnV2Vault.Withdraw.handler(async ({ event, context }) => {
@@ -673,6 +719,11 @@ YearnV2Vault.Withdraw.handler(async ({ event, context }) => {
     amount: event.params.amount,
   };
   context.V2Withdraw.set(entity);
+
+  // Update user event counts
+  const userId = event.params.recipient.toLowerCase();
+  const counts = (await context.UserEventCounts.get(userId)) ?? { id: userId, ...DEFAULT_COUNTS };
+  context.UserEventCounts.set({ ...counts, v2WithdrawCount: counts.v2WithdrawCount + 1 });
 });
 
 YearnV2Vault.StrategyReported.handler(async ({ event, context }) => {
@@ -867,6 +918,11 @@ YearnGauge.Deposit.handler(async ({ event, context }) => {
     shares: event.params.shares,
   };
   context.Deposit.set(entity);
+
+  // Update user event counts
+  const userId = event.params.owner.toLowerCase();
+  const counts = (await context.UserEventCounts.get(userId)) ?? { id: userId, ...DEFAULT_COUNTS };
+  context.UserEventCounts.set({ ...counts, depositCount: counts.depositCount + 1 });
 });
 
 YearnGauge.Withdraw.handler(async ({ event, context }) => {
@@ -887,6 +943,11 @@ YearnGauge.Withdraw.handler(async ({ event, context }) => {
     shares: event.params.shares,
   };
   context.Withdraw.set(entity);
+
+  // Update user event counts
+  const userId = event.params.owner.toLowerCase();
+  const counts = (await context.UserEventCounts.get(userId)) ?? { id: userId, ...DEFAULT_COUNTS };
+  context.UserEventCounts.set({ ...counts, withdrawCount: counts.withdrawCount + 1 });
 });
 
 YearnGauge.Transfer.handler(async ({ event, context }) => {
@@ -905,6 +966,16 @@ YearnGauge.Transfer.handler(async ({ event, context }) => {
     value: event.params.value,
   };
   context.Transfer.set(entity);
+
+  // Update sender's transferOutCount
+  const senderId = event.params.sender.toLowerCase();
+  const senderCounts = (await context.UserEventCounts.get(senderId)) ?? { id: senderId, ...DEFAULT_COUNTS };
+  context.UserEventCounts.set({ ...senderCounts, transferOutCount: senderCounts.transferOutCount + 1 });
+
+  // Update receiver's transferInCount
+  const receiverId = event.params.receiver.toLowerCase();
+  const receiverCounts = (await context.UserEventCounts.get(receiverId)) ?? { id: receiverId, ...DEFAULT_COUNTS };
+  context.UserEventCounts.set({ ...receiverCounts, transferInCount: receiverCounts.transferInCount + 1 });
 });
 
 MapleTimelock.ProposalScheduled.handler(async ({ event, context }) => {
