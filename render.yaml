@@ -32,6 +32,10 @@ services:
         value: "10"
       - key: HASURA_GRAPHQL_ADMIN_SECRET
         sync: false
+      # Set this in Render as a JSON string that pins every JWT-authenticated
+      # request to the readonly Hasura role via claims_map.
+      - key: HASURA_GRAPHQL_JWT_SECRET
+        sync: false
       - key: HASURA_GRAPHQL_STRINGIFY_NUMERIC_TYPES
         value: "true"
       - key: PORT

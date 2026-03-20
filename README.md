@@ -55,6 +55,30 @@ Copy `.env.example` to `.env` and fill in values as needed:
 
 - `ENVIO_API_TOKEN`
 - `HASURA_GRAPHQL_ADMIN_SECRET`
+- `HASURA_GRAPHQL_JWT_SECRET`
+
+For `HASURA_GRAPHQL_JWT_SECRET`, use a JSON value that pins all JWT-authenticated traffic to the `readonly` Hasura role:
+
+```json
+{"type":"HS256","key":"<random-secret>","claims_namespace":"https://hasura.io/jwt/claims","claims_format":"json","claims_map":{"x-hasura-default-role":{"value":"readonly"},"x-hasura-allowed-roles":{"value":["readonly"]}}}
+```
+
+Generate the `key` value with:
+
+```bash
+openssl rand -base64 32
+```
+
+Keep this value in Render as a secret env var and do not commit it to the repository.
+
+### Generate Hasura JWTs
+
+This repo includes a helper that reads `HASURA_GRAPHQL_JWT_SECRET` and generates a signed JWT. It always emits Hasura claims with the `readonly` role.
+
+```bash
+HASURA_GRAPHQL_JWT_SECRET='{"type":"HS256","key":"<random-secret>","claims_namespace":"https://hasura.io/jwt/claims","claims_format":"json","claims_map":{"x-hasura-default-role":{"value":"readonly"},"x-hasura-allowed-roles":{"value":["readonly"]}}}' \
+pnpm jwt:generate --sub user-123 --ttl 3600 --user-id user-123
+```
 
 ### Calculate Depositor Fees
 

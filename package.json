@@ -10,7 +10,8 @@
     "dev": "envio dev",
     "start": "envio start",
     "test": "pnpm mocha",
-    "calc-fees": "tsc -p tsconfig.calc.json && node build/calc/calculate-depositor-fees.js"
+    "calc-fees": "tsc -p tsconfig.calc.json && node build/calc/calculate-depositor-fees.js",
+    "jwt:generate": "node scripts/generate_hasura_jwt.js"
   },
   "devDependencies": {
     "@types/chai": "^4.3.20",
