@@ -17,7 +17,7 @@ services:
     region: ohio
     image:
       url: hasura/graphql-engine:v2.43.0
-    plan: starter
+    plan: standard
     healthCheckPath: /healthz
     envVars:
       - key: HASURA_GRAPHQL_DATABASE_URL
