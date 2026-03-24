@@ -27,6 +27,9 @@ importers:
       chai:
         specifier: 4.3.10
         version: 4.3.10
+      dotenv:
+        specifier: ^17.3.1
+        version: 17.3.1
       mocha:
         specifier: 10.8.2
         version: 10.8.2
@@ -503,6 +506,10 @@ packages:
   diff@5.2.2:
     resolution: {integrity: sha512-vtcDfH3TOjP8UekytvnHH1o1P4FcUdt4eQ1Y+Abap1tk/OB2MWQvcwS2ClCd1zuIhc3JKOx6p3kod8Vfys3E+A==}
     engines: {node: '>=0.3.1'}
+
+  dotenv@17.3.1:
+    resolution: {integrity: sha512-IO8C/dzEb6O3F9/twg6ZLXz164a2fhTnEWb95H23Dm4OuN+92NmEAlTrupP9VW6Jm3sO26tQlqyvyi4CsnY9GA==}
+    engines: {node: '>=12'}
 
   emoji-regex@8.0.0:
     resolution: {integrity: sha512-MSjYzcWNOA0ewAHpz0MxpYFvwg6yjy1NG3xteoqz644VCo/RPgnr1/GGt+ic3iJTzQ8Eu3TdM14SawnVUmGE6A==}
@@ -1361,6 +1368,8 @@ snapshots:
   diff@3.5.1: {}
 
   diff@5.2.2: {}
+
+  dotenv@17.3.1: {}
 
   emoji-regex@8.0.0: {}
 

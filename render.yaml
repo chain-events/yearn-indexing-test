@@ -114,3 +114,26 @@ services:
         sync: false
       - key: TUI_OFF
         value: "true"
+
+  # GraphiQL Explorer - authenticated GraphQL IDE for Hasura
+  - type: web
+    name: graphiql
+    runtime: node
+    region: ohio
+    plan: starter
+    rootDir: graphiql
+    buildCommand: echo "no build step"
+    startCommand: node server.js
+    healthCheckPath: /healthz
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: PORT
+        value: "4000"
+      - key: HASURA_GRAPHQL_ENDPOINT
+        fromService:
+          name: graphql-engine
+          type: web
+          envVarKey: RENDER_EXTERNAL_HOSTNAME
+      - key: HASURA_GRAPHQL_JWT_SECRET
+        sync: false
