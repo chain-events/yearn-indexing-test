@@ -8,13 +8,20 @@ databases:
     user: envio_ix_7f3a
     postgresMajorVersion: "18"
 
+  - name: envio-db
+    plan: basic-1gb
+    region: virginia
+    databaseName: envio_indexer
+    user: envio_ix_7f3a
+    postgresMajorVersion: "18"
+
 services:
   # Hasura GraphQL Engine - public-facing GraphQL API
   # Benchmark: 1% CPU, 50% memory on starter — no upgrade needed
   - type: web
     name: graphql-engine
     runtime: image
-    region: virginia
+    region: ohio
     image:
       url: hasura/graphql-engine:v2.43.0
     plan: standard
@@ -48,7 +55,7 @@ services:
   - type: worker
     name: envio-indexer
     runtime: node
-    region: virginia
+    region: ohio
     plan: standard
     buildCommand: pnpm install --frozen-lockfile && pnpm envio codegen
     startCommand: export HASURA_GRAPHQL_ENDPOINT="http://${HASURA_SERVICE_HOST}:${HASURA_SERVICE_PORT}/v1/metadata" && pnpm envio start
