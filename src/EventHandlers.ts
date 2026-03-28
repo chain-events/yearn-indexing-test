@@ -27,7 +27,6 @@ import {
   PufferTimelock,
   LidoTimelock,
   MapleTimelock,
-  MakerDSPause,
   TimelockEvent,
   YearnReferralWrapper,
   ReferralDeposit,
@@ -568,51 +567,6 @@ LidoTimelock.StartVote.handler(async ({ event, context }) => {
     signature: undefined,
     creator: event.params.creator,
     metadata: event.params.metadata,
-    votesFor: undefined,
-    votesAgainst: undefined,
-  };
-  context.TimelockEvent.set(entity);
-});
-
-// ─── MakerDSPause Handler ───────────────────────────────────────────────────
-
-const PLOT_SELECTOR = "0x46d2fbbb";
-
-MakerDSPause.LogNote.handler(async ({ event, context }) => {
-  const sig = event.params.sig;
-  if (!sig.startsWith(PLOT_SELECTOR)) return;
-
-  const foo = event.params.foo;
-  const usr = "0x" + foo.slice(-40).toLowerCase();
-
-  const fax = event.params.fax;
-  let eta: bigint | undefined;
-  if (fax.length >= 266) {
-    eta = BigInt("0x" + fax.slice(202, 266));
-  }
-
-  const entity: TimelockEvent = {
-    id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
-    timelockAddress: event.srcAddress,
-    timelockType: "Maker",
-    eventName: "LogPlot",
-    chainId: event.chainId,
-    blockNumber: event.block.number,
-    blockTimestamp: event.block.timestamp,
-    blockHash: event.block.hash,
-    transactionHash: event.transaction.hash,
-    transactionFrom: event.transaction.from,
-    logIndex: event.logIndex,
-    operationId: event.transaction.hash,
-    target: usr,
-    value: undefined,
-    data: undefined,
-    delay: eta,
-    predecessor: undefined,
-    index: undefined,
-    signature: undefined,
-    creator: event.params.guy,
-    metadata: undefined,
     votesFor: undefined,
     votesAgainst: undefined,
   };
