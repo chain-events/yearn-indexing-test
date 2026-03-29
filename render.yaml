@@ -1,13 +1,6 @@
 previewsEnabled: false
 
 databases:
-  - name: envio-postgres
-    plan: basic-1gb
-    region: ohio
-    databaseName: envio_indexer
-    user: envio_ix_7f3a
-    postgresMajorVersion: "18"
-
   - name: envio-db
     plan: basic-1gb
     region: virginia
@@ -128,7 +121,7 @@ services:
   - type: web
     name: graphiql
     runtime: node
-    region: ohio
+    region: virginia
     plan: starter
     rootDir: graphiql
     buildCommand: echo "no build step"
