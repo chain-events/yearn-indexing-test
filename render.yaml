@@ -26,6 +26,8 @@ services:
       url: hasura/graphql-engine:v2.43.0
     plan: standard
     healthCheckPath: /healthz
+    customDomains:
+      - name: envio-gql.yearn.dev
     envVars:
       - key: HASURA_GRAPHQL_DATABASE_URL
         fromDatabase:
@@ -132,6 +134,8 @@ services:
     buildCommand: echo "no build step"
     startCommand: node server.js
     healthCheckPath: /healthz
+    customDomains:
+      - name: envio-explorer.yearn.dev
     envVars:
       - key: NODE_VERSION
         value: "20"
