@@ -21,7 +21,7 @@ services:
   - type: web
     name: graphql-engine
     runtime: image
-    region: ohio
+    region: virginia
     image:
       url: hasura/graphql-engine:v2.43.0
     plan: standard
@@ -57,7 +57,7 @@ services:
   - type: worker
     name: envio-indexer
     runtime: node
-    region: ohio
+    region: virginia
     plan: standard
     buildCommand: pnpm install --frozen-lockfile && pnpm envio codegen
     startCommand: export HASURA_GRAPHQL_ENDPOINT="http://${HASURA_SERVICE_HOST}:${HASURA_SERVICE_PORT}/v1/metadata" && pnpm envio start
