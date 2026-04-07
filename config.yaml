@@ -107,6 +107,7 @@ networks:
           - "0x074134A2784F4F66b6ceD6f68849382990Ff3215" # ysUSDC - $3.9M
           - "0x696d02Db93291651ED510704c9b286841d506987" # yvUSD - $3.8M
           - "0x751F0cC6115410A3eE9eC92d08f46Ff6Da98b708" # yvWBTC-1 - $3.2M
+          - "0xAaaFEa48472f77563961Cdb53291DEDfB46F9040" # yvUSD Locked - #2.5M
           - "0xBF319dDC2Edc1Eb6FDf9910E39b37Be221C8805F" # yvcrvUSD-2 - $2.4M
           - "0xe1Ac97e2616Ad80f69f705ff007A4bbb3655544a" # kpdWBTC - $2.2M (retired)
           - "0xAc37729B76db6438CE62042AE1270ee574CA7571" # yvWETH-2 - $2M
@@ -316,6 +317,12 @@ networks:
           - "0xE007CA01894c863d7898045ed5A3B4Abf0b18f37" # WETH
           - "0x9A6bd7B6Fd5C4F87eb66356441502fc7dCdd185B" # USDT
           - "0xAa0362eCC584B985056E47812931270b99C91f9d" # WBTC
+          - "0xA03e39CDeAC8c2823A6EDC80956207294807c20d" # yvvbETH -> yvvbUSDC
+          - "0x2f817617A682A18851E3EaCBD945b214BE70474E" # yvvbWBTC -> yvvbUSDC
+          - "0xF352cdbE225B82Cc458aCa3c127F2935d7EE12CB" # yvvbUSDC -> yvvbETH
+          - "0x1166da048a9B0E840A57dD9Dce5378e6c32E53C4" # yvvbUSDC -> yvvbWBTC
+          - "0x17E6ee30d939d1C0186EF98265e9a4E38A056AA1" # yvvbETH -> yvvbWBTC
+          - "0x518EA05c41F89e36985A94c6dF8782F6d3F45111" # yvvbWBTC -> yvvbETH
       - name: TimelockController
         address:
           - "0x88Ba032be87d5EF1fbE87336B7090767F367BF73" # Yearn TimelockController
