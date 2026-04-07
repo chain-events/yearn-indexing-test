@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 
+const dotenv = require("dotenv");
+dotenv.config();
 const crypto = require("crypto");
-
 const HASURA_CLAIMS_NAMESPACE = "https://hasura.io/jwt/claims";
 const READONLY_ROLE = "readonly";
 const SUPPORTED_HMAC_TYPES = {
@@ -14,7 +15,7 @@ function usage() {
   console.error(
     [
       "Usage:",
-      "  pnpm jwt:generate --sub <subject> [--ttl <seconds>] [--user-id <id>] [--issuer <iss>] [--audience <aud>] [--extra '{\"foo\":\"bar\"}']",
+      '  pnpm jwt:generate --sub <subject> [--client-id <id>] [--ttl <seconds>] [--user-id <id>] [--issuer <iss>] [--audience <aud>] [--extra \'{"foo":"bar"}\']',
       "",
       "Notes:",
       "  - Reads HASURA_GRAPHQL_JWT_SECRET from the environment",
@@ -110,10 +111,11 @@ function main() {
 
   const config = readJwtConfig();
   const now = Math.floor(Date.now() / 1000);
-  const ttl = Number(options.ttl);
+  const noExpiry = options.ttl === "none";
+  const ttl = noExpiry ? 0 : Number(options.ttl);
 
-  if (!Number.isFinite(ttl) || ttl <= 0) {
-    throw new Error("--ttl must be a positive number of seconds");
+  if (!noExpiry && (!Number.isFinite(ttl) || ttl <= 0)) {
+    throw new Error("--ttl must be a positive number of seconds, or 'none' for no expiry");
   }
 
   let extraClaims = {};
@@ -132,8 +134,9 @@ function main() {
 
   const payload = {
     sub: options.sub || "readonly-user",
+    ...(options["client-id"] ? { client_id: options["client-id"] } : {}),
     iat: now,
-    exp: now + ttl,
+    ...(noExpiry ? {} : { exp: now + ttl }),
     ...extraClaims,
     [claimsNamespace]: {
       "x-hasura-default-role": READONLY_ROLE,

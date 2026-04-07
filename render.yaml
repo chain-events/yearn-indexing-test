@@ -1,9 +1,9 @@
 previewsEnabled: false
 
 databases:
-  - name: envio-postgres
+  - name: envio-db
     plan: basic-1gb
-    region: ohio
+    region: virginia
     databaseName: envio_indexer
     user: envio_ix_7f3a
     postgresMajorVersion: "18"
@@ -14,15 +14,17 @@ services:
   - type: web
     name: graphql-engine
     runtime: image
-    region: ohio
+    region: virginia
     image:
       url: hasura/graphql-engine:v2.43.0
     plan: standard
     healthCheckPath: /healthz
+    domains:
+      - envio-gql.yearn.dev
     envVars:
       - key: HASURA_GRAPHQL_DATABASE_URL
         fromDatabase:
-          name: envio-postgres
+          name: envio-db
           property: connectionString
       - key: HASURA_GRAPHQL_ENABLE_CONSOLE
         value: "true"
@@ -48,7 +50,7 @@ services:
   - type: worker
     name: envio-indexer
     runtime: node
-    region: ohio
+    region: virginia
     plan: standard
     buildCommand: pnpm install --frozen-lockfile && pnpm envio codegen
     startCommand: export HASURA_GRAPHQL_ENDPOINT="http://${HASURA_SERVICE_HOST}:${HASURA_SERVICE_PORT}/v1/metadata" && pnpm envio start
@@ -59,23 +61,23 @@ services:
         sync: false
       - key: ENVIO_PG_HOST
         fromDatabase:
-          name: envio-postgres
+          name: envio-db
           property: host
       - key: ENVIO_PG_PORT
         fromDatabase:
-          name: envio-postgres
+          name: envio-db
           property: port
       - key: ENVIO_PG_USER
         fromDatabase:
-          name: envio-postgres
+          name: envio-db
           property: user
       - key: ENVIO_PG_PASSWORD
         fromDatabase:
-          name: envio-postgres
+          name: envio-db
           property: password
       - key: ENVIO_PG_DATABASE
         fromDatabase:
-          name: envio-postgres
+          name: envio-db
           property: database
       - key: ENVIO_PG_SSL_MODE
         value: "false"
@@ -114,3 +116,28 @@ services:
         sync: false
       - key: TUI_OFF
         value: "true"
+
+  # GraphiQL Explorer - authenticated GraphQL IDE for Hasura
+  - type: web
+    name: graphiql
+    runtime: node
+    region: virginia
+    plan: starter
+    rootDir: graphiql
+    buildCommand: echo "no build step"
+    startCommand: node server.js
+    healthCheckPath: /healthz
+    domains:
+      - envio-explorer.yearn.dev
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: PORT
+        value: "4000"
+      - key: HASURA_GRAPHQL_ENDPOINT
+        fromService:
+          name: graphql-engine
+          type: web
+          envVarKey: RENDER_EXTERNAL_HOSTNAME
+      - key: HASURA_GRAPHQL_JWT
+        sync: false

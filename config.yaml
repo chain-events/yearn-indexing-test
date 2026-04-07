@@ -54,10 +54,6 @@ contracts:
     handler: src/EventHandlers.ts
     events:
       - event: "ProposalScheduled(uint256 indexed proposalId, (bytes32, bool, uint32, uint32, uint32) proposal)"
-  - name: MakerDSPause
-    handler: src/EventHandlers.ts
-    events:
-      - event: "LogNote(bytes4 indexed sig, address indexed guy, bytes32 indexed foo, bytes32 bar, bytes fax) anonymous"
   - name: YearnReferralWrapper
     handler: src/EventHandlers.ts
     events:
@@ -105,6 +101,7 @@ networks:
           - "0x4Bd05E6ff75b633F504F0fC501c1e257578C8A72" # ysUSDT - $7.3M
           - "0x310B7Ea7475A0B449Cfd73bE81522F1B88eFAFaa" # yvUSDT-1 - $7.2M
           - "0xA5DaB32DbE68E6fa784e1e50e4f620a0477D3896" # kpdUSDT - $5.6M (retired)
+          - "0xd7a540ba3626c0aa66e7DB4088971d0CD64695B6" # yETH Recovery - $4.9M
           - "0x9F4330700a36B29952869fac9b33f45EEdd8A3d8" # yBOLD - $4.4M
           - "0x23346B04a7f55b8760E5860AA5A77383D63491cD" # ysyBOLD - $4.4M
           - "0x074134A2784F4F66b6ceD6f68849382990Ff3215" # ysUSDC - $3.9M
@@ -128,6 +125,7 @@ networks:
           - "0xA89E83E39c8A1cB173D7a0c0201Cd3956B57db6d" # yv^2WETH-2 - $154K (retired)
           - "0x00C8a649C9837523ebb406Ceb17a6378Ab5C74cF" # ysUSDC - $148K
           - "0x564F7b5d8389F5C4c99E50fED5fC95070e697903" # ysPENDLE-LPT - $133K (retired)
+
       - name: TimelockController
         address:
           - "0xd8236031d8279d82e615af2bfab5fc0127a329ab" # CAP TimelockController
@@ -157,9 +155,6 @@ networks:
       - name: MapleTimelock
         address:
           - "0x2efff88747eb5a3ff00d4d8d0f0800e306c0426b" # Maple GovernorTimelock
-      - name: MakerDSPause
-        address:
-          - "0xbe286431454714f511008713973d3b053a2d38f3" # Maker DSPause
       - name: YearnReferralWrapper
         address:
           - "0x3744Df2673097d738aCaa3E463E6D638867757f2"
