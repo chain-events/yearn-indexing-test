@@ -9,6 +9,7 @@
     "codegen": "envio codegen",
     "dev": "envio dev",
     "start": "envio start",
+    "sync:vaults": "node scripts/update_kong_vaults.js",
     "test": "pnpm mocha",
     "calc-fees": "tsc -p tsconfig.calc.json && node build/calc/calculate-depositor-fees.js",
     "jwt:generate": "node scripts/generate_hasura_jwt.js"
