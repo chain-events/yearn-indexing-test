@@ -5,28 +5,23 @@
     "clean": "tsc --clean",
     "build": "tsc --build",
     "watch": "tsc --watch",
-    "mocha": "ts-mocha test/**/*.ts",
+    "mocha": "vitest run",
     "codegen": "envio codegen",
     "dev": "envio dev",
     "start": "envio start",
     "sync:vaults": "node scripts/update_kong_vaults.js",
-    "test": "pnpm mocha",
+    "test": "vitest run",
     "calc-fees": "tsc -p tsconfig.calc.json && node build/calc/calculate-depositor-fees.js",
     "jwt:generate": "node scripts/generate_hasura_jwt.js"
   },
   "devDependencies": {
-    "@types/chai": "^4.3.20",
-    "@types/mocha": "10.0.10",
     "@types/node": "20.17.0",
-    "chai": "4.3.10",
     "dotenv": "^17.4.1",
-    "mocha": "10.8.2",
-    "ts-mocha": "^10.1.0",
-    "tsx": "^4.21.0",
+    "vitest": "^3.1.1",
     "typescript": "5.9.3"
   },
   "dependencies": {
-    "envio": "2.32.10",
+    "envio": "3.0.0-alpha.21",
     "viem": "^2.47.11"
   },
   "optionalDependencies": {
