@@ -86,44 +86,36 @@ networks:
     contracts:
       - name: YearnV3Vault
         address:
-          # V3 vaults on Ethereum from Kong API (all TVL)
-          - "0x7B5A0182E400b241b317e781a4e9dEdFc1429822" # kpdUSDC - Katana Pre-Deposit USDC (retired) [hidden]
-          - "0xcc6a16Be713f6a714f68b0E1f4914fD3db15fBeF" # kpdWETH - Katana Pre-Deposit WETH (retired) [hidden]
+          # V3 vaults on Ethereum from Kong API (all TVL, excluding hidden)
           - "0xBe53A109B494E5c9f97b9Cd39Fe969BE68BF6204" # yvUSDC-1 - USDC-1 yVault
-          - "0x48c03B6FfD0008460F8657Db1037C7e09dEedfcb" # kpdUSDT - Katana Pre-Deposit USDT (retired) [hidden]
-          - "0x92C82f5F771F6A44CfA09357DD0575B81BF5F728" # kpdWBTC - Katana Pre-Deposit WBTC (retired) [hidden]
           - "0x028eC7330ff87667b6dfb0D94b954c820195336c" # yvDAI-1 - DAI-1 yVault
           - "0xc56413869c6CDf96496f2b1eF801fEDBdFA7dDB0" # yvWETH-1 - WETH-1 yVault
-          - "0xF470EB50B4a60c9b069F7Fd6032532B8F5cC014d" # kpdUSDC - Katana Pre-Deposit USDC (retired) [hidden]
           - "0x310B7Ea7475A0B449Cfd73bE81522F1B88eFAFaa" # yvUSDT-1 - USDT-1 yVault
           - "0xc9f01b5c6048B064E6d925d1c2d7206d4fEeF8a3" # ysUSDS - Spark USDS Compounder
           - "0x182863131F9a4630fF9E27830d945B1413e347E8" # yvUSDS-1 - USDS-1 yVault
           - "0x6D2981FF9b8d7edbb7604de7A65BAC8694ac849F" # ysUSDT - Morpho Gauntlet USDT Prime Compounder
-          - "0xA5DaB32DbE68E6fa784e1e50e4f620a0477D3896" # kpdUSDT - Katana Pre-Deposit USDT (retired) [hidden]
-          - "0xd7a540ba3626c0aa66e7DB4088971d0CD64695B6" # yETH-Recovery - Yearn yETH Recovery Vault [hidden]
           - "0x9F4330700a36B29952869fac9b33f45EEdd8A3d8" # yBOLD - Yearn BOLD
           - "0x23346B04a7f55b8760E5860AA5A77383D63491cD" # ysyBOLD - Staked yBOLD
           - "0x696d02Db93291651ED510704c9b286841d506987" # yvUSD
           - "0x751F0cC6115410A3eE9eC92d08f46Ff6Da98b708" # yvWBTC-1 - WBTC-1 yVault
           - "0xAaaFEa48472f77563961Cdb53291DEDfB46F9040" # Locked yvUSD
-          - "0xe1Ac97e2616Ad80f69f705ff007A4bbb3655544a" # kpdWBTC - Katana Pre-Deposit WBTC (retired) [hidden]
           - "0xBF319dDC2Edc1Eb6FDf9910E39b37Be221C8805F" # yvcrvUSD-2 - crvUSD-2 yVault
-          - "0x77570CfEcf83bc6bB08E2cD9e8537aeA9F97eA2F" # kpdWETH - Katana Pre-Deposit WETH (retired) [hidden]
           - "0xAc37729B76db6438CE62042AE1270ee574CA7571" # yvWETH-2 - WETH-2 yVault
           - "0x074134A2784F4F66b6ceD6f68849382990Ff3215" # ysUSDC - Morpho Steakhouse USDC Compounder
+          - "0x0e297dE4005883C757c9F09fdF7cF1363C20e626" # ysUSDC - Morpho Yearn OG USDC Compounder
           - "0x09AcE8B2f2fE2189A5B37046BBaFa29Dce31c920" # yscrvUSD - Curve Boosted crvUSD-sreUSD Lender
           - "0xAe7d8Db82480E6d8e3873ecbF22cf17b3D8A7308" # yvUSDC-2 - USDC-2 yVault
-          - "0x0e297dE4005883C757c9F09fdF7cF1363C20e626" # ysUSDC - Morpho Yearn OG USDC Compounder
           - "0x92545bCE636E6eE91D88D2D017182cD0bd2fC22e" # yvDAI-2 - DAI-2 yVault
-          - "0x89E93172AEF8261Db8437b90c3dCb61545a05317" # sUSDaf - Savings USDaf
           - "0xd9BA99D93ea94a65b5BC838a0106cA3AbC82Ec4F" # ysWETH - Morpho Y-WETH Compounder
+          - "0xeEB6Be70fF212238419cD638FAB17910CF61CBE7" # ysWETH - Morpho Gauntlet WETH Prime Compounder
           - "0x1F6f16945e395593d8050d6Cc33e4328a515B648" # yvyYB - yYB yVault
           - "0xC7baE383738274ea8C3292d53AfBB3b42B348DF0" # ysWETH - Aave V3 Lido WETH Lender
-          - "0xeEB6Be70fF212238419cD638FAB17910CF61CBE7" # ysWETH - Morpho Gauntlet WETH Prime Compounder
           - "0x694E47AFD14A64661a04eee674FB331bCDEF3737" # ysUSDC - Morpho Gauntlet USDC Prime Compounder
           - "0xA89E83E39c8A1cB173D7a0c0201Cd3956B57db6d" # yv^2WETH-2 - WETH-2 yVault Liquid Locker Compounder (retired)
           - "0x564F7b5d8389F5C4c99E50fED5fC95070e697903" # ysPENDLE-LPT - Lido stETH LP (25 DEC 2025) (retired)
+          - "0x89E93172AEF8261Db8437b90c3dCb61545a05317" # sUSDaf - Savings USDaf
           - "0xe24BA27551aBE96Ca401D39761cA2319Ea14e3CB" # yvAjnaDAI - Yearn-Ajna DAI Vault
+          - "0xc5976A234574A7345EfcbB3B0AaF5F435355d2DB" # ysOETH - Morpho OETH/yvUSDC-1 Lender Borrower
           - "0x00C8a649C9837523ebb406Ceb17a6378Ab5C74cF" # ysUSDC - USDC Fluid Lender
           - "0xaF71a4f5d93fb88B24C67760BCF9688a6C3A54D4" # yvSKY-1 - SKY-1 yVault
           - "0xaf48f006e75AF050c4136F5a32B69e3FE1C4140f" # ysWETH - Euler Prime WETH Compounder
@@ -135,8 +127,6 @@ networks:
           - "0xC40dC53931cd184F782f3602d95C7e3609706004" # yspxETH - Sturdy pxETH Compounder
           - "0x7eE351aA702C8fC735D77Fb229b7676AC15D7c79" # ysUSDC - Compound V3 USD Lender
           - "0x082a5743aAdf3d0Daf750EeF24652b36a68B1e9C" # ysyvAjnaDAI - yvAjnaDAI-harvester (retired)
-          - "0xC0C31393C0B406C9cCfDBFb772202ce3A7cb667E" # yvBal-GHO-USDf - Balancer GHO-USDf yVault [hidden]
-          - "0xc5976A234574A7345EfcbB3B0AaF5F435355d2DB" # ysOETH - Morpho OETH/yvUSDC-1 Lender Borrower
           - "0x04AeBe2e4301CdF5E9c57B01eBdfe4Ac4B48DD13" # yvmkUSD-A - mkUSD yVault-A (retired)
           - "0x76e9B1711D85BC9c88a437420787c34282956eC5" # yPT-USDe-Zircuit - yPT-USDe-Zircuit (auto-rolling Pendle PT) (retired)
           - "0x11AaE8beE9b1Da827C641540D20e4e664677e06F" # yvyPRISMA-1 - yPRISMA-1 yVault (retired)
@@ -156,9 +146,8 @@ networks:
           - "0x4Bd05E6ff75b633F504F0fC501c1e257578C8A72" # ysUSDT - USDT Fluid Lender
           - "0xf9A7084Ec30238495b3F5C51f05BA7Cd1C358dcF" # yv^2crvUSD - crvUSD-2 yVault Liquid Locker Compounder (retired)
           - "0x5f76526390d9cd9944d65C605C5006480FA1bFcB" # ysWETH - Sturdy Swell Aggregator Compounder
-          - "0x888239Ffa9a0613F9142C808aA9F7d1948a14f75" # ysUSDC - Morpho OEV-boosted USDC Compounder
           - "0xC08d81aba10f2dcBA50F9A3Efbc0988439223978" # ysUSDS - Aave V3 Lido USDS Lender
-          - "0x0aBd93dA8387B5Ef0511a2859d85D84fe4519e94" # sUSDaf - Savings USDaf [hidden]
+          - "0x888239Ffa9a0613F9142C808aA9F7d1948a14f75" # ysUSDC - Morpho OEV-boosted USDC Compounder
           - "0x4cE9c93513DfF543Bc392870d57dF8C04e89Ba0a" # ysUSDS - Sky Rewards USDS Compounder (retired)
           - "0x1fd862499e9b9402DE6c599b6C391f83981180Ab" # ysDAI - Spark DAI Lender
           - "0x90759801579208B28D2D36D13b1ED7443D1b717F" # ysWETH - Aave V3 WETH Lender
@@ -181,7 +170,6 @@ networks:
           - "0x602DA189F5aDa033E9aC7096Fc39C7F44a77e942" # ysUSDC - USDC to yvUSDS Farmer (retired)
           - "0xB35b02E3353BE80A5648F5299b0336579BCf64a0" # yv^2WETH-1 - WETH-1 yVault Liquid Locker Compounder (retired)
           - "0x9861708f2ad2BD1ed8D4D12436C0d8EB1ED36f1c" # ysWETH - Across WETH Lender (retired)
-          - "0xbDb97eC319c41c6FA383E94eCE6Bdf383dFC7BE4" # ysUSDC - Aave V3 USDC Lender (retired) [hidden]
           - "0x459F99D7c83Bc3653b1913B62D2978b1deDa01B5" # ysUSDC - sUSDC
           - "0x6acEDA98725505737c0F00a3dA0d047304052948" # ysDAI - DAI to yvUSDS Farmer (retired)
           - "0xb6da41D4BDb484BDaD0BfAa79bC8E182E5095F7e" # ysUSDC - Morpho Usual Boosted USDC Compounder
@@ -197,9 +185,7 @@ networks:
           - "0x1d0BCbf0f80Cc47E7766d48D61C5fE7AD8a19640" # ysPENDLE-LPT - sDAI LP (26 SEP 2024) (retired)
           - "0x2090C495FB109725CADd6593e1e5488a64819aD7" # yvBal-RZR-wstETH - Balancer RZR-wstETH yVault (retired)
           - "0x2478d5997324e8B47e9Ff870166DBa8d2e461993" # yPT-eETH-Karak - yPT-eETH-Karak (auto-rolling Pendle PT) (retired)
-          - "0x27ffA71dBB25A7C52A3Da74C6eED8C94c9A43E0d" # yscrvUSD - Aave V3 crvUSD Lender (retired) [hidden]
           - "0x378fFd482C767f847d48818552f8438B17335C89" # ysPENDLE-LPT - crvUSD LP (27 JUN 2024) (retired)
-          - "0x3f540647b08e3E9bcD297e065e42E6CDAF37eBa0" # yvSilo-LRT-WETH - Silo-LRT WETH yVault (retired) [hidden]
           - "0x433853acbA7Ec9fFecF7d9732EA94f0668518e8E" # ysPENDLE-LPT - Swell rswETH LP (27 JUN 2024) (retired)
           - "0x4A77913d07b4154600A1E37234336f8273409c96" # ysUSDC - Morpho Gauntlet USDC Core Compounder
           - "0x57a8b4061AA598d2Bb5f70C5F931a75C9F511fc8" # yPT-LBTC - yPT-LBTC (auto-rolling Pendle PT) (retired)
@@ -207,9 +193,7 @@ networks:
           - "0x68B9f74372b257fad2c9A160D2F12eE526EA9510" # yPT-rsETH-Zircuit - yPT-rsETH-Zircuit (auto-rolling Pendle PT) (retired)
           - "0x8294BbA6671d4094A7C0e9c98E615FBC11f96388" # yPT-swETH - yPT-swETH (auto-rolling Pendle PT) (retired)
           - "0x82c24073a19f4C46ab2646323B322427Eb98F616" # ysPENDLE-LPT - uniETH LP (27 JUN 2024) (retired)
-          - "0x8C6e6284AE2504FBde50A80D266E736e4b18D51C" # yPT-rsENA - yPT-rsENA (auto-rolling Pendle PT) (retired) [hidden]
           - "0x93b88b35283E1DC30981567843f5BA88485C16Cc" # ysPENDLE-LPT - Lido stETH LP (30 DEC 2027) (retired)
-          - "0x95d69641ED7eCAa5e7d5539F56Dc6194b5Bcd7fA" # ysUSDT - Aave V3 USDT Lender (retired) [hidden]
           - "0x9784Ded306E42C0b8130f668e9B7533Faa72e65D" # ysWETH - Sturdy Sommelier Compounder
           - "0xA89a7420B19679B5A124cD1499787a6122E800D7" # ysPENDLE-LPT - eETH LP (27 JUN 2024) (retired)
           - "0xb2155fFA9807B2dECb4A411f7330da5BB6e46C31" # yPT-sfrxETH - yPT-sfrxETH (auto-rolling Pendle PT) (retired)
@@ -225,7 +209,6 @@ networks:
           - "0xE5323ca5B11EB8495C56473756De679e43168d57" # ysGHO - StrategyGearboxLenderGHO
           - "0xe838ab2EB50Db41Bd713f27346690d3Ead2D98f1" # yPT-weETH-Zircuit - yPT-weETH-Zircuit (auto-rolling Pendle PT) (retired)
           - "0xec48E0b9579062770888AaF900d054A1bC10A3Bf" # yPT-USDe-Karak - yPT-USDe-Karak (auto-rolling Pendle PT) (retired)
-          - "0xF02B8c7FF1accD022CD78444dd9F56330cB699B9" # ysUSDC - Bankr USDC Vault [hidden]
           - "0xF18245B7B7bA6c9c3Bf29B070ebea893d8FC549d" # ysWBTC - Morpho Gauntlet WBTC Core Compounder
           - "0xf45eec3B50658054755A5055173cEEB82c94Aa4e" # yPT-eBTC - yPT-eBTC (auto-rolling Pendle PT) (retired)
           - "0xF68a6B53D907B5ABC0bFdeCEB8343E91FEC052ee" # ysPENDLE-LPT - eETH LP (26 DEC 2024) (retired)
@@ -233,12 +216,12 @@ networks:
           - "0xfe4e8B0FdD1BA3c8eEf19e8b32A919b8B80e5200" # ysPENDLE-LPT - sfrxETH LP (26 DEC 2024) (retired)
       - name: YearnV2Vault
         address:
-          # V2 vaults on Ethereum from Kong API (all TVL)
+          # V2 vaults on Ethereum from Kong API (all TVL, excluding hidden)
           - "0xa258C4606Ca8206D8aA700cE2143D7db854D168c" # yvWETH - WETH yVault (retired)
           - "0x1Fc80CfCF5B345b904A0fB36d4222196Ed9eB8a5" # yvCurve-DOLA-sUSDe-f - Curve DOLA-sUSDe Factory yVault
           - "0xdA816459F1AB5631232FE5e97a05BBBb94970c95" # yvDAI - DAI yVault (retired)
-          - "0xa354F35829Ae975e850e23e9615b11Da1B3dC4DE" # yvUSDC - USDC yVault (retired)
           - "0x27B5739e22ad9033bcBf192059122d163b60349D" # yvyCRV - yCRV yVault
+          - "0xa354F35829Ae975e850e23e9615b11Da1B3dC4DE" # yvUSDC - USDC yVault (retired)
           - "0x5B8C556B8b2a78696F0B9B830B3d67623122E270" # yvCurve-stETH-f - Curve stETH Factory yVault
           - "0x3B27F92C0e212C671EA351827EDF93DB27cc0c65" # yvUSDT - USDT yVault (retired)
           - "0x7Da96a3891Add058AdA2E826306D812C638D87a7" # yvUSDT - USDT yVault (retired)
@@ -246,23 +229,22 @@ networks:
           - "0xdCD90C7f6324cfa40d7169ef80b12031770B4325" # yvCurve-stETH - Curve stETH Pool yVault (retired)
           - "0x5f18C75AbDAe578b483E5F43f12a39cF75b973a9" # yvUSDC - USDC yVault (retired)
           - "0xf165a634296800812B8B0607a75DeDdcD4D3cC88" # yvCurve-reUSD-scrvUSD-f - Curve reUSD-scrvUSD Factory yVault
-          - "0x19D3364A399d251E894aC732651be8B0E4e85001" # yvDAI - DAI yVault (retired)
           - "0x6E9455D109202b426169F0d8f01A3332DAE160f3" # lp-yCRVv2 - LP Yearn CRV Vault v2
+          - "0x19D3364A399d251E894aC732651be8B0E4e85001" # yvDAI - DAI yVault (retired)
           - "0xe0287cA62fE23f4FFAB827d5448d68aFe6DD9Fd7" # yvCurve-msUSD-frxUSD-f - Curve msUSD-frxUSD Factory yVault
           - "0xc952f3028E322da48e239A077b810A24556f36f1" # yvCurve-pmUSD-frxUSD-f - Curve pmUSD-frxUSD Factory yVault
           - "0x8770d076dC2db46f368BDc8EaAE3b7164e59267b" # yvCurve-USD3-sUSDe-f - Curve USD3-sUSDe Factory yVault
           - "0xaA379c2aA72529d5ec0da8A41e2F41ED7Fe4b48C" # yvCurve-3CryptoUSDC-f - Curve TriCryptoUSDC Factory yVault
           - "0xa9fE4601811213c340e850ea305481afF02f5b28" # yvWETH - WETH yVault (retired)
-          - "0x4282B8f159ee677559Dc6A20cd478DD0BDe75fF2" # yvCurve-frxUSD-crvUSD-f - Curve frxUSD-crvUSD Factory yVault
           - "0xBfBC4acAE2ceC91A5bC80eCA1C9290F92959f7c3" # yvCurve-eUSD-USDC-f - Curve eUSD-USDC Factory yVault
           - "0xc9e146B126f4ca0Aa8edA3BDBCd76a960B4dcba7" # yvCurve-USD3-sUSDS-f - Curve USD3-sUSDS Factory yVault
-          - "0x25212Df29073FfFA7A67399AcEfC2dd75a831A1A" # yvCurve-EURS - Curve EURS Pool yVault (retired)
           - "0xa540744DEDBDA9eF64cf753F0E851EfE4a419EA9" # yvCurve-MIM-f - Curve MIM Factory yVault
           - "0x75A291F0232ADD37d72Dd1Dcff55B715755ECDEe" # yvCurve-CVX-ETH-f - Curve CVX-ETH Factory yVault
           - "0xdb25cA703181E7484a155DD612b06f57E12Be5F0" # yvYFI - YFI yVault
           - "0x27b7b1ad7288079A66d12350c828D3C00A6F07d7" # yvCurve-IronBank - Curve Iron Bank Pool yVault (retired)
           - "0x1635b506a88fBF428465Ad65d00e8d6B6E5846C3" # yvCurve-CVXETH - Curve CVX-ETH Pool yVault (retired)
           - "0x9d409a0A012CFbA9B15F6D4B36Ac57A46966Ab9a" # yvBOOST - Yearn Compounding veCRV yVault (retired)
+          - "0x4282B8f159ee677559Dc6A20cd478DD0BDe75fF2" # yvCurve-frxUSD-crvUSD-f - Curve frxUSD-crvUSD Factory yVault
           - "0xAd86Df2e8F989c828B25A7Da5EB1Ec363283fA3F" # yvCurve-LUSD-f - Curve LUSD Factory yVault
           - "0x5fA5B62c8AF877CB37031e0a3B2f34A78e3C56A6" # yvCurve-LUSD - Curve LUSD Pool yVault (retired)
           - "0x8078198Fc424986ae89Ce4a910Fc109587b6aBF3" # yvCurve-3Crypto-f - Curve 3Crypto Factory yVault
@@ -274,8 +256,9 @@ networks:
           - "0xDb26d8815EdA864Dfa43306766f2F8CA50C03F9E" # yvCurve-msUSD-FRAXBP-f - Curve msUSD-FRAXBP Factory yVault
           - "0x241AdD131B9aaa7527132b752252b99420937ADc" # yvCurve-USDT-crvUSD-f - Curve USDT-crvUSD Factory yVault
           - "0xE537B5cc158EB71037D4125BDD7538421981E6AA" # yvCurve-3Crypto - Curve 3Crypto Pool yVault (retired)
-          - "0x84E13785B5a27879921D6F685f041421C7F482dA" # yvCurve-3pool - Curve 3pool yVault (retired)
           - "0x8017B5d498f75d12dA6A857e867699fB07De41a4" # yvCurve-RSUP-WETH-f - Curve RSUP-WETH Factory yVault
+          - "0x84E13785B5a27879921D6F685f041421C7F482dA" # yvCurve-3pool - Curve 3pool yVault (retired)
+          - "0x68E3C51f091102960CDBddEd27Dd06eC21083854" # yvCurve-OUSD-USDC-f - Curve OUSD-USDC Factory yVault
           - "0x04c8bfe2eb09a1e2e9fA97A2fd970E06d87B43de" # yvCurve-GEAR-ETH-f - Curve GEAR-ETH Factory yVault
           - "0xb37094c1B5614Bd6EcE40AFb295C26F4377069d3" # yvCurve-FRAX-f - Curve FRAX Factory yVault
           - "0xB4AdA607B9d6b2c9Ee07A275e9616B84AC560139" # yvCurve-FRAX - Curve FRAX Pool yVault (retired)
@@ -285,8 +268,8 @@ networks:
           - "0xC8B38D661794d8847961baF40Db92B76f2EBf30d" # yvCurve-MUSD-2pool-f - Curve MUSD-2pool Factory yVault
           - "0x671a912C10bba0CFA74Cfc2d6Fba9BA1ed9530B2" # yvLINK - LINK yVault (retired)
           - "0xb4D1Be44BfF40ad6e506edf43156577a3f8672eC" # yvCurve-sAave - Curve sAave Pool yVault (retired)
-          - "0xf2db9a7c0ACd427A680D640F02d90f6186E71725" # yvCurve-LINK - Curve LINK Pool yVault (retired)
           - "0xc97232527B62eFb0D8ed38CF3EA103A6CcA4037e" # lp-yCRV - LP Yearn CRV Vault (retired)
+          - "0xf2db9a7c0ACd427A680D640F02d90f6186E71725" # yvCurve-LINK - Curve LINK Pool yVault (retired)
           - "0x944d749017053e0D37ec206c9898716A21e0B2E2" # yvCurve-mUSD-f - Curve mUSD Factory yVault
           - "0x8cc94ccd0f3841a468184aCA3Cc478D2148E1757" # yvCurve-mUSD - Curve mUSD Pool yVault (retired)
           - "0x321d570790fd2f109Fe4e55aa419Adf2fce0c842" # yvCurve-agEUR-EUROC-f - Curve agEUR-EUROC Factory yVault
@@ -294,7 +277,6 @@ networks:
           - "0xe9a4F7119BF549F65465551DE3C31FfD8D3B22f4" # yvCurve-OUSD-msUSD-f - Curve OUSD-msUSD Factory yVault
           - "0x22c64f32b5FeA40D7D387CA875D079d80415F988" # yvCurve-OUSD-crvUSD-f - Curve OUSD-crvUSD Factory yVault
           - "0x528D50dC9a333f01544177a924893FA1F5b9F748" # yvCurve-ibKRW - Curve ibKRW Pool yVault (retired)
-          - "0x67e019bfbd5a67207755D04467D6A70c0B75bF60" # yvCurve-ibEUR - Curve ibEUR Pool yVault (retired)
           - "0xFBEB78a723b8087fD2ea7Ef1afEc93d35E8Bed42" # yvUNI - UNI yVault (retired)
           - "0x849dC56ceCa7Cf55AbF5ec87910DA21c5C7dA581" # yvCurve-ETH+-f - Curve ETH+ Factory yVault
           - "0x5a770DbD3Ee6bAF2802D29a901Ef11501C44797A" # yvCurve-sUSD - Curve sUSD Pool yVault (retired)
@@ -306,26 +288,25 @@ networks:
           - "0x77e829FFF18C14AD9bb88963acB0010A0506de88" # yvCurve-StaFi-rETH-f - Curve StaFi rETH Factory yVault
           - "0xBfedbcbe27171C418CDabC2477042554b1904857" # yvCurve-rETH - Curve rETH Pool yVault (retired)
           - "0x3D980E50508CFd41a13837A60149927a11c03731" # yvCurve-triCrypto - Curve triCrypto Pool yVault (retired)
-          - "0x08c0833AF1331831759b8e0BFeF1BC5738436325" # yvCurve-sDOLA-scrvUSD-f - Curve sDOLA-scrvUSD Factory yVault
           - "0x5F208d3a8b13062adE45a33Ca9Bc8de64D520CB9" # yvCurve-stETHv2-f - Curve stETHv2 Factory yVault
           - "0x3f34A7eF4f17528CbFFb7817060941BCdaC924fa" # yvCurve-TriCRV-f - Curve TriCRV Factory yVault
+          - "0x08c0833AF1331831759b8e0BFeF1BC5738436325" # yvCurve-sDOLA-scrvUSD-f - Curve sDOLA-scrvUSD Factory yVault
           - "0x7845Ebf66c9575Fc5f5A0dBb9a34a706Ad997a3f" # yvCurve-3CryptoUSDT-f - Curve TriCryptoUSDT Factory yVault
           - "0xF29AE508698bDeF169B89834F76704C3B205aedf" # yvSNX - SNX yVault (retired)
           - "0x2c8a33C66c00264316Ea4E4433e86A386Eb6ECBf" # yvCurve-pxETH-stETH-f - Curve pxETH-stETH Factory yVault
           - "0x5c0A86A32c129538D62C106Eb8115a8b02358d57" # yvCurve-rETHwstETH - Curve rETH-wstETH Pool yVault (retired)
           - "0x625b7DF2fa8aBe21B0A976736CDa4775523aeD1E" # yvCurve-HBTC - Curve HBTC Pool yVault (retired)
+          - "0x6949145469362F9eeaB3c96Ea41b51D9B4cC2b21" # yvCurve-TriCryptoINV-f - Curve TriCryptoINV Factory yVault
           - "0xbCe40f1840A449cAAaF374Df0A1fEe1e212784CB" # yvCurve-DOLA-scrvUSD-f - Curve DOLA-scrvUSD Factory yVault
           - "0x6F9A3ab8Aea89892b4157643A6e75d8E6ff2291d" # yvCurve-USDf-USDC-f - Curve USDf-USDC Factory yVault
-          - "0x6949145469362F9eeaB3c96Ea41b51D9B4cC2b21" # yvCurve-TriCryptoINV-f - Curve TriCryptoINV Factory yVault
           - "0xa669d6C2Df33F41940c2646A9BF3031e2524d515" # yvCurve-sdCRVv2-f - Curve sdCRVv2 Factory yVault
           - "0x5fFd0C196838aa5e700657C1f6fd8A87f5d80ED2" # yvCurve-OETH-ARM-stETH-f - Curve OETH-ARM-stETH Factory yVault
           - "0xa8E0c42F45C877e611C76F2D4bF57476f2014381" # yvCurve-IronBank-f - Curve Iron Bank Factory yVault (retired)
-          - "0x39CAF13a104FF567f71fd2A4c68C026FDB6E740B" # yvCurve-Aave - Curve Aave Pool yVault (retired)
           - "0xd02b103f7f5dba89Ad316E2b3Fe247F280CcE5b2" # yvCurve-xETH-f - Curve xETH Factory yVault
+          - "0x39CAF13a104FF567f71fd2A4c68C026FDB6E740B" # yvCurve-Aave - Curve Aave Pool yVault (retired)
           - "0x2147935D9739da4E691b8Ae2e1437492A394eBf5" # ubiWETH - WETH ubiVault (retired)
-          - "0xe9Dc63083c464d6EDcCFf23444fF3CFc6886f6FB" # yvCurve-oBTC - Curve oBTC Pool yVault (retired)
-          - "0xC4dAf3b5e2A9e93861c3FBDd25f1e943B8D87417" # yvCurve-USDP - Curve USDP Pool yVault (retired)
           - "0x490bD0886F221A5F79713D3E84404355A9293C50" # yvCurve-ibCHF - Curve ibCHF Pool yVault (retired)
+          - "0xC4dAf3b5e2A9e93861c3FBDd25f1e943B8D87417" # yvCurve-USDP - Curve USDP Pool yVault (retired)
           - "0xd9788f3931Ede4D5018184E198699dC6d66C1915" # yvAAVE - AAVE yVault (retired)
           - "0x150F76e1339A918BaA38338ED9bd695Bd0924Bcf" # yvCurve-alETH-frxETH-f - Curve alETH-frxETH Factory yVault
           - "0x03f8CCf5b5004B55309e949ea9D08136a32E9C5d" # yvCurve-tBTC-cbBTC-f - Curve tBTC-cbBTC Factory yVault
@@ -334,48 +315,47 @@ networks:
           - "0xAE6eD98B1Bd9aAdd3185160324e0e011159B61D3" # yvCurve-Compound-f - Curve Compound Factory yVault
           - "0xD6Ea40597Be05c201845c0bFd2e96A60bACde267" # yvCurve-Compound - Curve Compound Pool yVault (retired)
           - "0x6a7A0481e476827857704B87bdeE7922D058cbE4" # yvCurve-hyUSD-eUSD-f - Curve hyUSD-eUSD Factory yVault
+          - "0x25212Df29073FfFA7A67399AcEfC2dd75a831A1A" # yvCurve-EURS - Curve EURS Pool yVault (retired)
           - "0x6A5694C1b37fFA30690b6b60D8Cf89c937d408aD" # yvCurve-coveYFI-f - Curve coveYFI Factory yVault
           - "0x5383C1Ab5beac04d6A6E6872Cc6a422f2Dc25576" # yvCurve-USDC+-f - Curve USDC+ Factory yVault (retired)
-          - "0x0d4EA8536F9A13e4FBa16042a46c30f092b06aA5" # yvCurve-EURT - Curve EURT Pool yVault (retired)
           - "0x3a51269E0707A3416044bad5066858A12198fCf5" # yvCurve-CLEV-ETH-f - Curve CLEV-ETH Factory yVault
-          - "0xe3Bf2D04cd3B6e74613D36368c7D21B2d6C26d72" # yvCurve-USDaf-scrvUSD-f - Curve USDaf-scrvUSD Factory yVault
           - "0xe5F625e8f4D2A038AE9583Da254945285E5a77a4" # yvCurve-DOLA-FRXBP-f - Curve DOLA-FRAXBP Factory yVault
+          - "0xe3Bf2D04cd3B6e74613D36368c7D21B2d6C26d72" # yvCurve-USDaf-scrvUSD-f - Curve USDaf-scrvUSD Factory yVault
           - "0x801Ab06154Bf539dea4385a39f5fa8534fB53073" # yvCurve-EURSUSDC - Curve EURS-USDC Pool yVault (retired)
           - "0x774B4Cbc2703cE83fB3b828b7C782d1CD983b04A" # yvCurve-ankrETH-f - Curve ankrETH Factory yVault
-          - "0xE2CaD35CFD1A9B5acD557558f44B096ef8340C1B" # yvCurve-TriCryptoLLAMA-f - Curve TriCryptoLLAMA Factory yVault
           - "0xf70B3F1eA3BFc659FFb8b27E84FAE7Ef38b5bD3b" # yvCurve-dYFI-ETH-f - Curve dYFI-ETH Factory yVault
+          - "0xE2CaD35CFD1A9B5acD557558f44B096ef8340C1B" # yvCurve-TriCryptoLLAMA-f - Curve TriCryptoLLAMA Factory yVault
           - "0xcC2EFb8bEdB6eD69ADeE0c3762470c38D4730C50" # yvCurve-DOLA-FRAXPYUSD-f - Curve DOLA-FRAXPYUSD Factory yVault
           - "0x873fB544277FD7b977B196a826459a69E27eA4ea" # yvRAI - RAI yVault (retired)
           - "0xFD0877d9095789cAF24c98F7CCe092fa8E120775" # yvTUSD - TUSD yVault (retired)
           - "0x132d8D2C76Db3812403431fAcB00F3453Fc42125" # yvCurve-ankrETH - Curve ankrETH Pool yVault (retired)
           - "0xB8C3B7A2A618C552C23B1E4701109a9E756Bab67" # yv1INCH - 1INCH yVault (retired)
           - "0x6d765CbE5bC922694afE112C140b8878b9FB0390" # yvSUSHI - SUSHI yVault (retired)
+          - "0x5faF6a2D186448Dfa667c51CB3D695c7A6E52d8E" # yvCurve-stETH-WETH - Curve stETH-WETH Pool yVault (retired)
           - "0x2a38B9B0201Ca39B17B460eD2f11e4929559071E" # yvCurve-GUSD - Curve GUSD Pool yVault (retired)
           - "0x63bD3Bbb6c5cb6E457C3f3cbb2D8aa2536E319F1" # yvCurve-GUSD-f - Curve GUSD Factory yVault
-          - "0x5faF6a2D186448Dfa667c51CB3D695c7A6E52d8E" # yvCurve-stETH-WETH - Curve stETH-WETH Pool yVault (retired)
           - "0xAbD64D5AB5A4b129df4f6f37A8d461c2510b5503" # yvCurve-3Crv-f - Curve 3Crv Factory yVault
           - "0x4A3FE75762017DB0eD73a71C9A06db7768DB5e66" # yvCOMP - COMP yVault (retired)
           - "0x4B5BfD52124784745c1071dcB244C6688d2533d3" # yUSD - Curve Y Pool yVault (retired)
           - "0x0e8A7717A4FD7694682E7005957dD5d7598bF14A" # yExptWBTC - yExperimentalWBTC (retired)
           - "0x595a68a8c9D5C230001848B69b1947ee2A607164" # yvCurve-ibGBP - Curve ibGBP Pool yVault (retired)
-          - "0xB512D68A3194ba294A5b8146FA9beCd6a5Fea137" # yvCurve-sUSD-crvUSD-f - Curve sUSD-crvUSD Factory yVault
           - "0xBf2BD27F8C4B38aBdcaD6d3E37445343Cb0630eF" # yvCurve-TriCryptoGHO-f - Curve TriCryptoGHO Factory yVault
+          - "0xB512D68A3194ba294A5b8146FA9beCd6a5Fea137" # yvCurve-sUSD-crvUSD-f - Curve sUSD-crvUSD Factory yVault
           - "0x0DAa35A1735152EDb928239c1712883Dd8Eb976f" # yLQTY - Yearn LQTY (retired)
-          - "0x18f85861488380a7577c73B25df1C4458e5191F8" # yvCurve-GHO-USR-f - Curve GHO-USR Factory yVault
           - "0x4560b99C904aAD03027B5178CCa81584744AC01f" # yvCurve-cvxCRV - Curve cvxCRV Pool yVault (retired)
-          - "0xD347e7A3DdF5Ce4C42E19a4F30eEAA761795C72B" # yvCurve-ibEUR-f - Curve ibEUR Factory yVault (retired)
           - "0x378cb52b00F9D0921cb46dFc099CFf73b42419dC" # yvLUSD - LUSD yVault (retired)
           - "0x2E2b268cbC86917D2809CE2715A19E58a210FceE" # yvCurve-HBTC-f - Curve HBTC Factory yVault (retired)
           - "0xf8768814b88281DE4F532a3beEfA5b85B69b9324" # yvCurve-TUSD - Curve TUSD Pool yVault (retired)
           - "0xb7b1C394b3F82091988A1e400C6499178eE64b99" # yvCurve-alUSD-sDOLA-f - Curve alUSD-sDOLA Factory yVault
+          - "0x18f85861488380a7577c73B25df1C4458e5191F8" # yvCurve-GHO-USR-f - Curve GHO-USR Factory yVault
           - "0x4856A7EFBbFcaE92AB13c5e2e322Fc77647bB856" # yvRAI - RAI yVault (retired)
           - "0x91aE8fEaBe09182Fe5F91Fc273040b7D8F7aeFE7" # yvCurve-USDP-f - Curve Paxos Factory yVault
           - "0xBf5f9a383531c86192D0876b5c56cCa0300Be4DA" # yvCurve-USD3-USDM-f - Curve USD3-USDM Factory yVault (retired)
           - "0xe11ba472F74869176652C35D30dB89854b5ae84D" # yvHEGIC - HEGIC yVault (retired)
           - "0xB5dE7250128775a317B3f775a7AFcEC73571B732" # yvCurve-sETH-f - Curve sETH Factory yVault (retired)
           - "0x7158c1Bee7a0Fa5BD6AFFc77b2309991D7ADCdd4" # yvUSDC - USDC yVault (retired)
-          - "0x82c83ddA32DB09F63F9A59A129278f3fdC3EeE67" # yvCurve-3EUR-f - Curve 3EUR Factory yVault (retired)
           - "0x6Ede7F19df5df6EF23bD5B9CeDb651580Bdf56Ca" # yvCurve-BUSD - Curve BUSD Pool yVault (retired)
+          - "0x82c83ddA32DB09F63F9A59A129278f3fdC3EeE67" # yvCurve-3EUR-f - Curve 3EUR Factory yVault (retired)
           - "0xe2277cC76f806925DC6c9a5E4E5933605f43c3c4" # yvCurve-LUSD-crvUSD-f - Curve LUSD-crvUSD Factory yVault
           - "0x7c439Df9ADE8831180EA4D546c1E910D4Ba71a86" # yvCurve-reUSD-sDOLA-f - Curve reUSD-sDOLA Factory yVault
           - "0x986b4AFF588a109c09B50A03f42E4110E29D353F" # yvCurve-sETH - Curve sETH Pool yVault (retired)
@@ -384,96 +364,95 @@ networks:
           - "0x93cF0b02D0A2B61551d107378AFf60CEAe40c342" # yvCurve-sdYFIv2-f - Curve sdYFIv2 Factory yVault
           - "0xF59D66c1d593Fb10e2f8c2a6fD2C958792434B9c" # yvCurve-OUSD - Curve OUSD Pool yVault (retired)
           - "0xd88dBBA3f9c4391Ee46f5FF548f289054db6E51C" # yvCurve-DOLA - Curve DOLA Pool yVault (retired)
-          - "0x57a2c7925bAA1894a939f9f6721Ea33F2EcFD0e2" # yvCurve-DOLA-USR-f - Curve DOLA-USR Factory yVault
           - "0xFCa9Ab2996e7b010516adCC575eB63de4f4fa47A" # yvCurve-upYFI-f - Curve upYFI Factory yVault
           - "0xfBd4d8bf19c67582168059332c46567563d0d75f" # yvCurve-USDC-USDT-f - Curve USDC-USDT Factory yVault
-          - "0xa5cA62D95D24A4a350983D5B8ac4EB8638887396" # yvsUSD - sUSD yVault (retired)
           - "0x8414Db07a7F743dEbaFb402070AB01a4E0d2E45e" # yvCurve-sBTC - Curve sBTC Pool yVault (retired)
+          - "0xa5cA62D95D24A4a350983D5B8ac4EB8638887396" # yvsUSD - sUSD yVault (retired)
           - "0xce2f57252644Db26c76011aD490553d88C3B9030" # yvCurve-lvlUSD-USDC-f - Curve lvlUSD-USDC Factory yVault
+          - "0xe9Dc63083c464d6EDcCFf23444fF3CFc6886f6FB" # yvCurve-oBTC - Curve oBTC Pool yVault (retired)
+          - "0x57a2c7925bAA1894a939f9f6721Ea33F2EcFD0e2" # yvCurve-DOLA-USR-f - Curve DOLA-USR Factory yVault
           - "0x1Ae8Ccd120A05080d9A01C3B4F627F865685D091" # yvWBTC - WBTC yVault (retired)
           - "0xcB550A6D4C8e3517A939BC79d0c7093eb7cF56B5" # yvWBTC - WBTC yVault (retired)
+          - "0x67e019bfbd5a67207755D04467D6A70c0B75bF60" # yvCurve-ibEUR - Curve ibEUR Pool yVault (retired)
           - "0x5AB64C599FcC59f0f2726A300b03166A395578Da" # yvCurve-3EUR - Curve 3EUR Pool yVault (retired)
           - "0xe1747F4D30479D7a2DCFEa5af69fb86B8f71cCeC" # yvCurve-TRYb-f - Curve TRYb Factory yVault (retired)
           - "0x5b2384D566D2E4a0b29B8eccB642C63199cd393c" # yvCurve-sUSD-f - Curve sUSD Factory yVault (retired)
           - "0xF614d3864EF53510909a94c618a5EC1Ff75103BF" # yvCurve-cbETH-f - Curve cbETH Factory yVault
           - "0x961Ad224fedDFa468c81acB3A9Cc2cC4731809f4" # yvCurve-dgnETH-ETH+-f - Curve dgnETH-ETH+ Factory yVault
-          - "0xAc22e3a3cfE4dC82FFD4Ffa7453729Ca963CeB5a" # yvCurve-GHO-crvUSD-f - Curve GHO-crvUSD Factory yVault
           - "0xa8eF50905352aCD611F53640b001E48F2eA31d63" # yvCurve-cvxCRVv2-f - Curve cvxCRVv2 Factory yVault
+          - "0xAc22e3a3cfE4dC82FFD4Ffa7453729Ca963CeB5a" # yvCurve-GHO-crvUSD-f - Curve GHO-crvUSD Factory yVault
           - "0xc97511a1dDB162C8742D39FF320CfDCd13fBcf7e" # yvCurve-USDP - Curve Paxos Pool yVault (retired)
           - "0x72FDf7e33893cc1649eFE5821414E4c9B7C47D40" # yvCurve-USD3-sDAI-f - Curve USD3-sDAI Factory yVault
           - "0xCFBA4c80d764fe3Cb7A9B8D72Dbb176c6e0b3716" # yvCurve-lvlUSD-slvlUSD-f - Curve lvlUSD-slvlUSD Factory yVault
           - "0x8ee57c05741aA9DB947A744E713C15d4d19D8822" # yvCurve-yBUSD - Curve yBUSD Pool yVault (retired)
-          - "0x68E3C51f091102960CDBddEd27Dd06eC21083854" # yvCurve-OUSD-USDC-f - Curve OUSD-USDC Factory yVault
-          - "0x8A5f20dA6B393fE25aCF1522C828166D22eF8321" # yvCurve-DOLA-wstUSR-f - Curve DOLA-wstUSR Factory yVault
           - "0xbcccE9991D2C8A8056D677c0c52C20ac901f39eC" # yvCurve-fxUSD-GHO-f - Curve fxUSD-GHO Factory yVault
-          - "0xACA399117aC588E1F48398d34eCA76CDB1E45fA5" # Ondo-agg - Ondo aggregator [hidden]
-          - "0x56A5Fd5104a4956898753dfb060ff32882Ae0eb4" # yvALCX - ALCX yVault [hidden]
-          - "0x59518884EeBFb03e90a18ADBAAAB770d4666471e" # yvCurve-ibJPY - Curve ibJPY Pool yVault (retired)
+          - "0x8A5f20dA6B393fE25aCF1522C828166D22eF8321" # yvCurve-DOLA-wstUSR-f - Curve DOLA-wstUSR Factory yVault
           - "0x8fA3A9ecd9EFb07A8CE90A6eb014CF3c0E3B32Ef" # yvCurve-BBTC - Curve BBTC Pool yVault (retired)
+          - "0x59518884EeBFb03e90a18ADBAAAB770d4666471e" # yvCurve-ibJPY - Curve ibJPY Pool yVault (retired)
           - "0x507c6dE33f50c0505F77F598c0B3CA7b5fEB3D68" # yvCurve-alUSD-FRAXBP-f - Curve alUSD-FRAXBP Factory yVault
           - "0xbA61BaA1D96c2F4E25205B331306507BcAeA4677" # lp-yPRISMA - LP Yearn PRISMA Vault (retired)
           - "0x2a82DcdcBfB88e92021B8BcC3DA22703a2E4459c" # yvCurve-BUSD-f - Curve BUSD Factory yVault (retired)
-          - "0x133cb5cF617a33F5D02cFFfF579435776ef29FB0" # yvCurve-multiBTC-f - Curve multiBTC Factory yVault (retired)
           - "0x1b905331F7dE2748F4D6a0678e1521E20347643F" # yvCurve-ibAUD - Curve ibAUD Pool yVault (retired)
-          - "0xD6A4180c819324A9E432CA07C689EcBF00088cd6" # yvCurve-EURS-f - Curve EURS Factory yVault (retired)
           - "0xd6627F7dE81eB517A32F0F81537Ea2636B27B8CC" # yvCurve-wBETH-f - Curve wBETH Factory yVault
           - "0x8cdf57760Be305F32e03B3d231e5A81e550C6295" # yvCurve-USDN-f - Curve USDN Factory yVault (retired)
           - "0x1F8ad2cec4a2595Ff3cdA9e8a39C0b1BE1A02014" # yvDAIcc - DAI-crosschain yVault (retired)
           - "0x65346970F0f66CCAd8a5bfc3a03C96836C1897bE" # yvCurve-DUSD-f - Curve DUSD Factory yVault
           - "0xcaE0347E9fafC1e08880C79c8331F15c786083E0" # yvUSDC - USDC yVault (retired)
+          - "0x133cb5cF617a33F5D02cFFfF579435776ef29FB0" # yvCurve-multiBTC-f - Curve multiBTC Factory yVault (retired)
           - "0x30FCf7c6cDfC46eC237783D94Fc78553E79d4E9C" # yvCurve-DUSD - Curve DUSD Pool yVault (retired)
           - "0x0Bd7B7d511d9f60D5Fa5846A9B911168C5a82094" # yvCurve-alETH-pxETH-f - Curve alETH-pxETH Factory yVault
           - "0xbA8e83CC28B54bB063984033Df20F9a9F1220C24" # yvCurveLend-crvUSD-wstETH-f - Curve Lend crvUSD-wstETH Factory yVault (retired)
           - "0x477faf103dADc5Fe5BAa40951cf7512dcBC18126" # yvUSDC - USDC yVault (retired)
+          - "0xC116dF49c02c5fD147DE25Baa105322ebF26Bd97" # yvCurve-RSV - Curve RSV Pool yVault (retired)
+          - "0x3c5DF3077BcF800640B5DAE8c91106575a4826E6" # yvCurve-pBTC - Curve pBTC Pool yVault (retired)
           - "0xd901DCf4948a29d7D9D7E015AAF61591825AC267" # yvCurve-mkUSD-crvUSD-f - Curve mkUSD-crvUSD Factory yVault (retired)
           - "0xC2ADaD1Bd59a1DA3D35bd86cDb555694372f488F" # yvCurve-MIM-crvUSD-f - Curve MIM-crvUSD Factory yVault
           - "0x17EaFb42d42FeDc0B950bbCc73FA532216322e7D" # yvCurve-frxUSD-USDe-f - Curve frxUSD-USDe Factory yVault
           - "0xD070f6216Ef1f2609Dfae2aE7E3D7208b1E993D5" # yvAAVE - AAVE yVault (retired)
-          - "0x3c5DF3077BcF800640B5DAE8c91106575a4826E6" # yvCurve-pBTC - Curve pBTC Pool yVault (retired)
           - "0xac333895ce1A73875CF7B4Ecdc5A743C12f3d82B" # yvWETH - WETH yVault (retired)
           - "0x01B01C4A1F4C522aD341A9da5eaA48aF207ab3Ec" # yvCurve-pUSD-FRAXBP-f - Curve pUSD-FRAXBP Factory yVault
-          - "0xC116dF49c02c5fD147DE25Baa105322ebF26Bd97" # yvCurve-RSV - Curve RSV Pool yVault (retired)
           - "0x4c2dF8adB2B14e1d5FDBD9d11A2cf7562b67adC9" # yvCurve-mevETH-frxETH-f - Curve mevETH-frxETH Factory yVault
           - "0xfC0a3397c73ca69E697C8b98D5E1887e409F289a" # yvCurve-tacUSD-USDT-f - Curve tacUSD-USDT Factory yVault
           - "0xA76436957378bF3812dba0A98E864686086fd0e6" # yvCurve-FXS-crvUSD-f - Curve FXS-crvUSD Factory yVault
+          - "0x0d4EA8536F9A13e4FBa16042a46c30f092b06aA5" # yvCurve-EURT - Curve EURT Pool yVault (retired)
           - "0x2D59aa422A7AaE58038CF8aE6eD07330Cc7d3ae8" # yvCurve-bLUSD-f - Curve bLUSD Factory yVault
-          - "0xd395DEC4F1733ff09b750D869eEfa7E0D37C3eE6" # yvCurve-DOLA-FRAXBP-U - Curve DOLA-FRAXBP Pool yVault - Unlisted (retired) [hidden]
           - "0xca46d6e44499AfbD8795f8F86910F068a6bF1a7c" # yvCurve-DYDX-ETH-f - Curve DYDX-ETH Factory yVault
-          - "0x571B384636BA518697d745AC218aD4cEE5EE0ABC" # yvCurve-sBTCv2-f - Curve sBTCv2 Factory yVault (retired)
           - "0xcd68c3fC3e94C5AcC10366556b836855D96bfa93" # yvCurve-dETH-f - Curve dETH Factory yVault (retired)
           - "0x63c5c0604Ec410130C69C958aCab81794f7a622F" # yvCurve-MATIC-ETH-f - Curve MATIC-ETH Factory yVault
-          - "0x341bb10D8f5947f3066502DC8125d9b8949FD3D6" # yvCurve-STG-USDC - Curve STG-USDC Pool yVault (retired)
           - "0xBB1Cc2ca1d89Fb593e2F79FC7474fdF40d78f6Be" # yvCurve-USD3-eUSD-f - Curve USD3-eUSD Factory yVault
+          - "0x341bb10D8f5947f3066502DC8125d9b8949FD3D6" # yvCurve-STG-USDC - Curve STG-USDC Pool yVault (retired)
           - "0xdf5110EF6bc751cBaf76D35B8A3f312b581B5173" # ubiDAI - DAI ubiVault (retired)
           - "0x30B801F933e676Cb25892D1838FDCC00A1dde4cf" # yvCurve-JPEG-pETH-f - Curve JPEG-pETH Factory yVault
+          - "0xe7c25cb1eac7D870F3cD103cBB060A6DFbc5eaF2" # yvCurve-ynETHx-f - Curve ynETHx Factory yVault
           - "0x71955515ADF20cBDC699B8bC556Fc7Fd726B31B0" # yvUSDC - USDC yVault (retired)
           - "0x054AF22E1519b020516D72D749221c24756385C9" # yvCurve-HUSD - Curve HUSD Pool yVault (retired)
-          - "0xe7c25cb1eac7D870F3cD103cBB060A6DFbc5eaF2" # yvCurve-ynETHx-f - Curve ynETHx Factory yVault
           - "0x1C6a9783F812b3Af3aBbf7de64c3cD7CC7D1af44" # yvCurve-UST - Curve UST Pool yVault (retired)
+          - "0x571B384636BA518697d745AC218aD4cEE5EE0ABC" # yvCurve-sBTCv2-f - Curve sBTCv2 Factory yVault (retired)
           - "0xBD7c44d61C923eF6Efb09697F9d64e0376A0b9CB" # yvCurve-mkUSD-USDC-f - Curve mkUSD-USDC Factory yVault (retired)
           - "0xC8cA30Aa2E486846f7304D3B9334f96d32000F8d" # yvCurve-apeUSD-FBP-f - Curve apeUSD-FRAXBP Factory yVault (retired)
           - "0x2Ab6578239eD541Ef7cC7D11a45D740cE9F0a1F4" # yvCurve-CTR-ETH-f - Curve CTR-ETH Factory yVault
           - "0x2D85Ac3F2AeD4f0A14DC6852f1725240E47Cfc1f" # yvCurve-TryLSD-f - Curve TryLSD Factory yVault
           - "0xED0244B688cF059f32f45E38A6ac6E479D6755f6" # yvWETH - WETH yVault (retired)
           - "0xF56fB6cc29F0666BDD1662FEaAE2A3C935ee3469" # yvCurve-USDP-crvUSD-f - Curve USDP-crvUSD Factory yVault
-          - "0x5331009B82853e9FB711bC0b300E1b374724AdaC" # yvCurve-sdYFI-f - Curve sdYFI Factory yVault (retired)
           - "0x79F4a9ed7a6196c67a2D6BCE8eC55E9F18802018" # yvCurve-oETH-f - Curve oETH Factory yVault
+          - "0x5331009B82853e9FB711bC0b300E1b374724AdaC" # yvCurve-sdYFI-f - Curve sdYFI Factory yVault (retired)
           - "0x5359680A80c1FB2175cD33efF32f762e43cD8C41" # yvCurve-ibKRW-f - Curve ibKRW Factory yVault (retired)
+          - "0xD347e7A3DdF5Ce4C42E19a4F30eEAA761795C72B" # yvCurve-ibEUR-f - Curve ibEUR Factory yVault (retired)
           - "0xFfA0F0616229eE2aC08FA4C358D23b18D980134B" # yvCurve-PRISMA-ETH-f - Curve PRISMA-ETH Factory yVault (retired)
           - "0xd8C620991b8E626C099eAaB29B1E3eEa279763bb" # yvCurve-MIMUST - Curve MIM-UST Pool yVault (retired)
           - "0xAc1C90b9c76d56BA2e24F3995F7671c745f8f308" # yvAAVE - AAVE yVault (retired)
-          - "0xBCBB5b54Fa51e7b7Dc920340043B203447842A6b" # yvCurve-EURTUSD - Curve EURT-USD Pool yVault (retired)
           - "0x00e8Eb340f8AF587EEA6200D2081E31dC87285ac" # yvCurve-XAI-FRAXBP-f - Curve XAI-FRAXBP Factory yVault
+          - "0xBCBB5b54Fa51e7b7Dc920340043B203447842A6b" # yvCurve-EURTUSD - Curve EURT-USD Pool yVault (retired)
           - "0xd6b2f4F0586BCfc9B1bf5cD8E22546aDD7B81a64" # yvCurve-T-ETH-f - Curve T-ETH Factory yVault
           - "0x708d1A6FDF342D53F4d006aa9B85e223c68a0Edb" # yvCurve-PRISMA-mkUSD-f - Curve PRISMA-mkUSD Factory yVault (retired)
-          - "0x468C76f16B7735303f7215b3839D270d058b3d7a" # yvCurve-eUSD-FRAXBP-f - Curve eUSD-FRAXBP Factory yVault
           - "0xa2619fDFB99ABeb533a1147461f3f1109c5ADe75" # yvWETH - WETH yVault (retired)
+          - "0x468C76f16B7735303f7215b3839D270d058b3d7a" # yvCurve-eUSD-FRAXBP-f - Curve eUSD-FRAXBP Factory yVault
           - "0x23D3D0f1c697247d5e0a9efB37d8b0ED0C464f7f" # yvCurve-tBTC - Curve tBTC Pool yVault (retired)
           - "0x0a35322c5C9Dd22fF592bfC5b134c5CE78154d10" # yvCurve-TOKE-ETH-f - Curve TOKE-ETH Factory yVault
           - "0x7e113c504263354ba99290dadAd00D1e1F2b6476" # yvCurve-sdFXS-f - Curve sdFXS Factory yVault (retired)
           - "0xe2F6b9773BF3A015E2aA70741Bde1498bdB9425b" # yvUSDC - Yearn USDC Vault (retired)
-          - "0xeC456f00E1f1a6A9097b723Ab979c27AB45C5906" # yvCurve-sdYB-f - Curve sdYB Factory yVault
           - "0x1C97e67Dc7ca179aE82E0c4AFF4Af9ff66612A43" # yvCurve-PAL-ETH-f - Curve PAL-ETH Factory yVault
+          - "0xeC456f00E1f1a6A9097b723Ab979c27AB45C5906" # yvCurve-sdYB-f - Curve sdYB Factory yVault
           - "0x573E8C71DC41F9C04c9b77942D8f18801548e545" # yvCurve-sUSD-USDe-f - Curve sUSD-USDe Factory yVault
           - "0x3466c90017F82DDA939B01E8DBd9b0f97AEF8DfC" # yvsUSD - sUSD yVault (retired)
           - "0x63739d137EEfAB1001245A8Bd1F3895ef3e186E7" # yvDAI - DAI yVault (retired)
@@ -485,12 +464,13 @@ networks:
           - "0x7047F90229a057C13BF847C0744D646CFb6c9E1A" # yvCurve-renBTC - Curve renBTC Pool yVault (retired)
           - "0xFF8f8A38c80b9899a928152D58F219fDCcD4306C" # yvWETH - WETH yVault (retired)
           - "0x5120FeaBd5C21883a4696dBCC5D123d6270637E9" # yvWETH - WETH yVault (retired)
+          - "0x8b9C0c24307344B6D7941ab654b2Aeee25347473" # yvCurve-EURN - Curve EURN Pool yVault (retired)
+          - "0xD6A4180c819324A9E432CA07C689EcBF00088cd6" # yvCurve-EURS-f - Curve EURS Factory yVault (retired)
           - "0x2F194Da57aa855CAa02Ea3Ab991fa5d38178B9e6" # yvUNI - UNI yVault (retired)
           - "0x6B5ce31AF687a671a804d8070Ddda99Cab926dfE" # yvCurve-ibGBP-USDC - Curve ibGBP-USDC Pool yVault (retired)
           - "0x9A39f31DD5EDF5919A5C0c2433cE053fAD2E0336" # yvCurve-ibJPY-USDC - Curve ibJPY-USDC Pool yVault (retired)
           - "0xB98Df7163E61bf053564bde010985f67279BBCEC" # yvDAI - DAI yVault (retired)
           - "0xF962B098Ecc4352aA2AD1d4164BD2b8367fd94c3" # yvLINK - LINK yVault (retired)
-          - "0x84ca3Bf4822A342E9C1aD27bd5FBCf5fc5E37128" # yvb-yswap - yvBOOST-yswap yVault (retired) [hidden]
           - "0x429EA2d8d5B06CA40dD986FaC0734BA0E0CaC022" # yvCurve-sdCRV-f - Curve sdCRV Factory yVault (retired)
           - "0x8B2335962111F3CBa6cfC5b2aCD8894635241c3b" # yvCurve-ZUN-pxETH-f - Curve ZUN-pxETH Factory yVault (retired)
           - "0x1133b2E2F51becCF25b2f8d0cA48c1d93DD5ab12" # yvOCEAN - OCEAN yVault (retired)
@@ -500,7 +480,6 @@ networks:
           - "0x8Bb5491c0872445EC15d9b67CC6117811e0D8498" # yvCurve-deUSD-USDT-f - Curve deUSD-USDT Factory yVault (retired)
           - "0x8176b059BD8f63aeB7e20282b12D243b4626E2AE" # yvCurve-FRAX-crvUSD-f - Curve FRAX-crvUSD Factory yVault
           - "0x8472E9914C0813C4b465927f82E213EA34839173" # yvsBTC - sBTC yVault (retired)
-          - "0x8b9C0c24307344B6D7941ab654b2Aeee25347473" # yvCurve-EURN - Curve EURN Pool yVault (retired)
           - "0x1A5ebfF0E881Aec34837845e4D0EB430a1B4b737" # yvCurve-FRAXBP-f - Curve FRAXBP Factory yVault (retired)
           - "0xAf322a2eDf31490250fdEb0D712621484b09aBB6" # yvUSDT - USDT yVault (retired)
           - "0x902cF5373317BB3E42660e9F4e85AA21532c0e44" # yvUSDC - USDC yVault (retired)
@@ -518,114 +497,69 @@ networks:
           - "0x416ebADc07CC7efa94D9110A5B932089BBd49931" # yvLINK - LINK yVault (retired)
           - "0xc7C1B907BCD3194C0D9bFA2125251af98BdDAfbb" # yvCurve-DOLA-deUSD-f - Curve DOLA-deUSD Factory yVault (retired)
           - "0x0141E81fB74C11CfD2308212D9C9a6a052Db3A98" # yvCurve-ZCHF-crvUSD-f - Curve ZCHF-crvUSD Factory yVault
-          - "0x015d78C7aD1289F5aA1DEC25bD6b67ba31fAc1Cf" # yvcrvTETH - crvTETH yVault (retired) [hidden]
           - "0x019015647be0b2604506F4EB8290908F062B62cb" # yvCurve-rgUSD-fxUSD-f - Curve rgUSD-fxUSD Factory yVault
-          - "0x03c31f3444357087d5f568d24AE17f9177c8AA84" # yvLINK - LINK yVault (retired) [hidden]
           - "0x03eaE26089A8c28DDC4c81d65bEfE014C793A60d" # yvCurve-stETH-frxETH-f - Curve stETH-frxETH Factory yVault
           - "0x04D549bAfE83B8BdCCC8dF38F15b90199D20f1eE" # yvCurve-tBTC-f - Curve tBTC Factory yVault
           - "0x04d73c87b20d372cB3240C72eEFB9d79bA5e4959" # yvCurve-UST - Curve UST Wormhole Pool yVault (retired)
           - "0x0c7e3925E0986826B066CE77138b934F349a871B" # yvCurve-CVG-ETH-f - Curve CVG-ETH Factory yVault (retired)
-          - "0x0ca8Eb6546AC5ff2055320c2c6e629d55e2d4014" # yvCurve-USPDUSDC-f - Curve USPDUSDC Factory yVault (retired) [hidden]
-          - "0x0F6121fB28C7C42916d663171063c62684598f9F" # yvHBTC - HBTC yVault (retired) [hidden]
-          - "0x0ff3773a6984aD900f7FB23A9acbf07AC3aDFB06" # yUSD - Curve Y Pool yVault (retired) [hidden]
           - "0x1025b1641d1F23C289412Dd5E5701e9810103a93" # yvCurve-ibAUD-USDC - Curve ibAUD-USDC Pool yVault (retired)
           - "0x133dAa2Fa268b36E088b2BE1358857D41a8369eb" # yvCurve-mkUSD-FRAXBP-f - Curve mkUSD-FRAXBP Factory yVault (retired)
           - "0x136AFB1250F0A65E387fC040Bf194C76EC3c1CAe" # yvCurve-cvgCVX-CVX1-f - Curve cvgCVX-CVX1 Factory yVault
-          - "0x19b8Bc5CcF9700e16f2780bEA152F01C449f45D0" # yvALCX - ALCX yVault (retired) [hidden]
-          - "0x1bb04fCBC210bAA384531079ed7f59d9149309ba" # yvBal-USDC-DAI-USDT-f - Balancer USDC-DAI-USDT Factory yVault (retired) [hidden]
           - "0x1E15886B5CcE9C3C9BD8f82B3b7A53860b3aD895" # yvCurve-rgUSD-FRAX-f - Curve rgUSD-FRAX Factory yVault
-          - "0x1E6462678462c95e1F8AFE2558D7FF8692affBD0" # yvCurve-FEI - Curve FEI Pool yVault (retired) [hidden]
-          - "0x1f6BDffBadD98e410F83C66D1278241375F5199f" # yvWBTC - WBTC yVault (retired) [hidden]
-          - "0x20F6A2ec303dF7120eAe3346dE5aD877f80Beb64" # yvBal-auraBAL-f - Balancer auraBAL Factory yVault [hidden]
           - "0x2407b40c08e528A627Ebd99CCcea89d888d00906" # yvCurveLend-crvUSD-tBTC-f - Curve Lend crvUSD-tBTC Factory yVault (retired)
           - "0x2807387F1212cB2852aB97cdAa3627dACa5E4661" # yvMIM - MIM yVault (retired)
-          - "0x28a5b95C101df3Ded0C0d9074DB80C438774B6a9" # yvCurve-USDT - Curve USDT Pool yVault (retired) [hidden]
           - "0x2e5c7e9B1Da0D9Cb2832eBb06241d18552A85400" # yvCurve-ibCHF-USDC - Curve ibCHF-USDC Pool yVault (retired)
-          - "0x2E919d27D515868f3D5Bc9110fa738f9449FC6ad" # yvCurve-yveCRV - Curve yveCRV Pool Vault (retired) [hidden]
           - "0x2F11d0Cf731F1D7C79b7D8e718BF5CB1bd55E7aB" # yvCurve-2CRV-f - Curve 2CRV Factory yVault
           - "0x2fB06235aB90812e5BaE28404024C9498fF9414d" # yvCurve-JPEG-pETH-f - Curve JPEG-pETH Factory yVault (retired)
-          - "0x3149950258FbBcE1638d6C23ac93A692604Ef864" # yvcrvRenWBTC - crvRenWBTC yVault (retired) [hidden]
           - "0x3221BFBE308144f19089CB197b7C11c2Bf495906" # yvCurve-BTRFLY-ETH-f - Curve BTRFLY-ETH Factory yVault
-          - "0x32413274504908460f0c373C7f20F429Fb80ed3A" # yvsaCRV - saCRV yVault (retired) [hidden]
-          - "0x32651dD149a6EC22734882F790cBEB21402663F9" # yvUSDT - USDT yVault (retired) [hidden]
           - "0x332142140F3791ca7726e4CfC184Fb737F43918C" # yvCurve-sfrxUSD-frxUSD-f - Curve sfrxUSD-frxUSD Factory yVault
-          - "0x3408324Dbb537886CADc180f6FfCf674eE215F67" # "yvrenBTC" - "renBTC yVault" (retired) [hidden]
           - "0x379984a6Afb7CBE73EFae3B414D8E3474eDfF7B2" # yvCurve-rgUSD-DOLA-f - Curve rgUSD-DOLA Factory yVault
-          - "0x3C26DE7e22613A31b77E93F011d804D8A7821581" # yvLOOKS - LOOKS yVault (retired) [hidden]
-          - "0x3C90033684F2504D55eeb652720785F70FA692D4" # yvcDAI+cUSDC - cDAI+cUSDC yVault (retired) [hidden]
-          - "0x3D27705c64213A5DcD9D26880c1BcFa72d5b6B0E" # yvCurve-USDK - Curve USDK Pool yVault (retired) [hidden]
           - "0x3DCc44ce7867a3Fd592cB9e77abC676B2675eD8a" # yvCurve-yUSD-USDC-f - Curve yUSD-USDC Factory yVault
           - "0x3e720ba935Bf137d45a3c98938DB1f4C8517298E" # yvCurve-VEUR-agEUR-f - Curve VEUR-agEUR Factory yVault (retired)
-          - "0x4213458C69c19E6792510E1153cb0c5834665fdC" # yvBalancer-BoostedAaveUSD - Balancer Boosted Aave USD Pool yVault (retired) [hidden]
           - "0x445F62Ee351E57cACBF3161F66562Ff2B1261db4" # yvCurve-TUSD-crvUSD-f - Curve TUSD-crvUSD Factory yVault
           - "0x487AFb967Ba2827D393A93a730Ff1951A81164D8" # yvCurveLend-crvUSD-WETH-f - Curve Lend crvUSD-WETH Factory yVault (retired)
           - "0x4907fd39d4691F03b3751590b8df6ed01E3c2b63" # yvCurve-pxETH-mkUSD-f - Curve pxETH-mkUSD Factory yVault (retired)
-          - "0x4962B6C40B5E9433E029c5c423F6b1ce7fF28b0f" # yvsUSD - sUSD yVault (retired) [hidden]
-          - "0x49b3E44e54b6220aF892DbA48ae45F1Ea6bC4aE9" # yvTUSD - TUSD yVault (retired) [hidden]
-          - "0x4C4A6A22bCE915C724A66b82128577F1B24831eD" # yvCurve-EURT - Curve EURT Pool yVault (retired) [hidden]
-          - "0x4cb5483D87028518c5F35a49c151612a062bfCD0" # yvBal-GHO-bb-a-USD-f - Balancer GHO-bb-a-USD Factory yVault (retired) [hidden]
           - "0x4f86Bf06bB97B6619fD6B55C0369Fb4Ed16Cfb6E" # yvCurveLend-crvUSD-sUSDe-f - Curve Lend crvUSD-sUSDe Factory yVault (retired)
           - "0x4Fdd1B06eF986238446be0F3EA163C1b6Fe28cC1" # yvGUSD - GUSD yVault
           - "0x527F6b584e467b2a54A1BB5704B9101C416CC73a" # yvCurve-TriOGN-f - Curve TriOGN Factory yVault
-          - "0x5737022626C282a89D105fD2e89ed6928EbDAe93" # yveCRV - eCRV yVault (retired) [hidden]
-          - "0x58900d761Ae3765B75DDFc235c1536B527F25d8F" # yvCurve-yETH-f - Curve yETH Factory yVault (retired) [hidden]
-          - "0x5b189D92983E941273b26e3b46e5a16206c08827" # yveCRV - eCRV yVault (retired) [hidden]
-          - "0x5B707472eeF1553646740a7e5BEcFD41B9B4Ef4C" # yvCOMP - COMP yVault (retired) [hidden]
           - "0x5b737CC835c29c493845353e0399B408Fbd7105D" # yvCurve-sFRAX-crvUSD-f - Curve sFRAX-crvUSD Factory yVault
           - "0x5CBF567cb0C3D319A052C91eFB3B3318899338DF" # yvCurve-pETH-f - Curve pETH Factory yVault (retired)
           - "0x5d10DFA44AdC63C41906Af61eEffB9454860e999" # yvCurve-mkUSD-PayPool-f - Curve mkUSD-PayPool Factory yVault (retired)
           - "0x5e69e8b51B71C8596817fD442849BD44219bb095" # yvCurve-ibBTC - Curve ibBTC Pool yVault (retired)
           - "0x61f46C65E403429266e8b569F23f70dD75d9BeE7" # lp-yCRV - LP Yearn CRV Vault
-          - "0x63859212aa05d60295a2F18a9e0C707040605BAd" # ubiDAI - DAI ubiVault (retired) [hidden]
-          - "0x6601526470E7Bad2760FB63507Bf6965A0d4360b" # yvb-yswap - yvBOOST-yswap yVault (retired) [hidden]
           - "0x66A7024fC367eBa201dF1381A9B6305d1e90919A" # yvCurve-mkUSD-USDe-f - Curve mkUSD-USDe Factory yVault (retired)
-          - "0x67B9F46BCbA2DF84ECd41cC6511ca33507c9f4E9" # yvCurve-DOLA-U - Curve DOLA Pool yVault - Unlisted (retired) [hidden]
           - "0x6A5468752f8DB94134B6508dAbAC54D3b45efCE6" # yvCurve-CRVETH - Curve CRV-ETH Pool yVault (retired)
-          - "0x6AEfd381C0AEF49bAafF58eBc70534B3941c61Bf" # yvCurve-YFIETH - Curve YFI-ETH Pool yVault (retired) [hidden]
           - "0x6c6371E15499FedCdadEE06ADc5b55680b3d0785" # yvCurve-cbETH-frxETH-f - Curve cbETH-frxETH Factory yVault
-          - "0x6D2F347DCFc55C6AC80e515a58344acd7FeF0B84" # yvbCRV - bCRV yVault (retired) [hidden]
           - "0x6f0Ace0F94f4B9890Dfa99A4175B3Ef0288C16B3" # yvCurve-CRV-ETH-f - Curve CRV-ETH Factory yVault (retired)
           - "0x6FAfCA7f49B4Fd9dC38117469cd31A1E5aec91F5" # yvCurve-USDM - Curve USDM Pool yVault (retired)
           - "0x718AbE90777F5B778B52D553a5aBaa148DD0dc5D" # yvCurve-alETH - Curve alETH Pool yVault (retired)
-          - "0x722f76f34cB5c3B008A50E0664e55A53F4F461AB" # yvUSDT-Meta - yvUSDT MetaVault (retired) [hidden]
           - "0x72FaEA467BD88db6720A861e56A3a72B4Aa579DF" # yvCurve-ibCHF-f - Curve ibCHF Factory yVault (retired)
-          - "0x75A3f32ba5e60A094729257EE44841F9552baFb9" # yvAAVE - AAVE yVault (retired) [hidden]
-          - "0x79fF6c5A23B492619661F7c5b73a961114A4C940" # yvAAVE - AAVE yVault (retired) [hidden]
           - "0x7AB4a7BE740131BdE216521B54ADddD672F44A05" # yvCurve-agEUREUROC - Curve agEUR-EUROC Pool yVault (retired)
           - "0x7bDeb15b00437fc8b5DbBf8Ba7B0FC6CB7F7e68c" # yvCurve-CADC-USDC-f - Curve CADC-USDC Factory yVault
           - "0x7eb27381F8Ab6A73cc0a0B40cAA4ABF672F8d90d" # yvCurve-ynETH/ETHx-f - Curve ynETH/ETHx Factory yVault
-          - "0x7F7DF0e9a040DdA05FC609143cc8dA7cC6c59587" # yvsUSD - sUSD yVault (retired) [hidden]
           - "0x7F8b06CDF3b4b0650bc9E810744E15140f5984Ee" # yvCurve-XAUt-PAXG-f - Curve XAUt-PAXG Factory yVault
           - "0x8072B1d66389a1AA039e21Aac35A92464005baF5" # yvCurve-rETH-frxETH-f - Curve rETH-frxETH Factory yVault
-          - "0x80bbeE2fa460dA291e796B9045e93d19eF948C6A" # yvCurve-Pax - Curve Pax Pool yVault (retired) [hidden]
           - "0x823976dA34aC45C23a8DfEa51B3Ff1Ae0D980213" # yvCurve-ynETH-LSD-f - Curve ynETH-LSD Factory yVault
           - "0x8257A895A1380f42c33eCE9CD9e6Bff35Be69d55" # yvCurve-USD3-scrvUSD-f - Curve USD3-scrvUSD Factory yVault
           - "0x82e75Cf176C18DCCeF1b05B0F1d89a444a3A1005" # yvCurve-USDe-FRAX-f - Curve USDe-FRAX Factory yVault
           - "0x864f78037639225b7CD0B6c632F8F187520b480B" # yvCurve-USDe-crvUSD-f - Curve USDe-crvUSD Factory yVault
-          - "0x883A777f2594004419fc08b388D7d3bdC1c0D6c1" # yvBal-bb-a-USD-f - Balancer bb-a-USD Factory yVault (retired) [hidden]
           - "0x8a0889d47f9Aa0Fac1cC718ba34E26b867437880" # st-yCRV - Staked Yearn CRV Vault
           - "0x8Aa95B71D8e0e1C7949bd84223E0C7911D85171C" # yvCurve-RSR-FRAXBP-f - Curve RSR-FRAXBP Factory yVault
-          - "0x8B58Aa42A4Aa222b684078459CE03Dd0A43342B1" # yvUSDP - USDP yVault (retired) [hidden]
           - "0x8c99c1FF4978790ea496c71bc6e769F1D8691e1C" # yvCurve-zunETH-frxETH-f - Curve zunETH-frxETH Factory yVault (retired)
           - "0x8F1a55896a882601880adb79e3F97579Dae6a365" # yvCurve-ebUSD-USDC-f - Curve ebUSD-USDC Factory yVault
           - "0x9068678b49B8D633952aEF7bc0077FDa71Ca68b8" # yvCurveLend-crvUSD-USDe-f - Curve Lend crvUSD-USDe Factory yVault (retired)
           - "0x928dB6676340e5206A91aD122a24E363131FFcE7" # yvCurve-USDaf-SR-f - Curve USDaf-SR Factory yVault (retired)
           - "0x96718b51e0d3f8Bd5ae516e22a2022a916eC1D94" # yvCurve-ynRWAx-ynUSDx-f - Curve ynRWAx-ynUSDx Factory yVault
-          - "0x9894acf19de6F00D4056DbFDDF2dd7444F993D87" # yvBal-wstETH-rETH-sfrxETH-f - Balancer wstETH-rETH-sfrxETH Factory yVault [hidden]
           - "0x98b72deBe9BEdCc11aF3f1f5BFAc6994aac43786" # yvCurve-dgnETH-ETH+-f - Curve dgnETH-ETH+ Factory yVault (retired)
           - "0x98fA691998a9e6f410702dEA8BC08a9d500AaAFe" # yvCurve-STG-FRAXBP-f - Curve STG-FRAXBP Factory yVault
           - "0x990200DACA8c96f1B1d10aF074D4054cD8916028" # yvCurve-rUSDY-USDC - Curve rUSDY-USDC yVault (retired)
           - "0x9cBD86ee0dA1B6552D69f1df2F689fB78fAc2dF7" # yvCurve-reUSD-fxUSD-f - Curve reUSD-fxUSD Factory yVault
           - "0x9E0E0AF468FbD041Cab7883c5eEf16D1A99a47C3" # yvCurve-sdANGLE-f - Curve sdANGLE Factory yVault (retired)
-          - "0xa442BEB83baBC33D93c8Bec471070Ce59b88fb7d" # yvWETH - WETH yVault (retired) [hidden]
           - "0xa857aB5913BdA50B65d257aD13FC039afe02eC17" # yvCurve-RevPool-f - Curve RevPool Factory yVault
           - "0xA9412Ffd7E0866755ae0dda3318470A61F62abe8" # yvBlpFUD - Balancer FUD Auto-Compounding yVault (retired)
-          - "0xAA4f7562D3C25Bd2fCB8FEd615182667C0A7086C" # yvBal-stafiETH-f - Balancer stafiETH Factory yVault [hidden]
-          - "0xAaAee277F21Bb7D2Bf49E6b36d0d94DC229B0B25" # yvLUSD - LUSD yVault (retired) [hidden]
           - "0xb09F2a67a731466182518fae980feAe96479d80b" # yvKP3RETH-f - KP3RETH-f yVault (retired)
           - "0xb0D6d7C0ed4b9C2B8186a3Ac3Acad88683586e35" # yvUSDC - USDC yVault (retired)
           - "0xB25a14D81794884AE3ce69f14B5C97b4F50Eb8F3" # yvCurve-USD3-rgUSD-f - Curve USD3-rgUSD Factory yVault
-          - "0xB364D19c3FF37e0fa4B94bf4cf626729533C1c26" # yvFRAX - FRAX yVault (retired) [hidden]
           - "0xb3CA5C531BCaF94C3575500DA16b7e219b910224" # yvCurve-2BTC-f - Curve 2BTC Factory yVault
           - "0xb41c14954E4002D29BbBaC86B52143328DB2eE47" # yvCurve-USD3-ETH+-f - Curve USD3-ETH+ Factory yVault
           - "0xb46325F5bcf8A58A4eB6B1196677e61fD30b8FC0" # yvCurve-pmUSD-OUSD-f - Curve pmUSD-OUSD Factory yVault
@@ -636,43 +570,27 @@ networks:
           - "0xbB12C45849831201617ca6bFc0ef6EA5990580Ff" # yvCurveLend-crvUSD-WBTC-f - Curve Lend crvUSD-WBTC Factory yVault (retired)
           - "0xBc2b808e385E933b5f6655fE311aeBaa0d6fc80F" # yvCurve-sDOLA-yUSD-f - Curve sDOLA-yUSD Factory yVault (retired)
           - "0xbCf0Ebe75e99395B6b56138A6E580E3Be560eE74" # yvCurve-pmUSD-crvUSD-f - Curve pmUSD-crvUSD Factory yVault
-          - "0xbD65955F752B2eF093B34B05e5FFb439AE8e5049" # yvCOMP - COMP yVault (retired) [hidden]
-          - "0xbda3A6CB2aaef41805F6317841d7B8654eC8b124" # yvcrvRenWBTC - crvRenWBTC yVault (retired) [hidden]
           - "0xbE4afE6737CCf34cA21cdeF461E5C7547Adc8C77" # yvCurve-ibGBP-f - Curve ibGBP Factory yVault (retired)
           - "0xBF7AA989192b020a8d3e1C65a558e123834325cA" # yvHBTC - HBTC yVault
           - "0xbf91b696a35b539b1142e2f921A2A88BB019506a" # yvCurve-ETHx-WETH-f - Curve ETHx-WETH Factory yVault
-          - "0xBFa4D8AA6d8a379aBFe7793399D3DdaCC5bBECBB" # yvDAI - DAI yVault (retired) [hidden]
           - "0xc09cfb625e586B117282399433257a1C0841edf3" # st-yBAL - Staked Yearn BAL Vault
           - "0xC1f3C276Bf73396C020E8354bcA581846171649d" # yvwstETH - wstETH yVault (retired)
-          - "0xc325849908D482550b87f96ef60271B95f92C861" # yvBal-cbETH-wstETH-f - Balancer cbETH-wstETH Factory yVault [hidden]
           - "0xc52d44abA4B7739173821afF175aEb53367E629E" # yvCurve-ZUSD-FRAXBP-f - Curve ZUSD-FRAXBP Factory yVault (retired)
           - "0xc5F3D11580c41cD07104e9AF154Fc6428bb93c73" # yvBalancer-BoostedAaveUSD - Balancer Boosted Aave USD Pool yVault (retired)
           - "0xc688c419f2407670463068CE540528B9a710AE7F" # yvCurve-ankrETH-frxETH-f - Curve ankrETH-frxETH Factory yVault
-          - "0xC8BE5E2aE51c3F75FcfBD900505Ec63Ce7dE320c" # yvBal-stETH-f - Balancer stETH Factory yVault [hidden]
-          - "0xcE0F1Ef5aAAB82547acc699d3Ab93c069bb6e547" # yvsUSD-h - sUSD-hedging yVault (retired) [hidden]
-          - "0xcE71767158421482C39E72f209A7A8ef3A0c669d" # yvBal-rETH-f - Balancer rETH Factory yVault [hidden]
           - "0xcfC71c6e1d3aB51E02C7400E82D9a2d58593082d" # yvCurve-ETH+-WETH-f - Curve ETH+-WETH Factory yVault
           - "0xD19660365a4f8c92c00913127bb004aC27Eb0191" # yvCurve-cbBTC-WBTC-f - Curve cbBTC-WBTC Factory yVault
-          - "0xD4108Bb1185A5c30eA3f4264Fd7783473018Ce17" # yvDOLA-U - DOLA yVault - Unlisted (retired) [hidden]
           - "0xD5497A68c3a77e7De0fa7fa0880387e6EC55d014" # yvCurve-frxUSD-scrvUSD-f - Curve frxUSD-scrvUSD Factory yVault
-          - "0xD631734272c437e1730De3CD2193c060e8DfB39E" # yvcrvSPELLETH - crvSPELLETH yVault (retired) [hidden]
-          - "0xd6A528faAd34Fe51c6F181acF43C1E20db4f84aC" # yvBal-DOLA-USDC-f - Balancer DOLA-USDC Factory yVault (retired) [hidden]
           - "0xD725F5742047B4B4A3110D0b38284227fcaB041e" # lp-yBAL - LP Yearn BAL Vault
           - "0xD727551e619E54FB0d8d5aF30D3fE5c94F8615d6" # yvCurve-ZETA-crvUSD-f - Curve ZETA-crvUSD Factory yVault
           - "0xDa764e05bdeb2CAfA8DE7FdB5bEa414C0F419197" # yvCurve-JUSD-USDC-f - Curve JUSD-USDC Factory yVault
           - "0xdADbB5472474E612A6fA9d82d3395DEA5829a52a" # yvCurve-frxETH-f - Curve frxETH Factory yVault
-          - "0xDdb166C6CB38CEDe52d12c405b6e906c1fB6f9d7" # yvcrvRenWSBTC - crvRenWSBTC yVault (retired) [hidden]
-          - "0xE22Ef63F2bD31eb69bF5917589a5daE3445c27b2" # yvBB-A-USD - Balancer Boosted Aave USD Pool yVault (retired) [hidden]
           - "0xE510E87d0eF7d987Ed1baF8E1D7Aaef5b9e3db42" # yvCurve-OHM-ETH-f - Curve OHM-ETH Factory yVault
           - "0xE5eDcE53e39Cbc6d819E2C340BCF295e0084ff7c" # yvCurve-ibEUR-USDC - Curve ibEUR-USDC Pool yVault (retired)
           - "0xe80Cc7b2b69f32999766c1a0035ab77E8fb5B99C" # yvCurve-cvxFXS-f - Curve cvxFXS Factory yVault
           - "0xe8b96C38a0b370eAfb11D9b8Df4131415423577a" # yvCurve-STBT-f - Curve STBT Factory yVault
-          - "0xe92AE2cF5b373c1713eB5855D4D3aF81D8a8aCAE" # yvCurvexFraxTplLP-U - Curve Stax Frax/Temple xLP + LP yVault - Unlisted (retired) [hidden]
           - "0xEeC7036C1Af1f07668b4c5520CcB4b52Ec4594D7" # yvCurve-PYUSD-USDC-f - Curve PYUSD-USDC Factory yVault
-          - "0xf4fDbc7C66Dc9832D672Ffe6242B6A386CeAd5DE" # yvsUSD - sUSD yVault (retired) [hidden]
           - "0xfa6dCB142e12b4f2CB15CABb344a618B7e8d6A62" # yvCurve-MKULTRA-f - Curve MKULTRA Factory yVault (retired)
-          - "0xfb9A680825f29972629b2295E050f74CB2f4992b" # yvBal-GHO-LUSD-f - Balancer GHO-LUSD Factory yVault (retired) [hidden]
-          - "0xFe8A3837cFf919C800bdC5d1ac6136F84497d679" # yvUNI - UNI yVault (retired) [hidden]
           - "0xfF11566C1Bfe3c625804c9cd707dD2f36797BF1D" # yvCurve-cvxPRISMA-f - Curve cvxPRISMA Factory yVault (retired)
           - "0xFffE4eE5D8BdFE534F6df350c36842be9652B0c5" # yvCurve-ynRWAx-OUSD-f - Curve ynRWAx-OUSD Factory yVault
       - name: TimelockController
@@ -728,7 +646,7 @@ networks:
     contracts:
       - name: YearnV2Vault
         address:
-          # V2 vaults on Optimism from Kong API (all TVL)
+          # V2 vaults on Optimism from Kong API (all TVL, excluding hidden)
           - "0xf7D66b41Cd4241eae450fd9D2d6995754634D9f3" # yvVelo-alETH-WETH-f - Velodrome v2 alETH-WETH Factory yVault
           - "0xd0d2Ac44Cc842079e978bB11b094764f7D0dec6A" # yvVelo-msETH-WETH-f - Velodrome v2 msETH-WETH Factory yVault
           - "0x5B977577Eb8a480f63e11FC615D6753adB8652Ae" # yvWETH - WETH yVault (retired)
@@ -747,8 +665,8 @@ networks:
           - "0xD7EE0E2d232BcBeFa74EF36A439d0De880c6ece5" # yvVelo-RED-VELO-f - Velodrome v2 RED-VELO Factory yVault
           - "0xDdDCAeE873f2D9Df0E18a80709ef2B396d4a6EA5" # yvVelo-OP-WETH-f - Velodrome v2 OP-WETH Factory yVault
           - "0x906122aC1b55B71248ABFA552fDc6ABd3356884A" # yvVelo-MTA-USDC.e-f - Velodrome v2 MTA-USDC.e Factory yVault
-          - "0xFaee21D0f0Af88EE72BB6d68E54a90E6EC2616de" # yvUSDT - USDT yVault (retired)
           - "0x6Ec9d003f0e5184Ee54c1d899B414322a0f0Dc07" # yvVelo-wstETH-WETH-f - Velodrome v2 wstETH-WETH Factory yVault
+          - "0xFaee21D0f0Af88EE72BB6d68E54a90E6EC2616de" # yvUSDT - USDT yVault (retired)
           - "0x00a2faF97CC2b985B29a0a0eAa6E0D8033Dc0eA1" # yvVelo-tBTC-WETH-f - Velodrome v2 tBTC-WETH Factory yVault
           - "0xa3d57625B9a6284D1265d76294443b1E39a18007" # yvVelo-ERN-USDC-f - Velodrome v2 ERN-USDC Factory yVault
           - "0x7bDEA31F968089f93A548ddec8BB74036E8ac6e0" # yvVelo-ERN-LUSD-f - Velodrome v2 ERN-LUSD Factory yVault
@@ -773,11 +691,11 @@ networks:
           - "0x45b0a7Dc29B7856A1B5069DB4CfA2A984b69cC41" # yvVelo-THALES-WETH-f - Velodrome v2 THALES-WETH Factory yVault
           - "0x2a90F479002DAae9934c3a70EBB6e8DbeB46292b" # yvsUSD - sUSD yVault (retired)
           - "0x4C8b1958B09B3bde714f68864Bcc3a74Eaf1A23D" # yvUSDC - USDC yVault (retired)
-          - "0xD02Ce9E211279ab3f414ff7A661518f9173780CB" # yvVelo-MAI-alUSD-f - Velodrome v2 MAI-alUSD Factory yVault
           - "0x27939E33435cc4ee4e74c0F0260914596bcEb116" # yvVelo-OATH-WETH-f - Velodrome v2 OATH-WETH Factory yVault
+          - "0xD02Ce9E211279ab3f414ff7A661518f9173780CB" # yvVelo-MAI-alUSD-f - Velodrome v2 MAI-alUSD Factory yVault
           - "0xdD76A3C91A358B1093de52Cb82af5EC3282f6f7F" # yvVelo-TAROT-OP-f - Velodrome v2 TAROT-OP Factory yVault
-          - "0xC328D83883F5F90E1108D4Dd7A18FFcA17Ae74d7" # yvsUSD - sUSD yVault (retired)
           - "0xf39B6196E6BB16cf0f37E4741a83413Cc329539D" # yvVelo-GRAIN-WETH-f - Velodrome v2 GRAIN-WETH Factory yVault
+          - "0xC328D83883F5F90E1108D4Dd7A18FFcA17Ae74d7" # yvsUSD - sUSD yVault (retired)
           - "0x686c125472024bDd3fA74eeb3720B3237541dCDC" # yvVelo-KWENTA-WETH-f - Velodrome v2 KWENTA-WETH Factory yVault
           - "0xf6B272134A193Df5b04332e73184E5b40b8EB810" # yvVelo-STG-USDC.e-f - Velodrome v2 STG-USDC.e Factory yVault
           - "0x5e70E0EdE43373bD9CF4Bc85199d424AcF0241EF" # yvCurve-sUSD - Curve sUSD Pool yVault (retired)
@@ -786,11 +704,11 @@ networks:
           - "0xB9A14C5C760023801f8c731b4621C99F8ac211D9" # yvVelo-SONNE-USDC.e-f - Velodrome v2 SONNE-USDC.e Factory yVault
           - "0xB3532518DACA20Fd14e539B0eD6C0De5C59Fd2DE" # yvVelo-frxETH-WETH-f - Velodrome v2 frxETH-WETH Factory yVault
           - "0x93d6D0AB2b2aA25580cb77e8C5f9D5a0cc5E08Fe" # yvVelo-UNIDX-WETH-f - Velodrome v2 UNIDX-WETH Factory yVault
-          - "0xAa07Ca79490B3CDA1A25B8fCC69b76C09C6e7A4f" # yvVelo-CHI-DAI-f - Velodrome v2 CHI-DAI Factory yVault
           - "0xb4E4CFA9971C7e1069685771DaB61CA56e72e5C3" # yvCurve-sETH - Curve sETH Pool yVault (retired)
+          - "0xAa07Ca79490B3CDA1A25B8fCC69b76C09C6e7A4f" # yvVelo-CHI-DAI-f - Velodrome v2 CHI-DAI Factory yVault
+          - "0xf5A8aF3C13C0f6c139F58aac8A549100484E0aaD" # yvVelo-UNLOCK-VELO-f - Velodrome v2 UNLOCK-VELO Factory yVault
           - "0x71117Bcd8FE69177EEb8857538D625209756B745" # yvVelo-rETH-WETH-f - Velodrome v2 rETH-WETH Factory yVault
           - "0xc2626aCEdc27cFfB418680d0307C9178955A4743" # yvVelo-sfrxETH-frxETH-f - Velodrome v2 sfrxETH-frxETH Factory yVault
-          - "0xf5A8aF3C13C0f6c139F58aac8A549100484E0aaD" # yvVelo-UNLOCK-VELO-f - Velodrome v2 UNLOCK-VELO Factory yVault
           - "0x6759574667896a453304897993D61F00FdC7214d" # yvMAI - MAI yVault (retired)
           - "0x6a44B0415a5c440D32E82965FDFAad54a72D477D" # yvVelo-sETH-WETH-f - Velodrome v2 sETH-WETH Factory yVault
           - "0x9778589c8e0417687cF5D3Dd2eD7C4ec01d7e53B" # yvVelo-UNIDX-DAI-f - Velodrome v2 UNIDX-DAI Factory yVault
@@ -848,54 +766,50 @@ networks:
     contracts:
       - name: YearnV2Vault
         address:
-          - "0xEF0210eB96c7EB36AF8ed1c20306462764935607" # yvUSDC - $1.8M (retired)
-          - "0xd817A100AB8A29fE3DBd925c2EB489D67F758DA9" # yvWBTC - $768K (retired)
-          - "0x637eC617c86D24E421328e6CAEa1d92114892439" # yvDAI - $410K (retired)
-          - "0xF137D22d7B23eeB1950B3e19d1f578c053ed9715" # yvCurve-Geist - $171K (retired)
-          # V2 vaults on Fantom from Kong API (all TVL)
-          # - "0xEF0210eB96c7EB36AF8ed1c20306462764935607" # yvUSDC - USDC yVault (retired)
-          # - "0xd817A100AB8A29fE3DBd925c2EB489D67F758DA9" # yvWBTC - WBTC yVault (retired)
-          # - "0x637eC617c86D24E421328e6CAEa1d92114892439" # yvDAI - DAI yVault (retired)
-          # - "0xF137D22d7B23eeB1950B3e19d1f578c053ed9715" # yvCurve-Geist - Curve Geist Pool yVault (retired)
-          # - "0x0fBbf9848D969776a5Eb842EdAfAf29ef4467698" # yvBOO - BOO yVault (retired)
-          # - "0x0A0b23D9786963DE69CB2447dC125c49929419d8" # yvMIM - MIM yVault (retired)
-          # - "0xCe2Fc0bDc18BD6a4d9A725791A3DEe33F3a23BB7" # yvWETH - WETH yVault (retired)
-          # - "0x2C850cceD00ce2b14AA9D658b7Cad5dF659493Db" # yvYFI - YFI yVault (retired)
-          # - "0x0DEC85e74A92c52b7F708c4B10207D9560CEFaf0" # yvWFTM - WFTM yVault (retired)
-          # - "0x148c05caf1Bb09B5670f00D511718f733C54bC4c" # yvUSDT - USDT yVault (retired)
-          # - "0x1b48641D8251c3E84ecbe3f2bD76B3701401906D" # yvDOLA - DOLA yVault (retired)
-          # - "0xf2d323621785A066E64282d2B407eAc79cC04966" # yvLINK - LINK yVault (retired)
-          # - "0xCbCaF8cB8cbeAFA927ECEE0c5C56560F83E9B7D9" # yvCurve-Tricrypto - Curve Tricrypto Pool yVault (retired)
-          # - "0x0446acaB3e0242fCf33Aa526f1c95a88068d5042" # yvCRV - CRV yVault (retired)
-          # - "0xD3c19eB022CAC706c898D60d756bf1535d605e1d" # yvSPELL - SPELL yVault (retired)
-          # - "0x357ca46da26E1EefC195287ce9D838A6D5023ef3" # yvFRAX - FRAX yVault (retired)
-          # - "0xA97E7dA01C7047D6a65f894c99bE8c832227a8BC" # yvCurve-MIM - Curve MIM Pool Vault (retired)
-          # - "0xc3Ca90f164d43E2053cCa591aC6e63FCAAD80782" # yvWFTM - WFTM yVault (retired)
-          # - "0x209667B173fE4E9559bdA7818e53Bd5F5E0f9acD" # yvMIM - MIM yVault (retired)
-          # - "0x27cbf0fddb356a2d1EBdef604Cfa90F8f300d34E" # yvWFTM - WFTM yVault (retired)
-          # - "0x8853a6232e3DEBE12098Bf682898A92eC10C9921" # yvWFTM - WFTM yVault (retired)
-          # - "0x9e3922FCBb28F40026dA2E58926f0f249d8A138d" # yvUSDC - USDC yVault (retired)
-          # - "0x03B82e4070cA32FF63A03F2EcfC16c0165689a9d" # yvAVAX - Curve AVAX yVault (retired)
-          # - "0x1482Faf8b5A9c458c94e6A561cCF93ed7A9f552E" # yvWFTM - WFTM yVault (retired)
-          # - "0x1e2fe8074a5ce1Bb7394856B0C618E75D823B93b" # yvfBEETS - fBEETS yVault (retired)
-          # - "0x3D8473724287eB1D903fE62688D3734DE2B97Ee8" # yvCurve-Geist - Curve Geist yVault (retired)
-          # - "0x3F0e90A85EAB7F2C441379CFc9a080A4e864Ae82" # yvfBEETS - fBEETS yVault (retired)
-          # - "0x85611D071406a9e08Ba49c073087e3Eb57819839" # yvWBTC - WBTC yVault (retired)
-          # - "0x9f87fC463327021b510f7E84A5683e1bDCE02Dcc" # yvUSDC - USDC yVault (retired)
-          # - "0xA946C861de1Dd6CB530a07687Da99E989b929139" # yvUSDT - Curve USDT yVault (retired)
+          # V2 vaults on Fantom from Kong API (all TVL, excluding hidden)
+          - "0xEF0210eB96c7EB36AF8ed1c20306462764935607" # yvUSDC - USDC yVault (retired)
+          - "0xd817A100AB8A29fE3DBd925c2EB489D67F758DA9" # yvWBTC - WBTC yVault (retired)
+          - "0x637eC617c86D24E421328e6CAEa1d92114892439" # yvDAI - DAI yVault (retired)
+          - "0xF137D22d7B23eeB1950B3e19d1f578c053ed9715" # yvCurve-Geist - Curve Geist Pool yVault (retired)
+          - "0x0A0b23D9786963DE69CB2447dC125c49929419d8" # yvMIM - MIM yVault (retired)
+          - "0xCe2Fc0bDc18BD6a4d9A725791A3DEe33F3a23BB7" # yvWETH - WETH yVault (retired)
+          - "0x2C850cceD00ce2b14AA9D658b7Cad5dF659493Db" # yvYFI - YFI yVault (retired)
+          - "0x0DEC85e74A92c52b7F708c4B10207D9560CEFaf0" # yvWFTM - WFTM yVault (retired)
+          - "0x148c05caf1Bb09B5670f00D511718f733C54bC4c" # yvUSDT - USDT yVault (retired)
+          - "0x1b48641D8251c3E84ecbe3f2bD76B3701401906D" # yvDOLA - DOLA yVault (retired)
+          - "0xf2d323621785A066E64282d2B407eAc79cC04966" # yvLINK - LINK yVault (retired)
+          - "0xCbCaF8cB8cbeAFA927ECEE0c5C56560F83E9B7D9" # yvCurve-Tricrypto - Curve Tricrypto Pool yVault (retired)
+          - "0x0446acaB3e0242fCf33Aa526f1c95a88068d5042" # yvCRV - CRV yVault (retired)
+          - "0xD3c19eB022CAC706c898D60d756bf1535d605e1d" # yvSPELL - SPELL yVault (retired)
+          - "0x357ca46da26E1EefC195287ce9D838A6D5023ef3" # yvFRAX - FRAX yVault (retired)
+          - "0x0fBbf9848D969776a5Eb842EdAfAf29ef4467698" # yvBOO - BOO yVault (retired)
+          - "0xA97E7dA01C7047D6a65f894c99bE8c832227a8BC" # yvCurve-MIM - Curve MIM Pool Vault (retired)
+          - "0xc3Ca90f164d43E2053cCa591aC6e63FCAAD80782" # yvWFTM - WFTM yVault (retired)
+          - "0x209667B173fE4E9559bdA7818e53Bd5F5E0f9acD" # yvMIM - MIM yVault (retired)
+          - "0x27cbf0fddb356a2d1EBdef604Cfa90F8f300d34E" # yvWFTM - WFTM yVault (retired)
+          - "0x8853a6232e3DEBE12098Bf682898A92eC10C9921" # yvWFTM - WFTM yVault (retired)
+          - "0x9e3922FCBb28F40026dA2E58926f0f249d8A138d" # yvUSDC - USDC yVault (retired)
+          - "0x03B82e4070cA32FF63A03F2EcfC16c0165689a9d" # yvAVAX - Curve AVAX yVault (retired)
+          - "0x1482Faf8b5A9c458c94e6A561cCF93ed7A9f552E" # yvWFTM - WFTM yVault (retired)
+          - "0x1e2fe8074a5ce1Bb7394856B0C618E75D823B93b" # yvfBEETS - fBEETS yVault (retired)
+          - "0x3D8473724287eB1D903fE62688D3734DE2B97Ee8" # yvCurve-Geist - Curve Geist yVault (retired)
+          - "0x3F0e90A85EAB7F2C441379CFc9a080A4e864Ae82" # yvfBEETS - fBEETS yVault (retired)
+          - "0x85611D071406a9e08Ba49c073087e3Eb57819839" # yvWBTC - WBTC yVault (retired)
+          - "0x9f87fC463327021b510f7E84A5683e1bDCE02Dcc" # yvUSDC - USDC yVault (retired)
+          - "0xA946C861de1Dd6CB530a07687Da99E989b929139" # yvUSDT - Curve USDT yVault (retired)
   - id: 8453  # Base
     start_block: 0
     contracts:
       - name: YearnV3Vault
         address:
-          # V3 vaults on Base from Kong API (all TVL)
+          # V3 vaults on Base from Kong API (all TVL, excluding hidden)
           - "0xF115C134c23C7A05FBD489A8bE3116EbF54B0D9f" # ysUSDC - Morpho Yearn Morpho Vault 1 Compounder
           - "0xb13CF163d916917d9cD6E836905cA5f12a1dEF4B" # TYD - True Yield Dollar
           - "0xc3BD0A2193c8F027B82ddE3611D18589ef3f62a9" # yvUSDC-H - USDC Horizon yVault
           - "0xd5428B889621Eee8060fc105AA0AB0Fa2e344468" # ysUSDC - Morpho Moonwell Flagship USDC Compounder (retired)
           - "0x4d81C7d534D703E0a0AECaDF668C0E0253E1f1C3" # yvWETH-H - WETH Horizon yVault
-          - "0x0dE119f5790c4EcF6eEd80Aac7c25D2dCAD10f0f" # ysEURC - EURC Fluid Lender
           - "0xBDD79a7DF622E9d9e19a7d92Bc7ea212FA0D2F3E" # ysWETH - Morpho Y-WETH Compounder
+          - "0x0dE119f5790c4EcF6eEd80Aac7c25D2dCAD10f0f" # ysEURC - EURC Fluid Lender
           - "0x989381F7eFb45F97E46BE9f390a69c5d94bf9e17" # yvcbETH-H - cbETH Horizon yVault
           - "0xfdB431E661372fA1146efB70bf120ECDed944a78" # ysUSDC - Moonwell USDC Lender WETH Borrower (retired)
           - "0x985CC9c306Bfe075F7c67EC275fb0b80F0b21976" # ysEURC - Morpho Moonwell Flagship EURC Compounder (retired)
@@ -903,34 +817,24 @@ networks:
           - "0x945Df73d55557Ea23c0c35CD350d8DE3b745287E" # ysUSDC - Moonwell USDC Lender cbBTC Borrower (retired)
           - "0x25f32eC89ce7732A4E9f8F3340a09259F823b7d3" # yvcbBTC-H - cbBTC Horizon yVault
           - "0xBb808A822dD7aEd1635956b85ca5e55478cCa957" # yscbBTC - LevMoonwell cbBTC (retired)
-          - "0x630dB4ae19219025dF594c943B638B5aCb5e9D18" # yvWETH-1 - WETH-1 yVault [hidden]
           - "0x0ace53f57A14ACfD4D43C7d4c46BE4b4a5347efF" # ysUSDC - LevMoonwell USDC (retired)
           - "0x03c5AfF0cd5e40889d689fD9D9Caff286b1BD7Fb" # yscbBTC - Moonwell cbBTC Lender WETH Borrower (retired)
-          - "0xd80c675366966Ef42B175125BBf1AcB1DB4151ac" # yvUSDC-1 - USDC-1 yVault [hidden]
           - "0xb3F14E3fda2147fa7574fd003BA40Df266E0B90c" # ysUSDC - Aave V3 USDC Lender
           - "0xfCfBc79409e6A9358Ad4D617E8684D21F39E9009" # yvUSDC-1 - USDC-1 yVault
           - "0xEF34B4Dcb851385b8F3a8ff460C34aDAFD160802" # ysWETH - Morpho Moonwell Flagship ETH Compounder (retired)
           - "0x953370e91B70897A0cECc97B58E99D7946C841dE" # ysUSDC - Morpho Seamless USDC Vault Compounder
           - "0x81bDd5E8FbDE5A85A2D38761D03d2307FE69A329" # ysWETH - Aave V3 WETH Lender
-          - "0x1D7A8593c249ab84B2733d09A9E4a6B9E42140fe" # yPT-LBTC - yPT-LBTC (auto-rolling Pendle PT) (retired) [hidden]
-          - "0x44da1202285eD9678dAB99B55AaDB2fA549fDFDC" # yswstETH - LevMoonwell wstETH (retired) [hidden]
           - "0x7bc9E2D216B22611D9805C12E0C682391720752F" # yscbBTC - Morpho Seamless cbBTC Vault Compounder
-          - "0x8436027a799Ac6c8B512E68b4d3852217c63647d" # ysWETH - Moonwell WETH Lender cbBTC Borrower (retired) [hidden]
-          - "0x9Eb7675377d1191beD352552267E5b5E592Fcf53" # yvtmUSDC - Truemarket USDC yVault [hidden]
           - "0xa72a60e6167E8fC5e523184911475c4B37B835E2" # ysWETH - Morpho Seamless WETH Vault Compounder
-          - "0xB9acb02818BDDD3aC178fa51a0587101E54748B0" # yscbBTC - Morpho Moonwell Frontier cbBTC Compounder (retired) [hidden]
-          - "0xD63f18AA7Beb87799FD1B368aEAd90a6A1C86f6C" # ysUSDC - Bankr USDC Vault [hidden]
-          - "0xd89A4f020C8d256a2A4B0dC40B36Ee0b27680776" # yscbETH - Moonwell cbETH Lender WETH Borrower (retired) [hidden]
-          - "0xDd120ded7c1c9E4978f92847bcb24847A9dBb071" # yscbETH - LevMoonwell cbETH (retired) [hidden]
       - name: YearnV2Vault
         address:
-          # V2 vaults on Base from Kong API (all TVL)
+          # V2 vaults on Base from Kong API (all TVL, excluding hidden)
           - "0x4d3ceBA4349ADB06d2De8EBD2F9320A61303aD81" # yvAero-hyUSD-eUSD-f - Aerodrome hyUSD-eUSD Factory yVault
           - "0x31Ce9aB5A358E5c802Cc01080F29a65a14EB45b8" # yvAero-BMX-wBLT-f - Aerodrome BMX-wBLT Factory yVault
           - "0x68393A804c9fe4f1c7148d37796436e450Ad98E8" # yvAero-AERO-USDbC-f - Aerodrome AERO-USDbC Factory yVault
           - "0x8C589ADdBe1466a9B555EaA6cE8940Ac1680C5F4" # yvAero-cbETH-WETH-f - Aerodrome cbETH-WETH Factory yVault
-          - "0xA3386F0a4034184ECB8A0d1E7E79b4f720634317" # yvAero-DOLA-USDbC-f - Aerodrome DOLA-USDbC Factory yVault
           - "0x00F30115B5E828AB387b8190f8532EA7cEAF3fDC" # yvAero-DOLA-USDC-f - Aerodrome DOLA-USDC Factory yVault
+          - "0xA3386F0a4034184ECB8A0d1E7E79b4f720634317" # yvAero-DOLA-USDbC-f - Aerodrome DOLA-USDbC Factory yVault
           - "0x3ED55314C0a4B1a1e3E6b4C9E0617d99c8B5fFf8" # yvAero-wstETH-WETH-f - Aerodrome wstETH-WETH Factory yVault
           - "0x12e3187D6B7a0BA98A427ef9EF287Bd9960764D1" # yvAero-DEUS-WETH-f - Aerodrome DEUS-WETH Factory yVault
           - "0x82A9CC022BfFba4358A4286381c0855A8e295605" # yvAero-bsdETH-WETH-f - Aerodrome bsdETH-WETH Factory yVault
@@ -977,7 +881,7 @@ networks:
     contracts:
       - name: YearnV3Vault
         address:
-          # V3 vaults on Arbitrum from Kong API (all TVL)
+          # V3 vaults on Arbitrum from Kong API (all TVL, excluding hidden)
           - "0x9FA306b1F4a6a83FEC98d8eBbaBEDfF78C407f6B" # yvUSDC-2 - USDC-2 yVault
           - "0xb739AE19620f7ECB4fb84727f205453aa5bc1AD2" # ysUSDC - Silo Lender ARB/USDC.e
           - "0x252b965400862d94BDa35FeCF7Ee0f204a53Cc36" # yUSND - Yearn USND
@@ -986,8 +890,8 @@ networks:
           - "0x1Dd930ADD968ff5913C3627dAA1e6e6FCC9dc544" # yPT-rsETH - yPT-rsETH (auto-rolling Pendle PT) (retired)
           - "0x6FAF8b7fFeE3306EfcFc2BA9Fec912b4d49834C1" # yvUSDC-A - USDC-A yVault
           - "0xDa3b69a45797DCA697Ff5bB2c10682f14373c063" # yvUSDC-1 - USDC-1 yVault
-          - "0x85968BF0f1f110C707fEF10a59f80118F349c058" # ysUSDC - AaveV3 USDC.e Lender
           - "0xc0ba9bfED28aB46Da48d2B69316A3838698EF3f5" # yvUSDT-A - USDT-A yVault
+          - "0x85968BF0f1f110C707fEF10a59f80118F349c058" # ysUSDC - AaveV3 USDC.e Lender
           - "0xE82D060687C014B280b65df24AcD94A77251C784" # ysUSDC - Silo Lender wBTC/USDC.e
           - "0x0F2ae7531A83982F15ff1D26B165E2bF3D7566da" # yPT-ezETH - yPT-ezETH (auto-rolling Pendle PT) (retired)
           - "0x044E75fCbF7BD3f8f4577FF317554e9c0037F145" # yPT-weETH - yPT-weETH (auto-rolling Pendle PT) (retired)
@@ -1005,7 +909,6 @@ networks:
           - "0xb119e90Beb09Fcf9ABc92c20a8D84fe8bdfcc6E3" # ysPENDLE-LPT - Kelp rsETH LP (25 APR 2024) (retired)
           - "0x127A7F610cc704Be6122dfa76eb61E84C9cb0Efd" # ysUSDC - Silo Lender wstETH/USDC.e
           - "0x02822b7B6dE0bf087DcEa626f6f19a838AeDB7be" # yPT-mPENDLE - yPT-mPENDLE (auto-rolling Pendle PT) (retired)
-          - "0x022061d81e42fcb59711193346Bab758D24D6c43" # yPT-MUXLP - yPT-MUXLP (auto-rolling Pendle PT) (retired) [hidden]
           - "0x074943fEfE3391D033A15557dfa1b6f246Ce5fD0" # ysPENDLE-LPT - eETH LP (25 APR 2024)
           - "0x075472D809aA98A4686D6F04E2c2663802653f2A" # ysPENDLE-LPT - Stargate USDT LP (27 JUN 2024) (retired)
           - "0x08e3D13d50310aFbeA2da20A3DBD92aAcFc503Ac" # yPT-wstETH - yPT-wstETH (auto-rolling Pendle PT) (retired)
@@ -1018,23 +921,19 @@ networks:
           - "0x4da30274267DeDc73A6A7eB233fBa81691f34Ef7" # ysPENDLE-LPT - Lido wstETH LP (27 JUN 2024) (retired)
           - "0x586FB80DdadFC01294751a7CD58625CCFf4BDb2f" # ysPENDLE-LPT - Camelot ARB-ETH LP (27 JUN 2024) (retired)
           - "0x65073e8C0A9c26d4280a43A3eCD3cDEdD36fDB89" # ysPENDLE-LPT - Lido wstETH LP (26 JUN 2025) (retired)
-          - "0x7fD798ED77368E787E216DfDb5Be5F6CAe4C5aD5" # yPT-HLP - yPT-HLP (auto-rolling Pendle PT) [hidden]
           - "0x8A64111709Ce75434b9156e3878cDD5B1fBC2D13" # ysPENDLE-LPT - Silo PT-eETH LP (25 APR 2024) (retired)
           - "0x8b5aa1688297BC2e4664a18Df6ad22a70c4178B8" # ysPENDLE-LPT - Camelot PENDLE-ETH LP (27 JUN 2024) (retired)
           - "0x92F1E6D904f21c05074952bbAD51D91fd9F8730f" # ysPENDLE-LPT - ezETH LP (27 JUN 2024) (retired)
           - "0x985c0271ad0bF0a45951b64EB6FC58010B050908" # yPT-Pendle-ETH-Camelot - yPT-Pendle-ETH-Camelot (auto-rolling Pendle PT) (retired)
-          - "0x9eD00a5dc4b8e96ECDa1B863975A597917948C38" # yPT-dUSDC - yPT-dUSDC (auto-rolling Pendle PT) [hidden]
           - "0xAebA9F4a9293213e0E3ed18A2F688BDDd7f5FB0c" # yPT-gDAI - yPT-gDAI (auto-rolling Pendle PT) (retired)
           - "0xC40DA6a01Ac36F39736731ee50fb3b1B8204e2D3" # yPT-rETH - yPT-rETH (auto-rolling Pendle PT) (retired)
           - "0xCB1A0a9C9cBBca82A395301267d525125cFBa557" # ysPENDLE-LPT - Silo wstETH LP (26 DEC 2024) (retired)
-          - "0xD21E503d8aC357A7C8F8897BF84a4Bfd14fEc6E1" # yPT-USDC-Dolomite - yPT-USDC-Dolomite (auto-rolling Pendle PT) [hidden]
           - "0xDfaa4001308F5eC4d06920cD0D2C649c6f930e2C" # ysPENDLE-LPT - mPENDLE LP (26 SEP 2024) (retired)
       - name: YearnV2Vault
         address:
-          # V2 vaults on Arbitrum from Kong API (all TVL)
+          # V2 vaults on Arbitrum from Kong API (all TVL, excluding hidden)
           - "0x239e14A19DFF93a17339DCC444f74406C17f8E67" # yvCurve-Tricrypto - Curve Tricrypto Pool Vault (retired)
           - "0x49448d2B94fb9C4e41a30aD8315D32f46004A34b" # yv2CRV - 2CRV yVault (retired)
-          - "0x630c9050E6b0014C6Fe4C214D4840909345aDB7D" # yvCurve-FRAX+VST - Curve FRAX-VST Pool Vault [hidden]
           - "0x1dBa7641dc69188D6086a73B972aC4bda29Ec35d" # yvCurve-MIM - Curve MIM Pool Vault (retired)
           - "0x976a1C749cd8153909e0B04EebE931eF8957b15b" # yPHP - PHPTest
       - name: TimelockController
@@ -1048,10 +947,9 @@ networks:
     contracts:
       - name: YearnV3Vault
         address:
-          # V3 vaults on Polygon from Kong API (all TVL)
+          # V3 vaults on Polygon from Kong API (all TVL, excluding hidden)
           - "0xD811a47cfD17355F47ac49Be02c4744A926dd16B" # ysUSDC - USDC Fluid Lender
           - "0x34b9421Fe3d52191B64bC32ec1aB764dcBcDbF5e" # USDC-1 - USDC-1 yVault
-          - "0x5BFd56F9BcBDb2be985C64C620ECa7F02Fa7b439" # ysUSDC - Bankr USDC Vault [hidden]
           - "0xb1403908F772E4374BB151F7C67E88761a0Eb4f1" # ysUSDC - Compound V3 USDC Lender
           - "0x335Bc8366545FaA446e0c1f639617aC40061f2EF" # yvUSDC.e-1 - USDC.e-1 yVault
           - "0xA013Fbd4b711f9ded6fB09C1c0d358E2FbC2EAA0" # yvUSDC-A - USDC yVault-A
@@ -1084,7 +982,6 @@ networks:
           - "0x32adfC6170344F848A8c0efe68dad93e5b6964aA" # ysaUSDC-WETH - yearn-V3-Gamma-USDC.e-WETH-Wide (retired)
           - "0x3A58dF70F9204beDcd6aee2b51582EB77fE30E02" # ysaWBTC-WETH - yearn-V3-Gamma-WBTC-WETH (retired)
           - "0x42908891cBC13301C910B4E71055431bf134AAa0" # ysawMATIC-USDC - yearn-V3-Gamma-WMATIC-USDC.e (retired)
-          - "0x5136c2F7aB13E202eD42bc1AE82Dd63475919653" # ysWETH - CompV3 WETH Lender USDC Borrower (retired) [hidden]
           - "0x8df66d28914084f44c4046783810cbAd662fA633" # ysaWMATIC-MATICX - yearn-V3-Gamma-WMATIC-MATICX (retired)
           - "0x91E646449A3105e9091e882C9A9a7A81950eeBB8" # ysawMATIC-WETH - yearn-V3-Gamma-WMATIC-WETH-Wide (retired)
           - "0xa823eF7dF6392800569946c6C1Dec0e34356EF18" # ysaUSDC-USDT - yearn-V3-Gamma-USDC.e-USDT (retired)
@@ -1100,25 +997,24 @@ networks:
     contracts:
       - name: YearnV3Vault
         address:
-          # V3 vaults on Katana from Kong API (all TVL)
+          # V3 vaults on Katana from Kong API (all TVL, excluding hidden)
           - "0x80c34BD3A3569E126e7055831036aa7b212cB159" # yvvbUSDC - vbUSDC yVault
           - "0xE007CA01894c863d7898045ed5A3B4Abf0b18f37" # yvvbETH - vbETH yVault
           - "0x37a79Bfb9F645F8Ed0a9ead9c722710D8f47C431" # ysvbETH - Morpho Yearn OG vbETH Compounder
           - "0x78EC25FBa1bAf6b7dc097Ebb8115A390A2a4Ee12" # ysvbUSDC - Morpho Yearn OG USDC Compounder
-          - "0xD46dFDAA7cAA8739B0e3274e2C085dFFc8d4776A" # ysvbUSDC - Morpho Gauntlet USDC Vault Compounder
           - "0x9A6bd7B6Fd5C4F87eb66356441502fc7dCdd185B" # yvvbUSDT - vbUSDT yVault
+          - "0xD46dFDAA7cAA8739B0e3274e2C085dFFc8d4776A" # ysvbUSDC - Morpho Gauntlet USDC Vault Compounder
           - "0x156C729C78076b7cd815D01Ca6967c00c5ac8D9C" # ysvbUSDT - Morpho Yearn OG USDT Compounder
           - "0xEA79C91540C7E884e6E0069Ce036E52f7BbB1194" # ysvbETH - Morpho Gauntlet WETH Vault Compounder
           - "0xAa0362eCC584B985056E47812931270b99C91f9d" # yvvbWBTC - vbWBTC yVault
           - "0x93Fec6639717b6215A48E5a72a162C50DCC40d68" # yvAUSD - AUSD yVault
           - "0x0432337365d89c0D73f1D0Cb263791F8f1B98D43" # ysvbWBTC - Morpho vbWBTC/yvUSDC Lender Borrower
-          - "0xC1Ec6d26902949Bf6cbb0c9859dbEAD1E87FB243" # ysAUSD - Morpho Steakhouse Prime AUSD Compounder
           - "0xF7EDe5332c6b4A235be4aA3c019222CFe72e984F" # ysAUSD - Morpho Gauntlet AUSD Vault Compounder
+          - "0xC1Ec6d26902949Bf6cbb0c9859dbEAD1E87FB243" # ysAUSD - Morpho Steakhouse Prime AUSD Compounder
           - "0x0a1937F0D7f15B9ADee5d96616f269a0C6749C6d" # ysvbWBTC - Morpho Gauntlet WBTC Vault Compounder
           - "0x2F0b01d1F36FB2c72f7DEB441a2a262e655d6888" # ysvbETH - Morpho vbWETH/yvUSDC Lender Borrower
           - "0x3384246D42cAc0B8DD9BBDbE902A06D0814244f7" # ysvbWBTC - Morpho vbWBTC/yvUSDT Lender Borrower
           - "0xA03e39CDeAC8c2823A6EDC80956207294807c20d" # ysvbETH - Yearn yvvbETH to yvvbUSDC Yield Splitter
-          - "0x1769111aA8EA46fee3BA23EF9B57F3CBe1873408" # yvwstETH - wstETH yVault [hidden]
           - "0x58B369aEC52DD904f70122cF72ed311f7AAe3bAc" # ysvbUSDC - Morpho Steakhouse Prime USDC Compounder
           - "0xF352cdbE225B82Cc458aCa3c127F2935d7EE12CB" # ysvbUSDC - Yearn yvvbUSDC to yvvbETH Yield Splitter
           - "0x1166da048a9B0E840A57dD9Dce5378e6c32E53C4" # ysvbUSDC - Yearn yvvbUSDC to yvvbWBTC Yield Splitter
@@ -1126,7 +1022,6 @@ networks:
           - "0x2f817617A682A18851E3EaCBD945b214BE70474E" # ysvbWBTC - Yearn yvvbWBTC to yvvbUSDC Yield Splitter
           - "0x518EA05c41F89e36985A94c6dF8782F6d3F45111" # ysvbWBTC - Yearn yvvbWBTC to yvvbETH Yield Splitter
           - "0x543CC24962b540430DD1121E83E8564770Da6810" # ysvbUSDT - Morpho Gauntlet USDT Vault Compounder
-          - "0x639bCcF37CC0415812A6f110CFCa33127a81c0e9" # yvWOOFY - Woofy yVault [hidden]
           - "0x8Fb1c10Ad4417EcA341a1D903Ff437d25ff87a4e" # yvvbUSDS - vbUSDS yVault
       - name: TimelockController
         address:

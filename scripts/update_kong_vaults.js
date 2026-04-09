@@ -108,6 +108,11 @@ function groupVaults(vaults, supportedChainIds) {
       continue;
     }
 
+    const isHidden = Boolean(vault.meta?.isHidden ?? vault.isHidden);
+    if (isHidden) {
+      continue;
+    }
+
     const key = makeGroupKey(vault.chainId, version);
     if (!grouped.has(key)) {
       grouped.set(key, new Map());
@@ -238,7 +243,7 @@ function splitContractBlocks(lines) {
 function buildVaultBlock(contractName, version, chainId, items) {
   const versionLabel = version === "v3" ? "V3" : "V2";
   const chainName = CHAIN_NAMES[chainId] ?? `chain ${chainId}`;
-  const header = `          # ${versionLabel} vaults on ${chainName} from Kong API (all TVL)`;
+  const header = `          # ${versionLabel} vaults on ${chainName} from Kong API (all TVL, excluding hidden)`;
   const lines = [
     `      - name: ${contractName}`,
     "        address:",
@@ -264,10 +269,6 @@ function formatVaultComment(vault) {
 
   if (vault.isRetired) {
     parts.push("(retired)");
-  }
-
-  if (vault.isHidden) {
-    parts.push("[hidden]");
   }
 
   return parts.join(" ");
