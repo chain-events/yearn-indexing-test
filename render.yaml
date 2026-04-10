@@ -87,7 +87,7 @@ services:
       - key: CONFIG_FILE
         value: "config.yaml"
       - key: LOG_LEVEL
-        value: "warn"
+        value: "trace"
       - key: LOG_STRATEGY
         value: "console-pretty"
       - key: HASURA_GRAPHQL_ROLE
