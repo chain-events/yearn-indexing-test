@@ -21,9 +21,6 @@ RUN pnpm install --frozen-lockfile
 COPY ./config.yaml ./config.yaml
 COPY ./schema.graphql ./schema.graphql
 
-# Remove the line if you inlined all event ABIs in the config.yaml
-COPY ./abis ./abis
-
 RUN pnpm envio codegen
 
 COPY ./ ./
