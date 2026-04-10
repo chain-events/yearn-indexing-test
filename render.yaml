@@ -49,14 +49,11 @@ services:
   # Benchmark: 50% CPU, 86% memory on starter — monitor after adding Katana
   - type: worker
     name: envio-indexer
-    runtime: node
+    runtime: image
     region: virginia
     plan: standard
-    buildCommand: pnpm install --frozen-lockfile && pnpm envio codegen
-    startCommand: pnpm envio start
+    dockerfilePath: ./Dockerfile
     envVars:
-      - key: NODE_VERSION
-        value: "22"
       - key: ENVIO_API_TOKEN
         sync: false
       - key: ENVIO_PG_HOST
