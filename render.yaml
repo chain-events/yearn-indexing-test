@@ -49,7 +49,7 @@ services:
   # Benchmark: 50% CPU, 86% memory on starter — monitor after adding Katana
   - type: worker
     name: envio-indexer
-    runtime: image
+    runtime: docker
     region: virginia
     plan: standard
     dockerfilePath: ./Dockerfile
