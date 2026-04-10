@@ -53,10 +53,7 @@ services:
     region: virginia
     plan: standard
     buildCommand: pnpm install --frozen-lockfile && pnpm envio codegen
-    startCommand: >-
-      export HASURA_GRAPHQL_ENDPOINT="http://${HASURA_SERVICE_HOST}:${HASURA_SERVICE_PORT}/v1/metadata";
-      trap 'kill -TERM $PID; wait $PID; exit $?' SIGTERM SIGINT;
-      pnpm envio start & PID=$!; wait $PID
+    startCommand: pnpm envio start
     envVars:
       - key: NODE_VERSION
         value: "22"
