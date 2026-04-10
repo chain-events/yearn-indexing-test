@@ -21,7 +21,9 @@ RUN pnpm install --frozen-lockfile
 COPY ./config.yaml ./config.yaml
 COPY ./schema.graphql ./schema.graphql
 
-RUN pnpm envio codegen
+# Codegen only parses the config — it doesn't connect, so a placeholder is fine.
+ARG ENVIO_RPC_URL_KATANA=http://placeholder
+RUN ENVIO_RPC_URL_KATANA=${ENVIO_RPC_URL_KATANA} pnpm envio codegen
 
 COPY ./ ./
 
