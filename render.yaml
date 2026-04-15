@@ -1,0 +1,140 @@
+previewsEnabled: false
+
+databases:
+  - name: envio-db
+    plan: basic-1gb
+    region: virginia
+    databaseName: envio_indexer
+    user: envio_ix_7f3a
+    postgresMajorVersion: "18"
+
+services:
+  # Hasura GraphQL Engine - public-facing GraphQL API
+  # Benchmark: 1% CPU, 50% memory on starter — no upgrade needed
+  - type: web
+    name: graphql-engine
+    runtime: image
+    region: virginia
+    image:
+      url: hasura/graphql-engine:v2.43.0
+    plan: standard
+    healthCheckPath: /healthz
+    domains:
+      - envio-gql.yearn.dev
+    envVars:
+      - key: HASURA_GRAPHQL_DATABASE_URL
+        fromDatabase:
+          name: envio-db
+          property: connectionString
+      - key: HASURA_GRAPHQL_ENABLE_CONSOLE
+        value: "true"
+      - key: HASURA_GRAPHQL_ENABLED_LOG_TYPES
+        value: "startup, http-log, webhook-log, websocket-log, query-log"
+      - key: HASURA_GRAPHQL_NO_OF_RETRIES
+        value: "10"
+      - key: HASURA_GRAPHQL_ADMIN_SECRET
+        sync: false
+      # Set this in Render as a JSON string that pins every JWT-authenticated
+      # request to the readonly Hasura role via claims_map.
+      - key: HASURA_GRAPHQL_JWT_SECRET
+        sync: false
+      - key: HASURA_GRAPHQL_STRINGIFY_NUMERIC_TYPES
+        value: "true"
+      - key: PORT
+        value: "8080"
+      - key: HASURA_GRAPHQL_UNAUTHORIZED_ROLE
+        value: "public"
+
+  # Envio Indexer - blockchain event indexer
+  # Benchmark: 50% CPU, 86% memory on starter — monitor after adding Katana
+  - type: worker
+    name: envio-indexer
+    runtime: docker
+    region: virginia
+    plan: standard
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: ENVIO_API_TOKEN
+        sync: false
+      - key: ENVIO_PG_HOST
+        fromDatabase:
+          name: envio-db
+          property: host
+      - key: ENVIO_PG_PORT
+        fromDatabase:
+          name: envio-db
+          property: port
+      - key: ENVIO_PG_USER
+        fromDatabase:
+          name: envio-db
+          property: user
+      - key: ENVIO_PG_PASSWORD
+        fromDatabase:
+          name: envio-db
+          property: password
+      - key: ENVIO_PG_DATABASE
+        fromDatabase:
+          name: envio-db
+          property: database
+      - key: ENVIO_PG_SSL_MODE
+        value: "false"
+      - key: ENVIO_PG_PUBLIC_SCHEMA
+        value: "envio"
+      - key: ENVIO_INDEXER_HOST
+        value: "0.0.0.0"
+      - key: ENVIO_INDEXER_PORT
+        value: "9898"
+      - key: CONFIG_FILE
+        value: "config.yaml"
+      - key: LOG_LEVEL
+        value: "trace"
+      - key: LOG_STRATEGY
+        value: "console-pretty"
+      - key: HASURA_GRAPHQL_ROLE
+        value: "admin"
+      - key: HASURA_GRAPHQL_ADMIN_SECRET
+        sync: false
+      - key: HASURA_SERVICE_HOST
+        fromService:
+          name: graphql-engine
+          type: web
+          envVarKey: RENDER_INTERNAL_HOSTNAME
+      - key: HASURA_SERVICE_PORT
+        value: "8080"
+      - key: ENVIO_THROTTLE_CHAIN_METADATA_INTERVAL_MILLIS
+        value: "500"
+      - key: ENVIO_THROTTLE_PRUNE_STALE_DATA_INTERVAL_MILLIS
+        value: "30000"
+      - key: ENVIO_THROTTLE_LIVE_METRICS_BENCHMARK_INTERVAL_MILLIS
+        value: "1000"
+      - key: ENVIO_THROTTLE_JSON_FILE_BENCHMARK_INTERVAL_MILLIS
+        value: "500"
+      - key: ENVIO_RPC_URL_KATANA
+        sync: false
+      - key: TUI_OFF
+        value: "true"
+
+  # GraphiQL Explorer - authenticated GraphQL IDE for Hasura
+  - type: web
+    name: graphiql
+    runtime: node
+    region: virginia
+    plan: starter
+    rootDir: graphiql
+    buildCommand: echo "no build step"
+    startCommand: node server.js
+    healthCheckPath: /healthz
+    domains:
+      - envio-explorer.yearn.dev
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: PORT
+        value: "4000"
+      - key: HASURA_GRAPHQL_ENDPOINT
+        fromService:
+          name: graphql-engine
+          type: web
+          envVarKey: RENDER_EXTERNAL_HOSTNAME
+      - key: HASURA_GRAPHQL_JWT
+        sync: false
