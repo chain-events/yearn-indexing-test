@@ -1,3 +1,17 @@
+# ─── User Event Counts (for parallel pagination without aggregates) ──────────
+
+type UserEventCounts {
+  id: ID! # userAddress (lowercase)
+  depositCount: Int!
+  withdrawCount: Int!
+  transferInCount: Int!
+  transferOutCount: Int!
+  v2DepositCount: Int!
+  v2WithdrawCount: Int!
+}
+
+# ─── Yearn V3 Vault Events ───────────────────────────────────────────────────
+
 type Deposit {
   id: ID!
   vaultAddress: String! @index
