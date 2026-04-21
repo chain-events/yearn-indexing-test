@@ -151,6 +151,8 @@ services:
     buildCommand: echo "no build step"
     startCommand: node server.js
     healthCheckPath: /healthz
+    domains:
+      - envio-monitoring.yearn.dev
     envVars:
       - key: NODE_VERSION
         value: "20"
