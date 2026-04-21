@@ -172,3 +172,14 @@ services:
       # Path to the indexer project inside the deployed rootDir (relative to apps/monitoring).
       - key: INDEXER_PROJECT_PATH
         value: "../indexer"
+      # Probe the envio-indexer's own metrics endpoint over Render's private
+      # network. envio-indexer is a `worker` service, so only the internal
+      # hostname is available (no public URL). Port 9898 matches
+      # ENVIO_INDEXER_PORT on envio-indexer.
+      - key: INDEXER_HOST
+        fromService:
+          name: envio-indexer
+          type: worker
+          envVarKey: RENDER_INTERNAL_HOSTNAME
+      - key: INDEXER_PORT
+        value: "9898"

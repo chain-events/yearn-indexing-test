@@ -1,2 +1,6 @@
 packages:
   - "apps/*"
+  # envio codegen writes a nested package here with its own dependencies
+  # (rescript, pino, etc.). Listing it as a workspace project makes pnpm
+  # install those deps when envio runs `pnpm install` from inside generated/.
+  - "apps/indexer/generated"

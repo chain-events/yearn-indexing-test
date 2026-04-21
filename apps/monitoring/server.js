@@ -46,6 +46,15 @@ const INDEXER_PROJECT_PATH = resolve(
   process.env.INDEXER_PROJECT_PATH || "../indexer",
 );
 
+// Envio indexer exposes Prometheus metrics on its own port (ENVIO_INDEXER_PORT,
+// default 9898). On Render we wire INDEXER_HOST via fromService (bare hostname,
+// private network); locally, set INDEXER_URL directly.
+const INDEXER_URL =
+  process.env.INDEXER_URL ||
+  (process.env.INDEXER_HOST
+    ? `http://${process.env.INDEXER_HOST}:${process.env.INDEXER_PORT || 9898}`
+    : null);
+
 if (!GRAPHQL_URL) {
   console.error("GRAPHQL_URL (or GRAPHQL_HOST) is required");
   process.exit(1);
@@ -83,6 +92,60 @@ function readEnvioVersion() {
   return null;
 }
 
+async function probeIndexer() {
+  if (!INDEXER_URL) return null;
+  const started = Date.now();
+  try {
+    const [healthRes, metricsRes] = await Promise.allSettled([
+      fetch(`${INDEXER_URL}/health`, { signal: AbortSignal.timeout(3000) }),
+      fetch(`${INDEXER_URL}/metrics`, { signal: AbortSignal.timeout(3000) }),
+    ]);
+    const latencyMs = Date.now() - started;
+
+    const health =
+      healthRes.status === "fulfilled" && healthRes.value.ok
+        ? await healthRes.value.text().catch(() => null)
+        : null;
+
+    let metrics = null;
+    if (metricsRes.status === "fulfilled" && metricsRes.value.ok) {
+      const text = await metricsRes.value.text().catch(() => null);
+      if (text) metrics = parsePrometheus(text);
+    }
+
+    return {
+      url: INDEXER_URL,
+      reachable: health != null || metrics != null,
+      latencyMs,
+      health: health?.trim() ?? null,
+      metrics,
+    };
+  } catch (err) {
+    return {
+      url: INDEXER_URL,
+      reachable: false,
+      latencyMs: Date.now() - started,
+      error: err.message,
+    };
+  }
+}
+
+function parsePrometheus(text) {
+  const out = {};
+  for (const raw of text.split("\n")) {
+    const line = raw.trim();
+    if (!line || line.startsWith("#")) continue;
+    const match = line.match(/^([a-zA-Z_][a-zA-Z0-9_]*)(\{[^}]*\})?\s+(\S+)/);
+    if (!match) continue;
+    const [, name, labels, value] = match;
+    const num = Number(value);
+    if (!Number.isFinite(num)) continue;
+    const key = labels ? `${name}${labels}` : name;
+    out[key] = num;
+  }
+  return out;
+}
+
 async function queryGraphQL(query) {
   const headers = { "Content-Type": "application/json" };
   if (GRAPHQL_BEARER_TOKEN) headers["Authorization"] = `Bearer ${GRAPHQL_BEARER_TOKEN}`;
@@ -98,7 +161,8 @@ async function queryGraphQL(query) {
 }
 
 async function getStatus() {
-  const data = await queryGraphQL(`
+  const [data, indexer] = await Promise.all([
+    queryGraphQL(`
     {
       chain_metadata {
         chain_id
@@ -113,7 +177,9 @@ async function getStatus() {
         timestamp_caught_up_to_head_or_endblock
       }
     }
-  `);
+  `),
+    probeIndexer(),
+  ]);
 
   const chains = (data.chain_metadata ?? []).map((c) => {
     const syncStart = c.first_event_block_number ?? c.start_block ?? 0;
@@ -154,6 +220,7 @@ async function getStatus() {
     envioVersion: readEnvioVersion(),
     indexerProjectPath: INDEXER_PROJECT_PATH,
     fetchedAt: new Date().toISOString(),
+    indexer,
     chains,
     totals: {
       chainCount: chains.length,
@@ -195,4 +262,5 @@ server.listen(PORT, () => {
   console.log(`envio-monitoring dashboard: http://localhost:${PORT}`);
   console.log(`  GraphQL: ${GRAPHQL_URL}`);
   console.log(`  Indexer project: ${INDEXER_PROJECT_PATH}`);
+  console.log(`  Indexer probe: ${INDEXER_URL ?? "(disabled — set INDEXER_URL or INDEXER_HOST)"}`);
 });
