@@ -27,20 +27,16 @@ COPY apps/monitoring/package.json ./apps/monitoring/package.json
 # Install only the indexer's dependency closure.
 RUN pnpm install --frozen-lockfile --filter envio-indexer...
 
-# Bring in just the pieces envio codegen needs before the rest of the source
-# so the codegen layer stays cached when unrelated files change.
-COPY apps/indexer/config.yaml ./apps/indexer/config.yaml
-COPY apps/indexer/schema.graphql ./apps/indexer/schema.graphql
-
-WORKDIR /repo/apps/indexer
-
-# Codegen only parses the config — it doesn't connect, so a placeholder is fine.
-ARG ENVIO_RPC_URL_KATANA=http://placeholder
-RUN ENVIO_RPC_URL_KATANA=${ENVIO_RPC_URL_KATANA} pnpm envio codegen
-
-# Copy the rest of the indexer source.
-WORKDIR /repo
+# Copy the full indexer source (generated/ is excluded via .dockerignore so
+# the container's codegen output is authoritative).
 COPY apps/indexer ./apps/indexer
 
 WORKDIR /repo/apps/indexer
+
+# Codegen parses config.yaml, schema.graphql, and the event handler source to
+# produce generated/src/Index.res.mjs (the start entry point). It doesn't
+# connect, so a placeholder RPC URL is fine at build time.
+ARG ENVIO_RPC_URL_KATANA=http://placeholder
+RUN ENVIO_RPC_URL_KATANA=${ENVIO_RPC_URL_KATANA} pnpm envio codegen
+
 CMD ["pnpm", "envio", "start"]
