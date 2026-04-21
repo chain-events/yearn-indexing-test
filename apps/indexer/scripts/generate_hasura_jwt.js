@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 
-const dotenv = require("dotenv");
+import dotenv from "dotenv";
+import crypto from "node:crypto";
+
 dotenv.config();
-const crypto = require("crypto");
 const HASURA_CLAIMS_NAMESPACE = "https://hasura.io/jwt/claims";
 const READONLY_ROLE = "readonly";
 const SUPPORTED_HMAC_TYPES = {

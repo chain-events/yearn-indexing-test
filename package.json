@@ -1,34 +1,15 @@
 {
-  "name": "envio-indexer",
-  "version": "0.1.0",
-  "type": "module",
-  "scripts": {
-    "clean": "tsc --clean",
-    "build": "tsc --build",
-    "watch": "tsc --watch",
-    "mocha": "vitest run",
-    "codegen": "envio codegen",
-    "dev": "envio dev",
-    "start": "envio start",
-    "sync:vaults": "node scripts/update_kong_vaults.js",
-    "test": "vitest run",
-    "calc-fees": "tsc -p tsconfig.calc.json && node build/calc/calculate-depositor-fees.js",
-    "jwt:generate": "node scripts/generate_hasura_jwt.js"
-  },
-  "devDependencies": {
-    "@types/node": "20.17.0",
-    "dotenv": "^17.4.1",
-    "vitest": "^3.1.1",
-    "typescript": "5.9.3"
-  },
-  "dependencies": {
-    "envio": "3.0.0-alpha.21",
-    "viem": "^2.47.11"
-  },
-  "optionalDependencies": {
-    "generated": "link:generated"
-  },
+  "name": "yearn-indexing-monorepo",
+  "private": true,
+  "version": "0.0.0",
   "engines": {
-    "node": ">=22.0.0"
-  }
+    "node": ">=22.0.0",
+    "pnpm": ">=9.7.1"
+  },
+  "scripts": {
+    "indexer:dev": "pnpm --filter envio-indexer dev",
+    "indexer:start": "pnpm --filter envio-indexer start",
+    "monitoring:start": "pnpm --filter envio-monitoring start"
+  },
+  "packageManager": "pnpm@9.7.1"
 }

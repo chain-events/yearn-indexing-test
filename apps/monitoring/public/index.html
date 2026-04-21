@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Envio Indexer Monitoring</title>
+<style>
+  :root {
+    --bg: #0b0f14;
+    --panel: #121821;
+    --panel-2: #1a222d;
+    --fg: #e6edf3;
+    --muted: #8b98a5;
+    --accent: #4ade80;
+    --accent-warn: #fbbf24;
+    --accent-err: #f87171;
+    --border: #22303d;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--fg);
+    min-height: 100vh;
+  }
+  header {
+    padding: 24px 28px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  header h1 { margin: 0; font-size: 20px; font-weight: 600; }
+  .meta { color: var(--muted); font-size: 13px; }
+  .meta span { margin-right: 18px; }
+  main { padding: 24px 28px; max-width: 1200px; margin: 0 auto; }
+  .summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+  }
+  .card .label { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; }
+  .card .value { font-size: 28px; font-weight: 600; margin-top: 6px; }
+  .card .sub { color: var(--muted); font-size: 12px; margin-top: 6px; }
+
+  section.chains h2 {
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    margin: 0 0 12px;
+  }
+  .chain-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 14px;
+  }
+  .chain {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 18px;
+  }
+  .chain-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 10px;
+  }
+  .chain-name { font-weight: 600; font-size: 15px; }
+  .chain-id { color: var(--muted); font-size: 12px; }
+  .progress {
+    height: 8px;
+    background: var(--panel-2);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 10px;
+  }
+  .progress-bar {
+    height: 100%;
+    background: var(--accent);
+    transition: width 0.4s ease;
+  }
+  .progress-bar.syncing { background: var(--accent-warn); }
+  .progress-bar.error { background: var(--accent-err); }
+  .chain-details {
+    font-size: 12px;
+    color: var(--muted);
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 4px 12px;
+  }
+  .chain-details .v { color: var(--fg); font-variant-numeric: tabular-nums; }
+  .badge {
+    display: inline-block;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--panel-2);
+    color: var(--muted);
+    margin-left: 6px;
+  }
+  .badge.ok { background: rgba(74, 222, 128, 0.15); color: var(--accent); }
+  .badge.warn { background: rgba(251, 191, 36, 0.15); color: var(--accent-warn); }
+  .pct { font-weight: 600; font-variant-numeric: tabular-nums; }
+  .status-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--muted);
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+  .status-dot.ok { background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+  .status-dot.warn { background: var(--accent-warn); }
+  .status-dot.err { background: var(--accent-err); }
+  .error-banner {
+    background: rgba(248, 113, 113, 0.12);
+    border: 1px solid rgba(248, 113, 113, 0.4);
+    color: var(--accent-err);
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 13px;
+  }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>Envio Indexer Monitoring</h1>
+    <div class="meta" id="meta">
+      <span id="meta-version">envio: —</span>
+      <span id="meta-path"></span>
+      <span id="meta-updated">updated: —</span>
+    </div>
+  </div>
+  <div>
+    <span id="global-status"><span class="status-dot"></span><span id="global-status-text">connecting…</span></span>
+  </div>
+</header>
+<main>
+  <div id="error" class="error-banner" style="display:none"></div>
+
+  <div class="summary">
+    <div class="card">
+      <div class="label">Envio version</div>
+      <div class="value" id="summary-version">—</div>
+      <div class="sub">from indexer project</div>
+    </div>
+    <div class="card">
+      <div class="label">Chains indexed</div>
+      <div class="value" id="summary-chains">—</div>
+      <div class="sub" id="summary-chains-sub">—</div>
+    </div>
+    <div class="card">
+      <div class="label">Average sync</div>
+      <div class="value"><span id="summary-pct">—</span>%</div>
+      <div class="sub" id="summary-sync-sub">—</div>
+    </div>
+    <div class="card">
+      <div class="label">Total events processed</div>
+      <div class="value" id="summary-events">—</div>
+      <div class="sub">across all chains</div>
+    </div>
+  </div>
+
+  <section class="chains">
+    <h2>Chains</h2>
+    <div class="chain-grid" id="chains"></div>
+  </section>
+</main>
+
+<script>
+  const fmt = new Intl.NumberFormat("en-US");
+  const pctFmt = (n) => (n >= 99.995 ? "100.00" : n.toFixed(2));
+
+  function setGlobalStatus(state, text) {
+    const dot = document.querySelector("#global-status .status-dot");
+    dot.className = "status-dot " + state;
+    document.getElementById("global-status-text").textContent = text;
+  }
+
+  function render(data) {
+    document.getElementById("summary-version").textContent = data.envioVersion ?? "unknown";
+    document.getElementById("meta-version").textContent = `envio: ${data.envioVersion ?? "unknown"}`;
+    document.getElementById("meta-path").textContent = data.indexerProjectPath ? `project: ${data.indexerProjectPath}` : "";
+    document.getElementById("meta-updated").textContent = `updated: ${new Date(data.fetchedAt).toLocaleTimeString()}`;
+
+    const { totals, chains } = data;
+    document.getElementById("summary-chains").textContent = totals.chainCount;
+    document.getElementById("summary-chains-sub").textContent = totals.allCaughtUp
+      ? "all caught up"
+      : `${chains.filter((c) => c.caughtUp).length} caught up`;
+    document.getElementById("summary-pct").textContent = pctFmt(totals.averagePercentSynced);
+    document.getElementById("summary-sync-sub").textContent = totals.allCaughtUp
+      ? "live at chain head"
+      : "syncing";
+    document.getElementById("summary-events").textContent = fmt.format(Math.round(totals.totalEvents));
+
+    setGlobalStatus(totals.allCaughtUp ? "ok" : "warn", totals.allCaughtUp ? "all chains live" : "syncing");
+
+    const grid = document.getElementById("chains");
+    grid.innerHTML = chains
+      .map((c) => {
+        const pct = pctFmt(c.percentSynced);
+        const barClass = c.caughtUp ? "" : "syncing";
+        const badge = c.caughtUp
+          ? `<span class="badge ok">caught up</span>`
+          : `<span class="badge warn">${fmt.format(c.blocksBehind)} blocks behind</span>`;
+        const hyper = c.isHyperSync ? `<span class="badge">HyperSync</span>` : `<span class="badge">RPC</span>`;
+        return `
+          <div class="chain">
+            <div class="chain-header">
+              <div>
+                <span class="chain-name">${c.chainName}</span>
+                ${hyper}
+              </div>
+              <div class="chain-id">#${c.chainId}</div>
+            </div>
+            <div class="progress"><div class="progress-bar ${barClass}" style="width:${Math.max(1, c.percentSynced)}%"></div></div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+              <span class="pct">${pct}%</span>
+              ${badge}
+            </div>
+            <div class="chain-details">
+              <span>processed</span><span class="v">${fmt.format(c.latestProcessedBlock)}</span>
+              <span>chain head</span><span class="v">${fmt.format(c.blockHeight)}</span>
+              <span>first event</span><span class="v">${c.firstEventBlock != null ? fmt.format(c.firstEventBlock) : "—"}</span>
+              <span>events</span><span class="v">${fmt.format(Math.round(c.numEventsProcessed))}</span>
+            </div>
+          </div>
+        `;
+      })
+      .join("");
+  }
+
+  async function refresh() {
+    try {
+      const res = await fetch("/api/status");
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      document.getElementById("error").style.display = "none";
+      render(data);
+    } catch (err) {
+      const banner = document.getElementById("error");
+      banner.textContent = `Failed to load status: ${err.message}`;
+      banner.style.display = "block";
+      setGlobalStatus("err", "error");
+    }
+  }
+
+  refresh();
+  setInterval(refresh, 5000);
+</script>
+</body>
+</html>
