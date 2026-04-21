@@ -176,6 +176,16 @@
     </div>
   </div>
 
+  <section class="chains" id="indexer-probe-section" style="margin-bottom:28px;">
+    <h2>Indexer service</h2>
+    <div class="card" id="indexer-probe">
+      <div class="label">Envio indexer probe</div>
+      <div class="value" id="indexer-probe-state">—</div>
+      <div class="sub" id="indexer-probe-url"></div>
+      <div class="chain-details" id="indexer-probe-metrics" style="margin-top:10px;"></div>
+    </div>
+  </section>
+
   <section class="chains">
     <h2>Chains</h2>
     <div class="chain-grid" id="chains"></div>
@@ -210,6 +220,36 @@
     document.getElementById("summary-events").textContent = fmt.format(Math.round(totals.totalEvents));
 
     setGlobalStatus(totals.allCaughtUp ? "ok" : "warn", totals.allCaughtUp ? "all chains live" : "syncing");
+
+    const probeSection = document.getElementById("indexer-probe-section");
+    if (data.indexer) {
+      probeSection.style.display = "";
+      const reachable = data.indexer.reachable;
+      document.getElementById("indexer-probe-state").innerHTML = reachable
+        ? `<span class="status-dot ok"></span>reachable <span class="badge">${data.indexer.latencyMs} ms</span>`
+        : `<span class="status-dot err"></span>unreachable${data.indexer.error ? ` <span class="badge warn">${data.indexer.error}</span>` : ""}`;
+      document.getElementById("indexer-probe-url").textContent = data.indexer.url;
+      const metricsEl = document.getElementById("indexer-probe-metrics");
+      const m = data.indexer.metrics ?? {};
+      const rows = [];
+      const pick = (keys) => {
+        for (const k of keys) if (k in m) return { key: k, value: m[k] };
+        return null;
+      };
+      const candidates = [
+        ["events processed", pick(["indexer_events_processed_total", "indexer_num_events_processed"])],
+        ["batches processed", pick(["indexer_batches_processed_total"])],
+        ["uptime seconds", pick(["process_uptime_seconds", "nodejs_process_start_time_seconds"])],
+        ["resident memory bytes", pick(["process_resident_memory_bytes"])],
+      ];
+      for (const [label, found] of candidates) {
+        if (found) rows.push(`<span>${label}</span><span class="v">${fmt.format(Math.round(found.value))}</span>`);
+      }
+      if (data.indexer.health) rows.push(`<span>/health</span><span class="v">${data.indexer.health}</span>`);
+      metricsEl.innerHTML = rows.join("") || `<span class="sub">no metrics parsed from /metrics</span>`;
+    } else {
+      probeSection.style.display = "none";
+    }
 
     const grid = document.getElementById("chains");
     grid.innerHTML = chains
