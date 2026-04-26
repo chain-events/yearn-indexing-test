@@ -137,6 +137,20 @@ type RoleSet {
   role: BigInt! @index
 }
 
+type RoleStatusChanged {
+  id: ID!
+  vaultAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionFrom: String @index
+  logIndex: Int!
+  role: BigInt! @index
+  status: BigInt! @index
+}
+
 type UpdateFutureRoleManager {
   id: ID!
   vaultAddress: String! @index
@@ -481,6 +495,120 @@ type V2EmergencyShutdown {
   transactionFrom: String @index
   logIndex: Int!
   active: Boolean!
+}
+
+# ─── Yearn V3 Debt Allocator Factory Events ─────────────────────────────────
+
+type NewDebtAllocator {
+  id: ID!
+  factoryAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionFrom: String @index
+  logIndex: Int!
+  allocator: String! @index
+  vault: String! @index
+}
+
+# ─── Yearn V3 Debt Allocator Events ─────────────────────────────────────────
+
+type UpdateStrategyDebtRatios {
+  id: ID!
+  allocatorAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionFrom: String @index
+  logIndex: Int!
+  strategy: String! @index
+  newTargetRatio: BigInt!
+  newMaxRatio: BigInt!
+  newTotalDebtRatio: BigInt!
+}
+
+type UpdateKeeper {
+  id: ID!
+  allocatorAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionFrom: String @index
+  logIndex: Int!
+  keeper: String! @index
+  allowed: Boolean!
+}
+
+type GovernanceTransferred {
+  id: ID!
+  allocatorAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionFrom: String @index
+  logIndex: Int!
+  previousGovernance: String! @index
+  newGovernance: String! @index
+}
+
+type UpdateMaxAcceptableBaseFee {
+  id: ID!
+  allocatorAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionFrom: String @index
+  logIndex: Int!
+  newMaxAcceptableBaseFee: BigInt!
+}
+
+type UpdateMaxDebtUpdateLoss {
+  id: ID!
+  allocatorAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionFrom: String @index
+  logIndex: Int!
+  newMaxDebtUpdateLoss: BigInt!
+}
+
+type UpdateMinimumChange {
+  id: ID!
+  allocatorAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionFrom: String @index
+  logIndex: Int!
+  newMinimumChange: BigInt!
+}
+
+type UpdateMinimumWait {
+  id: ID!
+  allocatorAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionFrom: String @index
+  logIndex: Int!
+  newMinimumWait: BigInt!
 }
 
 type TimelockEvent {

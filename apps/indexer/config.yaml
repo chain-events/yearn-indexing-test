@@ -18,6 +18,7 @@ contracts:
       - event: "StrategyChanged(address indexed strategy, uint256 indexed change_type)"
       - event: "UpdatedMaxDebtForStrategy(address indexed sender, address indexed strategy, uint256 new_debt)"
       - event: "RoleSet(address indexed account, uint256 indexed role)"
+      - event: "RoleStatusChanged(uint256 indexed role, uint256 indexed status)"
       - event: "UpdateFutureRoleManager(address indexed future_role_manager)"
       - event: "UpdateRoleManager(address indexed role_manager)"
       - event: "UpdateAccountant(address indexed accountant)"
@@ -80,6 +81,20 @@ contracts:
       - event: "Deposit(address indexed sender, address indexed owner, uint256 assets, uint256 shares)"
       - event: "Withdraw(address indexed sender, address indexed receiver, address indexed owner, uint256 assets, uint256 shares)"
       - event: "Transfer(address indexed sender, address indexed receiver, uint256 value)"
+  - name: DebtAllocatorFactory
+    handler: src/EventHandlers.ts
+    events:
+      - event: "NewDebtAllocator(address indexed allocator, address indexed vault)"
+  - name: DebtAllocator
+    handler: src/EventHandlers.ts
+    events:
+      - event: "UpdateStrategyDebtRatios(address indexed strategy, uint256 newTargetRatio, uint256 newMaxRatio, uint256 newTotalDebtRatio)"
+      - event: "UpdateKeeper(address indexed keeper, bool allowed)"
+      - event: "GovernanceTransferred(address indexed previousGovernance, address indexed newGovernance)"
+      - event: "UpdateMaxAcceptableBaseFee(uint256 newMaxAcceptableBaseFee)"
+      - event: "UpdateMaxDebtUpdateLoss(uint256 newMaxDebtUpdateLoss)"
+      - event: "UpdateMinimumChange(uint256 newMinimumChange)"
+      - event: "UpdateMinimumWait(uint256 newMinimumWait)"
 chains:
   - id: 1
     start_block: 0
@@ -709,6 +724,15 @@ chains:
       - name: YearnReferralWrapper
         address:
           - "0x3744Df2673097d738aCaa3E463E6D638867757f2"
+      - name: DebtAllocatorFactory
+        # TODO: replace with the canonical Yearn V3 DebtAllocatorFactory
+        # address(es) on Ethereum before running the indexer.
+        address:
+          - "0x0000000000000000000000000000000000000000"
+      - name: DebtAllocator
+        # No static addresses: each DebtAllocator is registered dynamically
+        # by DebtAllocatorFactory.NewDebtAllocator via contractRegister.
+        address: []
       - name: YearnGauge
         address:
           - "0x7fd8af959b54a677a1d8f92265bd0714274c56a3" # yG-yvCurve-YFIETH
