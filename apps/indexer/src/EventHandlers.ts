@@ -9,6 +9,7 @@ import {
   StrategyChanged,
   UpdatedMaxDebtForStrategy,
   RoleSet,
+  RoleStatusChanged,
   UpdateFutureRoleManager,
   UpdateRoleManager,
   UpdateAccountant,
@@ -44,6 +45,16 @@ import {
   V2UpdateManagementFee,
   V2EmergencyShutdown,
   YearnGauge,
+  DebtAllocatorFactory,
+  DebtAllocator,
+  NewDebtAllocator,
+  UpdateStrategyDebtRatios,
+  UpdateKeeper,
+  GovernanceTransferred,
+  UpdateMaxAcceptableBaseFee,
+  UpdateMaxDebtUpdateLoss,
+  UpdateMinimumChange,
+  UpdateMinimumWait,
 } from "generated";
 import { getAddress } from "viem";
 
@@ -214,6 +225,23 @@ YearnV3Vault.RoleSet.handler(async ({ event, context }) => {
     role: event.params.role,
   };
   context.RoleSet.set(entity);
+});
+
+YearnV3Vault.RoleStatusChanged.handler(async ({ event, context }) => {
+  const entity: RoleStatusChanged = {
+    id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
+    vaultAddress: getAddress(event.srcAddress),
+    chainId: event.chainId,
+    blockNumber: event.block.number,
+    blockTimestamp: event.block.timestamp,
+    blockHash: event.block.hash,
+    transactionHash: event.transaction.hash,
+    transactionFrom: addr(event.transaction.from),
+    logIndex: event.logIndex,
+    role: event.params.role,
+    status: event.params.status,
+  };
+  context.RoleStatusChanged.set(entity);
 });
 
 YearnV3Vault.UpdateFutureRoleManager.handler(async ({ event, context }) => {
@@ -865,6 +893,150 @@ YearnGauge.Transfer.handler(async ({ event, context }) => {
     value: event.params.value,
   };
   context.Transfer.set(entity);
+});
+
+// ─── DebtAllocatorFactory Handlers ──────────────────────────────────────────
+// Each NewDebtAllocator event registers a new DebtAllocator contract for
+// dynamic indexing.
+
+DebtAllocatorFactory.NewDebtAllocator.contractRegister(({ event, context }) => {
+  context.addDebtAllocator(getAddress(event.params.allocator));
+});
+
+DebtAllocatorFactory.NewDebtAllocator.handler(async ({ event, context }) => {
+  const entity: NewDebtAllocator = {
+    id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
+    factoryAddress: getAddress(event.srcAddress),
+    chainId: event.chainId,
+    blockNumber: event.block.number,
+    blockTimestamp: event.block.timestamp,
+    blockHash: event.block.hash,
+    transactionHash: event.transaction.hash,
+    transactionFrom: addr(event.transaction.from),
+    logIndex: event.logIndex,
+    allocator: getAddress(event.params.allocator),
+    vault: getAddress(event.params.vault),
+  };
+  context.NewDebtAllocator.set(entity);
+});
+
+// ─── DebtAllocator Handlers ─────────────────────────────────────────────────
+
+DebtAllocator.UpdateStrategyDebtRatios.handler(async ({ event, context }) => {
+  const entity: UpdateStrategyDebtRatios = {
+    id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
+    allocatorAddress: getAddress(event.srcAddress),
+    chainId: event.chainId,
+    blockNumber: event.block.number,
+    blockTimestamp: event.block.timestamp,
+    blockHash: event.block.hash,
+    transactionHash: event.transaction.hash,
+    transactionFrom: addr(event.transaction.from),
+    logIndex: event.logIndex,
+    strategy: getAddress(event.params.strategy),
+    newTargetRatio: event.params.newTargetRatio,
+    newMaxRatio: event.params.newMaxRatio,
+    newTotalDebtRatio: event.params.newTotalDebtRatio,
+  };
+  context.UpdateStrategyDebtRatios.set(entity);
+});
+
+DebtAllocator.UpdateKeeper.handler(async ({ event, context }) => {
+  const entity: UpdateKeeper = {
+    id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
+    allocatorAddress: getAddress(event.srcAddress),
+    chainId: event.chainId,
+    blockNumber: event.block.number,
+    blockTimestamp: event.block.timestamp,
+    blockHash: event.block.hash,
+    transactionHash: event.transaction.hash,
+    transactionFrom: addr(event.transaction.from),
+    logIndex: event.logIndex,
+    keeper: getAddress(event.params.keeper),
+    allowed: event.params.allowed,
+  };
+  context.UpdateKeeper.set(entity);
+});
+
+DebtAllocator.GovernanceTransferred.handler(async ({ event, context }) => {
+  const entity: GovernanceTransferred = {
+    id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
+    allocatorAddress: getAddress(event.srcAddress),
+    chainId: event.chainId,
+    blockNumber: event.block.number,
+    blockTimestamp: event.block.timestamp,
+    blockHash: event.block.hash,
+    transactionHash: event.transaction.hash,
+    transactionFrom: addr(event.transaction.from),
+    logIndex: event.logIndex,
+    previousGovernance: getAddress(event.params.previousGovernance),
+    newGovernance: getAddress(event.params.newGovernance),
+  };
+  context.GovernanceTransferred.set(entity);
+});
+
+DebtAllocator.UpdateMaxAcceptableBaseFee.handler(async ({ event, context }) => {
+  const entity: UpdateMaxAcceptableBaseFee = {
+    id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
+    allocatorAddress: getAddress(event.srcAddress),
+    chainId: event.chainId,
+    blockNumber: event.block.number,
+    blockTimestamp: event.block.timestamp,
+    blockHash: event.block.hash,
+    transactionHash: event.transaction.hash,
+    transactionFrom: addr(event.transaction.from),
+    logIndex: event.logIndex,
+    newMaxAcceptableBaseFee: event.params.newMaxAcceptableBaseFee,
+  };
+  context.UpdateMaxAcceptableBaseFee.set(entity);
+});
+
+DebtAllocator.UpdateMaxDebtUpdateLoss.handler(async ({ event, context }) => {
+  const entity: UpdateMaxDebtUpdateLoss = {
+    id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
+    allocatorAddress: getAddress(event.srcAddress),
+    chainId: event.chainId,
+    blockNumber: event.block.number,
+    blockTimestamp: event.block.timestamp,
+    blockHash: event.block.hash,
+    transactionHash: event.transaction.hash,
+    transactionFrom: addr(event.transaction.from),
+    logIndex: event.logIndex,
+    newMaxDebtUpdateLoss: event.params.newMaxDebtUpdateLoss,
+  };
+  context.UpdateMaxDebtUpdateLoss.set(entity);
+});
+
+DebtAllocator.UpdateMinimumChange.handler(async ({ event, context }) => {
+  const entity: UpdateMinimumChange = {
+    id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
+    allocatorAddress: getAddress(event.srcAddress),
+    chainId: event.chainId,
+    blockNumber: event.block.number,
+    blockTimestamp: event.block.timestamp,
+    blockHash: event.block.hash,
+    transactionHash: event.transaction.hash,
+    transactionFrom: addr(event.transaction.from),
+    logIndex: event.logIndex,
+    newMinimumChange: event.params.newMinimumChange,
+  };
+  context.UpdateMinimumChange.set(entity);
+});
+
+DebtAllocator.UpdateMinimumWait.handler(async ({ event, context }) => {
+  const entity: UpdateMinimumWait = {
+    id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
+    allocatorAddress: getAddress(event.srcAddress),
+    chainId: event.chainId,
+    blockNumber: event.block.number,
+    blockTimestamp: event.block.timestamp,
+    blockHash: event.block.hash,
+    transactionHash: event.transaction.hash,
+    transactionFrom: addr(event.transaction.from),
+    logIndex: event.logIndex,
+    newMinimumWait: event.params.newMinimumWait,
+  };
+  context.UpdateMinimumWait.set(entity);
 });
 
 MapleTimelock.ProposalScheduled.handler(async ({ event, context }) => {
