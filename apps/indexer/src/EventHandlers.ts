@@ -56,8 +56,6 @@ import {
   UpdateMinimumChange,
   UpdateMinimumWait,
   Erc4626Vault,
-  Erc4626Deposit,
-  Erc4626Withdraw,
   VotingEscrowFactory,
   VotingEscrowCreated,
   YearnStakingRegistry,
@@ -970,7 +968,7 @@ YearnGauge.Transfer.handler(async ({ event, context }) => {
 // ─── Additional Yearn Discovery And Strategy Handlers ───────────────────────
 
 Erc4626Vault.Deposit.handler(async ({ event, context }) => {
-  const entity: Erc4626Deposit = {
+  const entity: Deposit = {
     id: eventId(event),
     vaultAddress: getAddress(event.srcAddress),
     chainId: event.chainId,
@@ -985,11 +983,11 @@ Erc4626Vault.Deposit.handler(async ({ event, context }) => {
     assets: event.params.assets,
     shares: event.params.shares,
   };
-  context.Erc4626Deposit.set(entity);
+  context.Deposit.set(entity);
 });
 
 Erc4626Vault.Withdraw.handler(async ({ event, context }) => {
-  const entity: Erc4626Withdraw = {
+  const entity: Withdraw = {
     id: eventId(event),
     vaultAddress: getAddress(event.srcAddress),
     chainId: event.chainId,
@@ -1005,7 +1003,7 @@ Erc4626Vault.Withdraw.handler(async ({ event, context }) => {
     assets: event.params.assets,
     shares: event.params.shares,
   };
-  context.Erc4626Withdraw.set(entity);
+  context.Withdraw.set(entity);
 });
 
 VotingEscrowFactory.VestingEscrowCreated.handler(async ({ event, context }) => {

@@ -323,39 +323,6 @@ type ReferralDeposit {
   shares: BigInt!
 }
 
-type Erc4626Deposit {
-  id: ID!
-  vaultAddress: String! @index
-  chainId: Int! @index
-  blockNumber: Int! @index
-  blockTimestamp: Int! @index
-  blockHash: String!
-  transactionHash: String! @index
-  transactionFrom: String! @index
-  logIndex: Int!
-  sender: String!
-  owner: String! @index
-  assets: BigInt!
-  shares: BigInt!
-}
-
-type Erc4626Withdraw {
-  id: ID!
-  vaultAddress: String! @index
-  chainId: Int! @index
-  blockNumber: Int! @index
-  blockTimestamp: Int! @index
-  blockHash: String!
-  transactionHash: String! @index
-  transactionFrom: String! @index
-  logIndex: Int!
-  sender: String!
-  receiver: String!
-  owner: String! @index
-  assets: BigInt!
-  shares: BigInt!
-}
-
 type VotingEscrowCreated {
   id: ID!
   factoryAddress: String! @index
