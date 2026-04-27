@@ -8,6 +8,13 @@ const databaseUrlSource = env.ENVIO_DATABASE_URL
     : undefined;
 const databaseUrl = databaseUrlSource ? env[databaseUrlSource] : undefined;
 
+if (env.RENDER && !env.ENVIO_DATABASE_URL) {
+  console.error(
+    "Missing ENVIO_DATABASE_URL on Render. Sync the Blueprint or add ENVIO_DATABASE_URL from the Render Postgres internal connection string.",
+  );
+  process.exit(1);
+}
+
 if (databaseUrl) {
   const url = new URL(databaseUrl);
   env.ENVIO_PG_HOST = url.hostname;
