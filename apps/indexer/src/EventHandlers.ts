@@ -55,11 +55,54 @@ import {
   UpdateMaxDebtUpdateLoss,
   UpdateMinimumChange,
   UpdateMinimumWait,
+  Erc4626Vault,
+  Erc4626Deposit,
+  Erc4626Withdraw,
+  VotingEscrowFactory,
+  VotingEscrowCreated,
+  YearnStakingRegistry,
+  YearnStakingRegistryIndexed,
+  StakingPoolAdded,
+  YearnVeyfiRegistry,
+  VeyfiGaugeRegistered,
+  YearnV2Registry,
+  YearnV2Registry2,
+  V2RegistryNewVault,
+  V2RegistryNewExperimentalVault,
+  V2Registry2NewVault,
+  YearnV2Strategy,
+  V2StrategyMigrated,
+  V2StrategyHarvested,
+  YearnV2TradeHandler,
+  V2TradeEnabled,
+  V2TradeDisabled,
+  YearnV3Registry,
+  V3RegistryNewEndorsedVault,
+  YearnV3VaultFactory,
+  V3VaultFactoryNewVault,
+  YearnV3RoleManagerFactory,
+  V3RoleManagerFactoryNewProject,
+  YearnV3RoleManager,
+  V3RoleManagerAddedNewVault,
+  YearnV3Accountant,
+  V3AccountantVaultChanged,
+  YearnV3Strategy,
+  V3StrategyReported,
+  YearnV3SplitterFactory,
+  V3SplitterNewSplitter,
+  YearnV3YieldSplitterFactory,
+  V3YieldSplitterNewYieldSplitter,
 } from "generated";
 import { getAddress } from "viem";
 
 const addr = (a: string | undefined): string | undefined =>
   a ? getAddress(a) : undefined;
+
+const eventId = (event: {
+  chainId: number;
+  block: { number: number };
+  logIndex: number;
+}): string => `${event.chainId}_${event.block.number}_${event.logIndex}`;
 
 YearnV3Vault.Deposit.handler(async ({ event, context }) => {
   const entity: Deposit = {
@@ -173,6 +216,10 @@ YearnV3Vault.DebtPurchased.handler(async ({ event, context }) => {
     amount: event.params.amount,
   };
   context.DebtPurchased.set(entity);
+});
+
+YearnV3Vault.StrategyChanged.contractRegister(({ event, context }) => {
+  context.addYearnV3Strategy(getAddress(event.params.strategy));
 });
 
 YearnV3Vault.StrategyChanged.handler(async ({ event, context }) => {
@@ -687,6 +734,10 @@ YearnV2Vault.StrategyReported.handler(async ({ event, context }) => {
   context.V2StrategyReported.set(entity);
 });
 
+YearnV2Vault.StrategyAdded.contractRegister(({ event, context }) => {
+  context.addYearnV2Strategy(getAddress(event.params.strategy));
+});
+
 YearnV2Vault.StrategyAdded.handler(async ({ event, context }) => {
   const entity: V2StrategyAdded = {
     id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
@@ -705,6 +756,27 @@ YearnV2Vault.StrategyAdded.handler(async ({ event, context }) => {
     performanceFee: event.params.performanceFee,
   };
   context.V2StrategyAdded.set(entity);
+});
+
+YearnV2Vault.StrategyMigrated.contractRegister(({ event, context }) => {
+  context.addYearnV2Strategy(getAddress(event.params.newVersion));
+});
+
+YearnV2Vault.StrategyMigrated.handler(async ({ event, context }) => {
+  const entity: V2StrategyMigrated = {
+    id: eventId(event),
+    vaultAddress: getAddress(event.srcAddress),
+    chainId: event.chainId,
+    blockNumber: event.block.number,
+    blockTimestamp: event.block.timestamp,
+    blockHash: event.block.hash,
+    transactionHash: event.transaction.hash,
+    transactionFrom: addr(event.transaction.from),
+    logIndex: event.logIndex,
+    oldVersion: getAddress(event.params.oldVersion),
+    newVersion: getAddress(event.params.newVersion),
+  };
+  context.V2StrategyMigrated.set(entity);
 });
 
 YearnV2Vault.StrategyRevoked.handler(async ({ event, context }) => {
@@ -894,6 +966,433 @@ YearnGauge.Transfer.handler(async ({ event, context }) => {
   };
   context.Transfer.set(entity);
 });
+
+// ─── Additional Yearn Discovery And Strategy Handlers ───────────────────────
+
+Erc4626Vault.Deposit.handler(async ({ event, context }) => {
+  const entity: Erc4626Deposit = {
+    id: eventId(event),
+    vaultAddress: getAddress(event.srcAddress),
+    chainId: event.chainId,
+    blockNumber: event.block.number,
+    blockTimestamp: event.block.timestamp,
+    blockHash: event.block.hash,
+    transactionHash: event.transaction.hash,
+    transactionFrom: getAddress(event.transaction.from ?? event.params.sender),
+    logIndex: event.logIndex,
+    sender: getAddress(event.params.sender),
+    owner: getAddress(event.params.owner),
+    assets: event.params.assets,
+    shares: event.params.shares,
+  };
+  context.Erc4626Deposit.set(entity);
+});
+
+Erc4626Vault.Withdraw.handler(async ({ event, context }) => {
+  const entity: Erc4626Withdraw = {
+    id: eventId(event),
+    vaultAddress: getAddress(event.srcAddress),
+    chainId: event.chainId,
+    blockNumber: event.block.number,
+    blockTimestamp: event.block.timestamp,
+    blockHash: event.block.hash,
+    transactionHash: event.transaction.hash,
+    transactionFrom: getAddress(event.transaction.from ?? event.params.sender),
+    logIndex: event.logIndex,
+    sender: getAddress(event.params.sender),
+    receiver: getAddress(event.params.receiver),
+    owner: getAddress(event.params.owner),
+    assets: event.params.assets,
+    shares: event.params.shares,
+  };
+  context.Erc4626Withdraw.set(entity);
+});
+
+VotingEscrowFactory.VestingEscrowCreated.handler(async ({ event, context }) => {
+  const entity: VotingEscrowCreated = {
+    id: eventId(event),
+    factoryAddress: getAddress(event.srcAddress),
+    chainId: event.chainId,
+    blockNumber: event.block.number,
+    blockTimestamp: event.block.timestamp,
+    blockHash: event.block.hash,
+    transactionHash: event.transaction.hash,
+    transactionFrom: addr(event.transaction.from),
+    logIndex: event.logIndex,
+    funder: getAddress(event.params.funder),
+    token: getAddress(event.params.token),
+    recipient: getAddress(event.params.recipient),
+    escrow: getAddress(event.params.escrow),
+    amount: event.params.amount,
+    vesting_start: event.params.vesting_start,
+    vesting_duration: event.params.vesting_duration,
+    cliff_length: event.params.cliff_length,
+    open_claim: event.params.open_claim,
+  };
+  context.VotingEscrowCreated.set(entity);
+});
+
+YearnStakingRegistry.StakingPoolAdded.contractRegister(({ event, context }) => {
+  context.addYearnGauge(getAddress(event.params.stakingPool));
+});
+
+YearnStakingRegistry.StakingPoolAdded.handler(async ({ event, context }) => {
+  const entity: StakingPoolAdded = {
+    id: eventId(event),
+    registryAddress: getAddress(event.srcAddress),
+    chainId: event.chainId,
+    blockNumber: event.block.number,
+    blockTimestamp: event.block.timestamp,
+    blockHash: event.block.hash,
+    transactionHash: event.transaction.hash,
+    transactionFrom: addr(event.transaction.from),
+    logIndex: event.logIndex,
+    token: getAddress(event.params.token),
+    stakingPool: getAddress(event.params.stakingPool),
+  };
+  context.StakingPoolAdded.set(entity);
+});
+
+YearnStakingRegistryIndexed.StakingPoolAdded.contractRegister(
+  ({ event, context }) => {
+    context.addYearnGauge(getAddress(event.params.stakingPool));
+  },
+);
+
+YearnStakingRegistryIndexed.StakingPoolAdded.handler(
+  async ({ event, context }) => {
+    const entity: StakingPoolAdded = {
+      id: eventId(event),
+      registryAddress: getAddress(event.srcAddress),
+      chainId: event.chainId,
+      blockNumber: event.block.number,
+      blockTimestamp: event.block.timestamp,
+      blockHash: event.block.hash,
+      transactionHash: event.transaction.hash,
+      transactionFrom: addr(event.transaction.from),
+      logIndex: event.logIndex,
+      token: getAddress(event.params.token),
+      stakingPool: getAddress(event.params.stakingPool),
+    };
+    context.StakingPoolAdded.set(entity);
+  },
+);
+
+YearnVeyfiRegistry.Register.contractRegister(({ event, context }) => {
+  context.addYearnGauge(getAddress(event.params.gauge));
+});
+
+YearnVeyfiRegistry.Register.handler(async ({ event, context }) => {
+  const entity: VeyfiGaugeRegistered = {
+    id: eventId(event),
+    registryAddress: getAddress(event.srcAddress),
+    chainId: event.chainId,
+    blockNumber: event.block.number,
+    blockTimestamp: event.block.timestamp,
+    blockHash: event.block.hash,
+    transactionHash: event.transaction.hash,
+    transactionFrom: addr(event.transaction.from),
+    logIndex: event.logIndex,
+    gauge: getAddress(event.params.gauge),
+    idx: event.params.idx,
+  };
+  context.VeyfiGaugeRegistered.set(entity);
+});
+
+YearnV2Registry.NewVault.contractRegister(({ event, context }) => {
+  context.addYearnV2Vault(getAddress(event.params.vault));
+});
+
+YearnV2Registry.NewVault.handler(async ({ event, context }) => {
+  const entity: V2RegistryNewVault = {
+    id: eventId(event),
+    registryAddress: getAddress(event.srcAddress),
+    chainId: event.chainId,
+    blockNumber: event.block.number,
+    blockTimestamp: event.block.timestamp,
+    blockHash: event.block.hash,
+    transactionHash: event.transaction.hash,
+    transactionFrom: addr(event.transaction.from),
+    logIndex: event.logIndex,
+    token: getAddress(event.params.token),
+    deployment_id: event.params.deployment_id,
+    vault: getAddress(event.params.vault),
+    api_version: event.params.api_version,
+  };
+  context.V2RegistryNewVault.set(entity);
+});
+
+YearnV2Registry.NewExperimentalVault.contractRegister(({ event, context }) => {
+  context.addYearnV2Vault(getAddress(event.params.vault));
+});
+
+YearnV2Registry.NewExperimentalVault.handler(async ({ event, context }) => {
+  const entity: V2RegistryNewExperimentalVault = {
+    id: eventId(event),
+    registryAddress: getAddress(event.srcAddress),
+    chainId: event.chainId,
+    blockNumber: event.block.number,
+    blockTimestamp: event.block.timestamp,
+    blockHash: event.block.hash,
+    transactionHash: event.transaction.hash,
+    transactionFrom: addr(event.transaction.from),
+    logIndex: event.logIndex,
+    token: getAddress(event.params.token),
+    deployer: getAddress(event.params.deployer),
+    vault: getAddress(event.params.vault),
+    api_version: event.params.api_version,
+  };
+  context.V2RegistryNewExperimentalVault.set(entity);
+});
+
+YearnV2Registry2.NewVault.contractRegister(({ event, context }) => {
+  context.addYearnV2Vault(getAddress(event.params.vault));
+});
+
+YearnV2Registry2.NewVault.handler(async ({ event, context }) => {
+  const entity: V2Registry2NewVault = {
+    id: eventId(event),
+    registryAddress: getAddress(event.srcAddress),
+    chainId: event.chainId,
+    blockNumber: event.block.number,
+    blockTimestamp: event.block.timestamp,
+    blockHash: event.block.hash,
+    transactionHash: event.transaction.hash,
+    transactionFrom: addr(event.transaction.from),
+    logIndex: event.logIndex,
+    token: getAddress(event.params.token),
+    vaultId: event.params.vaultId,
+    vaultType: event.params.vaultType,
+    vault: getAddress(event.params.vault),
+    apiVersion: event.params.apiVersion,
+  };
+  context.V2Registry2NewVault.set(entity);
+});
+
+YearnV2Strategy.Harvested.handler(async ({ event, context }) => {
+  const entity: V2StrategyHarvested = {
+    id: eventId(event),
+    strategyAddress: getAddress(event.srcAddress),
+    chainId: event.chainId,
+    blockNumber: event.block.number,
+    blockTimestamp: event.block.timestamp,
+    blockHash: event.block.hash,
+    transactionHash: event.transaction.hash,
+    transactionFrom: addr(event.transaction.from),
+    logIndex: event.logIndex,
+    profit: event.params.profit,
+    loss: event.params.loss,
+    debtPayment: event.params.debtPayment,
+    debtOutstanding: event.params.debtOutstanding,
+  };
+  context.V2StrategyHarvested.set(entity);
+});
+
+YearnV2TradeHandler.TradeEnabled.handler(async ({ event, context }) => {
+  const entity: V2TradeEnabled = {
+    id: eventId(event),
+    tradeHandlerAddress: getAddress(event.srcAddress),
+    chainId: event.chainId,
+    blockNumber: event.block.number,
+    blockTimestamp: event.block.timestamp,
+    blockHash: event.block.hash,
+    transactionHash: event.transaction.hash,
+    transactionFrom: addr(event.transaction.from),
+    logIndex: event.logIndex,
+    seller: getAddress(event.params.seller),
+    tokenIn: getAddress(event.params.tokenIn),
+    tokenOut: getAddress(event.params.tokenOut),
+  };
+  context.V2TradeEnabled.set(entity);
+});
+
+YearnV2TradeHandler.TradeDisabled.handler(async ({ event, context }) => {
+  const entity: V2TradeDisabled = {
+    id: eventId(event),
+    tradeHandlerAddress: getAddress(event.srcAddress),
+    chainId: event.chainId,
+    blockNumber: event.block.number,
+    blockTimestamp: event.block.timestamp,
+    blockHash: event.block.hash,
+    transactionHash: event.transaction.hash,
+    transactionFrom: addr(event.transaction.from),
+    logIndex: event.logIndex,
+    seller: getAddress(event.params.seller),
+    tokenIn: getAddress(event.params.tokenIn),
+    tokenOut: getAddress(event.params.tokenOut),
+  };
+  context.V2TradeDisabled.set(entity);
+});
+
+YearnV3Registry.NewEndorsedVault.contractRegister(({ event, context }) => {
+  context.addYearnV3Vault(getAddress(event.params.vault));
+});
+
+YearnV3Registry.NewEndorsedVault.handler(async ({ event, context }) => {
+  const entity: V3RegistryNewEndorsedVault = {
+    id: eventId(event),
+    registryAddress: getAddress(event.srcAddress),
+    chainId: event.chainId,
+    blockNumber: event.block.number,
+    blockTimestamp: event.block.timestamp,
+    blockHash: event.block.hash,
+    transactionHash: event.transaction.hash,
+    transactionFrom: addr(event.transaction.from),
+    logIndex: event.logIndex,
+    vault: getAddress(event.params.vault),
+    asset: getAddress(event.params.asset),
+    releaseVersion: event.params.releaseVersion,
+    vaultType: event.params.vaultType,
+  };
+  context.V3RegistryNewEndorsedVault.set(entity);
+});
+
+YearnV3VaultFactory.NewVault.contractRegister(({ event, context }) => {
+  context.addYearnV3Vault(getAddress(event.params.vault_address));
+});
+
+YearnV3VaultFactory.NewVault.handler(async ({ event, context }) => {
+  const entity: V3VaultFactoryNewVault = {
+    id: eventId(event),
+    factoryAddress: getAddress(event.srcAddress),
+    chainId: event.chainId,
+    blockNumber: event.block.number,
+    blockTimestamp: event.block.timestamp,
+    blockHash: event.block.hash,
+    transactionHash: event.transaction.hash,
+    transactionFrom: addr(event.transaction.from),
+    logIndex: event.logIndex,
+    vault_address: getAddress(event.params.vault_address),
+    asset: getAddress(event.params.asset),
+  };
+  context.V3VaultFactoryNewVault.set(entity);
+});
+
+YearnV3RoleManagerFactory.NewProject.contractRegister(({ event, context }) => {
+  context.addYearnV3RoleManager(getAddress(event.params.roleManager));
+});
+
+YearnV3RoleManagerFactory.NewProject.handler(async ({ event, context }) => {
+  const entity: V3RoleManagerFactoryNewProject = {
+    id: eventId(event),
+    factoryAddress: getAddress(event.srcAddress),
+    chainId: event.chainId,
+    blockNumber: event.block.number,
+    blockTimestamp: event.block.timestamp,
+    blockHash: event.block.hash,
+    transactionHash: event.transaction.hash,
+    transactionFrom: addr(event.transaction.from),
+    logIndex: event.logIndex,
+    projectId: event.params.projectId,
+    roleManager: getAddress(event.params.roleManager),
+  };
+  context.V3RoleManagerFactoryNewProject.set(entity);
+});
+
+YearnV3RoleManager.AddedNewVault.contractRegister(({ event, context }) => {
+  context.addYearnV3Vault(getAddress(event.params.vault));
+  context.addDebtAllocator(getAddress(event.params.debtAllocator));
+});
+
+YearnV3RoleManager.AddedNewVault.handler(async ({ event, context }) => {
+  const entity: V3RoleManagerAddedNewVault = {
+    id: eventId(event),
+    roleManagerAddress: getAddress(event.srcAddress),
+    chainId: event.chainId,
+    blockNumber: event.block.number,
+    blockTimestamp: event.block.timestamp,
+    blockHash: event.block.hash,
+    transactionHash: event.transaction.hash,
+    transactionFrom: addr(event.transaction.from),
+    logIndex: event.logIndex,
+    vault: getAddress(event.params.vault),
+    debtAllocator: getAddress(event.params.debtAllocator),
+    category: event.params.category,
+  };
+  context.V3RoleManagerAddedNewVault.set(entity);
+});
+
+YearnV3Accountant.VaultChanged.handler(async ({ event, context }) => {
+  const entity: V3AccountantVaultChanged = {
+    id: eventId(event),
+    accountantAddress: getAddress(event.srcAddress),
+    chainId: event.chainId,
+    blockNumber: event.block.number,
+    blockTimestamp: event.block.timestamp,
+    blockHash: event.block.hash,
+    transactionHash: event.transaction.hash,
+    transactionFrom: addr(event.transaction.from),
+    logIndex: event.logIndex,
+    vault: getAddress(event.params.vault),
+    change: event.params.change,
+  };
+  context.V3AccountantVaultChanged.set(entity);
+});
+
+YearnV3Strategy.Reported.handler(async ({ event, context }) => {
+  const entity: V3StrategyReported = {
+    id: eventId(event),
+    strategyAddress: getAddress(event.srcAddress),
+    chainId: event.chainId,
+    blockNumber: event.block.number,
+    blockTimestamp: event.block.timestamp,
+    blockHash: event.block.hash,
+    transactionHash: event.transaction.hash,
+    transactionFrom: addr(event.transaction.from),
+    logIndex: event.logIndex,
+    profit: event.params.profit,
+    loss: event.params.loss,
+    protocolFees: event.params.protocolFees,
+    performanceFees: event.params.performanceFees,
+  };
+  context.V3StrategyReported.set(entity);
+});
+
+YearnV3SplitterFactory.NewSplitter.handler(async ({ event, context }) => {
+  const entity: V3SplitterNewSplitter = {
+    id: eventId(event),
+    factoryAddress: getAddress(event.srcAddress),
+    chainId: event.chainId,
+    blockNumber: event.block.number,
+    blockTimestamp: event.block.timestamp,
+    blockHash: event.block.hash,
+    transactionHash: event.transaction.hash,
+    transactionFrom: addr(event.transaction.from),
+    logIndex: event.logIndex,
+    splitter: getAddress(event.params.splitter),
+    manager: getAddress(event.params.manager),
+    manager_recipient: getAddress(event.params.manager_recipient),
+    splitee: getAddress(event.params.splitee),
+  };
+  context.V3SplitterNewSplitter.set(entity);
+});
+
+YearnV3YieldSplitterFactory.NewYieldSplitter.contractRegister(
+  ({ event, context }) => {
+    context.addYearnV3Strategy(getAddress(event.params.strategy));
+    context.addYearnV3Vault(getAddress(event.params.vault));
+  },
+);
+
+YearnV3YieldSplitterFactory.NewYieldSplitter.handler(
+  async ({ event, context }) => {
+    const entity: V3YieldSplitterNewYieldSplitter = {
+      id: eventId(event),
+      factoryAddress: getAddress(event.srcAddress),
+      chainId: event.chainId,
+      blockNumber: event.block.number,
+      blockTimestamp: event.block.timestamp,
+      blockHash: event.block.hash,
+      transactionHash: event.transaction.hash,
+      transactionFrom: addr(event.transaction.from),
+      logIndex: event.logIndex,
+      strategy: getAddress(event.params.strategy),
+      vault: getAddress(event.params.vault),
+      want: getAddress(event.params.want),
+    };
+    context.V3YieldSplitterNewYieldSplitter.set(entity);
+  },
+);
 
 // ─── DebtAllocatorFactory Handlers ──────────────────────────────────────────
 // Each NewDebtAllocator event registers a new DebtAllocator contract for

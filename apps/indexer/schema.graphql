@@ -323,6 +323,137 @@ type ReferralDeposit {
   shares: BigInt!
 }
 
+type Erc4626Deposit {
+  id: ID!
+  vaultAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionFrom: String! @index
+  logIndex: Int!
+  sender: String!
+  owner: String! @index
+  assets: BigInt!
+  shares: BigInt!
+}
+
+type Erc4626Withdraw {
+  id: ID!
+  vaultAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionFrom: String! @index
+  logIndex: Int!
+  sender: String!
+  receiver: String!
+  owner: String! @index
+  assets: BigInt!
+  shares: BigInt!
+}
+
+type VotingEscrowCreated {
+  id: ID!
+  factoryAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionFrom: String @index
+  logIndex: Int!
+  funder: String! @index
+  token: String! @index
+  recipient: String! @index
+  escrow: String! @index
+  amount: BigInt!
+  vesting_start: BigInt!
+  vesting_duration: BigInt!
+  cliff_length: BigInt!
+  open_claim: Boolean!
+}
+
+type StakingPoolAdded {
+  id: ID!
+  registryAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionFrom: String @index
+  logIndex: Int!
+  token: String! @index
+  stakingPool: String! @index
+}
+
+type VeyfiGaugeRegistered {
+  id: ID!
+  registryAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionFrom: String @index
+  logIndex: Int!
+  gauge: String! @index
+  idx: BigInt!
+}
+
+type V2RegistryNewVault {
+  id: ID!
+  registryAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionFrom: String @index
+  logIndex: Int!
+  token: String! @index
+  deployment_id: BigInt! @index
+  vault: String! @index
+  api_version: String!
+}
+
+type V2RegistryNewExperimentalVault {
+  id: ID!
+  registryAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionFrom: String @index
+  logIndex: Int!
+  token: String! @index
+  deployer: String! @index
+  vault: String! @index
+  api_version: String!
+}
+
+type V2Registry2NewVault {
+  id: ID!
+  registryAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionFrom: String @index
+  logIndex: Int!
+  token: String! @index
+  vaultId: BigInt! @index
+  vaultType: BigInt! @index
+  vault: String! @index
+  apiVersion: String!
+}
+
 # ─── Yearn V2 Vault Events ────────────────────────────────────────────────────
 
 type V2Deposit {
@@ -391,6 +522,20 @@ type V2StrategyAdded {
   minDebtPerHarvest: BigInt!
   maxDebtPerHarvest: BigInt!
   performanceFee: BigInt!
+}
+
+type V2StrategyMigrated {
+  id: ID!
+  vaultAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionFrom: String @index
+  logIndex: Int!
+  oldVersion: String! @index
+  newVersion: String! @index
 }
 
 type V2StrategyRevoked {
@@ -495,6 +640,172 @@ type V2EmergencyShutdown {
   transactionFrom: String @index
   logIndex: Int!
   active: Boolean!
+}
+
+type V2StrategyHarvested {
+  id: ID!
+  strategyAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionFrom: String @index
+  logIndex: Int!
+  profit: BigInt!
+  loss: BigInt!
+  debtPayment: BigInt!
+  debtOutstanding: BigInt!
+}
+
+type V2TradeEnabled {
+  id: ID!
+  tradeHandlerAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionFrom: String @index
+  logIndex: Int!
+  seller: String! @index
+  tokenIn: String! @index
+  tokenOut: String! @index
+}
+
+type V2TradeDisabled {
+  id: ID!
+  tradeHandlerAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionFrom: String @index
+  logIndex: Int!
+  seller: String! @index
+  tokenIn: String! @index
+  tokenOut: String! @index
+}
+
+type V3RegistryNewEndorsedVault {
+  id: ID!
+  registryAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionFrom: String @index
+  logIndex: Int!
+  vault: String! @index
+  asset: String! @index
+  releaseVersion: BigInt! @index
+  vaultType: BigInt! @index
+}
+
+type V3VaultFactoryNewVault {
+  id: ID!
+  factoryAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionFrom: String @index
+  logIndex: Int!
+  vault_address: String! @index
+  asset: String! @index
+}
+
+type V3RoleManagerFactoryNewProject {
+  id: ID!
+  factoryAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionFrom: String @index
+  logIndex: Int!
+  projectId: String! @index
+  roleManager: String! @index
+}
+
+type V3RoleManagerAddedNewVault {
+  id: ID!
+  roleManagerAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionFrom: String @index
+  logIndex: Int!
+  vault: String! @index
+  debtAllocator: String! @index
+  category: BigInt! @index
+}
+
+type V3AccountantVaultChanged {
+  id: ID!
+  accountantAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionFrom: String @index
+  logIndex: Int!
+  vault: String! @index
+  change: BigInt! @index
+}
+
+type V3StrategyReported {
+  id: ID!
+  strategyAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionFrom: String @index
+  logIndex: Int!
+  profit: BigInt!
+  loss: BigInt!
+  protocolFees: BigInt!
+  performanceFees: BigInt!
+}
+
+type V3SplitterNewSplitter {
+  id: ID!
+  factoryAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionFrom: String @index
+  logIndex: Int!
+  splitter: String! @index
+  manager: String! @index
+  manager_recipient: String! @index
+  splitee: String! @index
+}
+
+type V3YieldSplitterNewYieldSplitter {
+  id: ID!
+  factoryAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionFrom: String @index
+  logIndex: Int!
+  strategy: String! @index
+  vault: String! @index
+  want: String! @index
 }
 
 # ─── Yearn V3 Debt Allocator Factory Events ─────────────────────────────────
