@@ -39,4 +39,4 @@ WORKDIR /repo/apps/indexer
 ARG ENVIO_RPC_URL_KATANA=http://placeholder
 RUN ENVIO_RPC_URL_KATANA=${ENVIO_RPC_URL_KATANA} pnpm envio codegen
 
-CMD ["pnpm", "envio", "start"]
+CMD ["pnpm", "start"]

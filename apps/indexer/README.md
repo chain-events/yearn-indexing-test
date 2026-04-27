@@ -53,6 +53,8 @@ Copy `.env.example` to `.env` and fill in values as needed:
 
 `render.yaml` now sets the Envio runtime vars that recent Envio versions require in production mode. The indexer also derives `HASURA_GRAPHQL_ENDPOINT` from `HASURA_SERVICE_HOST` and `HASURA_SERVICE_PORT`, so you should not need a manual post-deploy override in Render anymore. The only secrets you still need to provide in the Render dashboard are:
 
+The indexer start script runs `envio local db-migrate up` before `envio start`. This keeps Envio's entity and history tables in sync with `schema.graphql` before rollback/reorg handling can touch them.
+
 - `ENVIO_API_TOKEN`
 - `HASURA_GRAPHQL_ADMIN_SECRET`
 - `HASURA_GRAPHQL_JWT_SECRET`
