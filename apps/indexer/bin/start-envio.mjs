@@ -20,7 +20,7 @@ if (databaseUrl) {
   env.ENVIO_PG_HOST = url.hostname;
   env.ENVIO_PG_PORT = url.port || "5432";
   env.ENVIO_PG_USER = decodeURIComponent(url.username);
-  env.ENVIO_PG_PASSWORD = decodeURIComponent(url.password);
+  env.ENVIO_POSTGRES_PASSWORD = decodeURIComponent(url.password);
   env.ENVIO_PG_DATABASE = decodeURIComponent(url.pathname.replace(/^\//, ""));
 }
 
@@ -28,7 +28,7 @@ for (const key of [
   "ENVIO_PG_HOST",
   "ENVIO_PG_PORT",
   "ENVIO_PG_USER",
-  "ENVIO_PG_PASSWORD",
+  "ENVIO_POSTGRES_PASSWORD",
   "ENVIO_PG_DATABASE",
 ]) {
   if (!env[key]) {

@@ -74,7 +74,7 @@ services:
         fromDatabase:
           name: envio-db
           property: user
-      - key: ENVIO_PG_PASSWORD
+      - key: ENVIO_POSTGRES_PASSWORD
         fromDatabase:
           name: envio-db
           property: password
