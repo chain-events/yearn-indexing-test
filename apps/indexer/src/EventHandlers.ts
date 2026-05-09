@@ -3,6 +3,7 @@ import {
   Deposit,
   Withdraw,
   Transfer,
+  Approval,
   StrategyReported,
   DebtUpdated,
   DebtPurchased,
@@ -34,15 +35,28 @@ import {
   YearnV2Vault,
   V2Deposit,
   V2Withdraw,
+  V2Sweep,
+  V2LockedProfitDegradationUpdated,
   V2StrategyReported,
+  V2FeeReport,
+  V2WithdrawFromStrategy,
   V2StrategyAdded,
+  V2StrategyUpdateDebtRatio,
+  V2StrategyUpdateMinDebtPerHarvest,
+  V2StrategyUpdateMaxDebtPerHarvest,
+  V2StrategyUpdatePerformanceFee,
   V2StrategyRevoked,
+  V2StrategyRemovedFromQueue,
+  V2StrategyAddedToQueue,
+  V2NewPendingGovernance,
   V2UpdateManagement,
   V2UpdateGovernance,
   V2UpdateGuardian,
+  V2UpdateRewards,
   V2UpdateDepositLimit,
   V2UpdatePerformanceFee,
   V2UpdateManagementFee,
+  V2UpdateWithdrawalQueue,
   V2EmergencyShutdown,
   YearnGauge,
   DebtAllocatorFactory,
@@ -74,6 +88,7 @@ import {
   YearnV2TradeHandler,
   V2TradeEnabled,
   V2TradeDisabled,
+  V2TradeAddressEvent,
   YearnV3Registry,
   V3RegistryNewEndorsedVault,
   YearnV3VaultFactory,
@@ -102,6 +117,18 @@ const eventId = (event: {
   logIndex: number;
 }): string => `${event.chainId}_${event.block.number}_${event.logIndex}`;
 
+const eventCore = (event: any) => ({
+  id: eventId(event),
+  chainId: event.chainId,
+  blockNumber: event.block.number,
+  blockTimestamp: event.block.timestamp,
+  blockHash: event.block.hash,
+  transactionHash: event.transaction.hash,
+  transactionIndex: event.transaction.transactionIndex,
+  transactionFrom: addr(event.transaction.from),
+  logIndex: event.logIndex,
+});
+
 YearnV3Vault.Deposit.handler(async ({ event, context }) => {
   const entity: Deposit = {
     id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
@@ -111,6 +138,7 @@ YearnV3Vault.Deposit.handler(async ({ event, context }) => {
     blockTimestamp: event.block.timestamp,
     blockHash: event.block.hash,
     transactionHash: event.transaction.hash,
+    transactionIndex: event.transaction.transactionIndex,
     transactionFrom: getAddress(event.transaction.from ?? event.params.sender),
     logIndex: event.logIndex,
     sender: getAddress(event.params.sender),
@@ -130,6 +158,7 @@ YearnV3Vault.Withdraw.handler(async ({ event, context }) => {
     blockTimestamp: event.block.timestamp,
     blockHash: event.block.hash,
     transactionHash: event.transaction.hash,
+    transactionIndex: event.transaction.transactionIndex,
     transactionFrom: getAddress(event.transaction.from ?? event.params.sender),
     logIndex: event.logIndex,
     sender: getAddress(event.params.sender),
@@ -150,6 +179,7 @@ YearnV3Vault.Transfer.handler(async ({ event, context }) => {
     blockTimestamp: event.block.timestamp,
     blockHash: event.block.hash,
     transactionHash: event.transaction.hash,
+    transactionIndex: event.transaction.transactionIndex,
     transactionFrom: getAddress(event.transaction.from ?? event.params.sender),
     logIndex: event.logIndex,
     sender: getAddress(event.params.sender),
@@ -157,6 +187,17 @@ YearnV3Vault.Transfer.handler(async ({ event, context }) => {
     value: event.params.value,
   };
   context.Transfer.set(entity);
+});
+
+YearnV3Vault.Approval.handler(async ({ event, context }) => {
+  const entity: Approval = {
+    ...eventCore(event),
+    vaultAddress: getAddress(event.srcAddress),
+    owner: getAddress(event.params.owner),
+    spender: getAddress(event.params.spender),
+    value: event.params.value,
+  };
+  context.Approval.set(entity);
 });
 
 YearnV3Vault.StrategyReported.handler(async ({ event, context }) => {
@@ -168,6 +209,7 @@ YearnV3Vault.StrategyReported.handler(async ({ event, context }) => {
     blockTimestamp: event.block.timestamp,
     blockHash: event.block.hash,
     transactionHash: event.transaction.hash,
+    transactionIndex: event.transaction.transactionIndex,
     transactionFrom: addr(event.transaction.from),
     logIndex: event.logIndex,
     strategy: getAddress(event.params.strategy),
@@ -190,6 +232,7 @@ YearnV3Vault.DebtUpdated.handler(async ({ event, context }) => {
     blockTimestamp: event.block.timestamp,
     blockHash: event.block.hash,
     transactionHash: event.transaction.hash,
+    transactionIndex: event.transaction.transactionIndex,
     transactionFrom: addr(event.transaction.from),
     logIndex: event.logIndex,
     strategy: getAddress(event.params.strategy),
@@ -208,6 +251,7 @@ YearnV3Vault.DebtPurchased.handler(async ({ event, context }) => {
     blockTimestamp: event.block.timestamp,
     blockHash: event.block.hash,
     transactionHash: event.transaction.hash,
+    transactionIndex: event.transaction.transactionIndex,
     transactionFrom: addr(event.transaction.from),
     logIndex: event.logIndex,
     strategy: getAddress(event.params.strategy),
@@ -229,6 +273,7 @@ YearnV3Vault.StrategyChanged.handler(async ({ event, context }) => {
     blockTimestamp: event.block.timestamp,
     blockHash: event.block.hash,
     transactionHash: event.transaction.hash,
+    transactionIndex: event.transaction.transactionIndex,
     transactionFrom: addr(event.transaction.from),
     logIndex: event.logIndex,
     strategy: getAddress(event.params.strategy),
@@ -246,6 +291,7 @@ YearnV3Vault.UpdatedMaxDebtForStrategy.handler(async ({ event, context }) => {
     blockTimestamp: event.block.timestamp,
     blockHash: event.block.hash,
     transactionHash: event.transaction.hash,
+    transactionIndex: event.transaction.transactionIndex,
     transactionFrom: addr(event.transaction.from),
     logIndex: event.logIndex,
     sender: getAddress(event.params.sender),
@@ -264,6 +310,7 @@ YearnV3Vault.RoleSet.handler(async ({ event, context }) => {
     blockTimestamp: event.block.timestamp,
     blockHash: event.block.hash,
     transactionHash: event.transaction.hash,
+    transactionIndex: event.transaction.transactionIndex,
     transactionFrom: addr(event.transaction.from),
     logIndex: event.logIndex,
     account: getAddress(event.params.account),
@@ -281,6 +328,7 @@ YearnV3Vault.RoleStatusChanged.handler(async ({ event, context }) => {
     blockTimestamp: event.block.timestamp,
     blockHash: event.block.hash,
     transactionHash: event.transaction.hash,
+    transactionIndex: event.transaction.transactionIndex,
     transactionFrom: addr(event.transaction.from),
     logIndex: event.logIndex,
     role: event.params.role,
@@ -298,6 +346,7 @@ YearnV3Vault.UpdateFutureRoleManager.handler(async ({ event, context }) => {
     blockTimestamp: event.block.timestamp,
     blockHash: event.block.hash,
     transactionHash: event.transaction.hash,
+    transactionIndex: event.transaction.transactionIndex,
     transactionFrom: addr(event.transaction.from),
     logIndex: event.logIndex,
     future_role_manager: getAddress(event.params.future_role_manager),
@@ -314,6 +363,7 @@ YearnV3Vault.UpdateRoleManager.handler(async ({ event, context }) => {
     blockTimestamp: event.block.timestamp,
     blockHash: event.block.hash,
     transactionHash: event.transaction.hash,
+    transactionIndex: event.transaction.transactionIndex,
     transactionFrom: addr(event.transaction.from),
     logIndex: event.logIndex,
     role_manager: getAddress(event.params.role_manager),
@@ -330,6 +380,7 @@ YearnV3Vault.UpdateAccountant.handler(async ({ event, context }) => {
     blockTimestamp: event.block.timestamp,
     blockHash: event.block.hash,
     transactionHash: event.transaction.hash,
+    transactionIndex: event.transaction.transactionIndex,
     transactionFrom: addr(event.transaction.from),
     logIndex: event.logIndex,
     accountant: getAddress(event.params.accountant),
@@ -346,6 +397,7 @@ YearnV3Vault.UpdateDefaultQueue.handler(async ({ event, context }) => {
     blockTimestamp: event.block.timestamp,
     blockHash: event.block.hash,
     transactionHash: event.transaction.hash,
+    transactionIndex: event.transaction.transactionIndex,
     transactionFrom: addr(event.transaction.from),
     logIndex: event.logIndex,
     new_default_queue: event.params.new_default_queue.map((a: string) =>
@@ -364,6 +416,7 @@ YearnV3Vault.UpdateUseDefaultQueue.handler(async ({ event, context }) => {
     blockTimestamp: event.block.timestamp,
     blockHash: event.block.hash,
     transactionHash: event.transaction.hash,
+    transactionIndex: event.transaction.transactionIndex,
     transactionFrom: addr(event.transaction.from),
     logIndex: event.logIndex,
     use_default_queue: event.params.use_default_queue,
@@ -380,6 +433,7 @@ YearnV3Vault.UpdateAutoAllocate.handler(async ({ event, context }) => {
     blockTimestamp: event.block.timestamp,
     blockHash: event.block.hash,
     transactionHash: event.transaction.hash,
+    transactionIndex: event.transaction.transactionIndex,
     transactionFrom: addr(event.transaction.from),
     logIndex: event.logIndex,
     auto_allocate: event.params.auto_allocate,
@@ -396,6 +450,7 @@ YearnV3Vault.UpdateDepositLimit.handler(async ({ event, context }) => {
     blockTimestamp: event.block.timestamp,
     blockHash: event.block.hash,
     transactionHash: event.transaction.hash,
+    transactionIndex: event.transaction.transactionIndex,
     transactionFrom: addr(event.transaction.from),
     logIndex: event.logIndex,
     deposit_limit: event.params.deposit_limit,
@@ -412,6 +467,7 @@ YearnV3Vault.UpdateDepositLimitModule.handler(async ({ event, context }) => {
     blockTimestamp: event.block.timestamp,
     blockHash: event.block.hash,
     transactionHash: event.transaction.hash,
+    transactionIndex: event.transaction.transactionIndex,
     transactionFrom: addr(event.transaction.from),
     logIndex: event.logIndex,
     deposit_limit_module: getAddress(event.params.deposit_limit_module),
@@ -428,6 +484,7 @@ YearnV3Vault.UpdateWithdrawLimitModule.handler(async ({ event, context }) => {
     blockTimestamp: event.block.timestamp,
     blockHash: event.block.hash,
     transactionHash: event.transaction.hash,
+    transactionIndex: event.transaction.transactionIndex,
     transactionFrom: addr(event.transaction.from),
     logIndex: event.logIndex,
     withdraw_limit_module: getAddress(event.params.withdraw_limit_module),
@@ -444,6 +501,7 @@ YearnV3Vault.UpdateMinimumTotalIdle.handler(async ({ event, context }) => {
     blockTimestamp: event.block.timestamp,
     blockHash: event.block.hash,
     transactionHash: event.transaction.hash,
+    transactionIndex: event.transaction.transactionIndex,
     transactionFrom: addr(event.transaction.from),
     logIndex: event.logIndex,
     minimum_total_idle: event.params.minimum_total_idle,
@@ -460,6 +518,7 @@ YearnV3Vault.UpdateProfitMaxUnlockTime.handler(async ({ event, context }) => {
     blockTimestamp: event.block.timestamp,
     blockHash: event.block.hash,
     transactionHash: event.transaction.hash,
+    transactionIndex: event.transaction.transactionIndex,
     transactionFrom: addr(event.transaction.from),
     logIndex: event.logIndex,
     profit_max_unlock_time: event.params.profit_max_unlock_time,
@@ -476,6 +535,7 @@ YearnV3Vault.Shutdown.handler(async ({ event, context }) => {
     blockTimestamp: event.block.timestamp,
     blockHash: event.block.hash,
     transactionHash: event.transaction.hash,
+    transactionIndex: event.transaction.transactionIndex,
     transactionFrom: addr(event.transaction.from),
     logIndex: event.logIndex,
   };
@@ -493,6 +553,7 @@ YearnReferralWrapper.ReferralDeposit.handler(async ({ event, context }) => {
     blockTimestamp: event.block.timestamp,
     blockHash: event.block.hash,
     transactionHash: event.transaction.hash,
+    transactionIndex: event.transaction.transactionIndex,
     transactionFrom: addr(event.transaction.from),
     logIndex: event.logIndex,
     receiver: getAddress(event.params.receiver),
@@ -518,6 +579,7 @@ TimelockController.CallScheduled.handler(async ({ event, context }) => {
     blockTimestamp: event.block.timestamp,
     blockHash: event.block.hash,
     transactionHash: event.transaction.hash,
+    transactionIndex: event.transaction.transactionIndex,
     transactionFrom: addr(event.transaction.from),
     logIndex: event.logIndex,
     operationId: event.params.id,
@@ -547,6 +609,7 @@ AaveTimelock.ProposalQueued.handler(async ({ event, context }) => {
     blockTimestamp: event.block.timestamp,
     blockHash: event.block.hash,
     transactionHash: event.transaction.hash,
+    transactionIndex: event.transaction.transactionIndex,
     transactionFrom: addr(event.transaction.from),
     logIndex: event.logIndex,
     operationId: event.params.proposalId.toString(),
@@ -576,6 +639,7 @@ CompoundTimelock.QueueTransaction.handler(async ({ event, context }) => {
     blockTimestamp: event.block.timestamp,
     blockHash: event.block.hash,
     transactionHash: event.transaction.hash,
+    transactionIndex: event.transaction.transactionIndex,
     transactionFrom: addr(event.transaction.from),
     logIndex: event.logIndex,
     operationId: event.params.txHash,
@@ -605,6 +669,7 @@ PufferTimelock.TransactionQueued.handler(async ({ event, context }) => {
     blockTimestamp: event.block.timestamp,
     blockHash: event.block.hash,
     transactionHash: event.transaction.hash,
+    transactionIndex: event.transaction.transactionIndex,
     transactionFrom: addr(event.transaction.from),
     logIndex: event.logIndex,
     operationId: event.params.txHash,
@@ -634,6 +699,7 @@ LidoTimelock.StartVote.handler(async ({ event, context }) => {
     blockTimestamp: event.block.timestamp,
     blockHash: event.block.hash,
     transactionHash: event.transaction.hash,
+    transactionIndex: event.transaction.transactionIndex,
     transactionFrom: addr(event.transaction.from),
     logIndex: event.logIndex,
     operationId: event.params.voteId.toString(),
@@ -663,6 +729,7 @@ YearnV2Vault.Transfer.handler(async ({ event, context }) => {
     blockTimestamp: event.block.timestamp,
     blockHash: event.block.hash,
     transactionHash: event.transaction.hash,
+    transactionIndex: event.transaction.transactionIndex,
     transactionFrom: getAddress(event.transaction.from ?? event.params.sender),
     logIndex: event.logIndex,
     sender: getAddress(event.params.sender),
@@ -670,6 +737,17 @@ YearnV2Vault.Transfer.handler(async ({ event, context }) => {
     value: event.params.value,
   };
   context.Transfer.set(entity);
+});
+
+YearnV2Vault.Approval.handler(async ({ event, context }) => {
+  const entity: Approval = {
+    ...eventCore(event),
+    vaultAddress: getAddress(event.srcAddress),
+    owner: getAddress(event.params.owner),
+    spender: getAddress(event.params.spender),
+    value: event.params.value,
+  };
+  context.Approval.set(entity);
 });
 
 YearnV2Vault.Deposit.handler(async ({ event, context }) => {
@@ -681,6 +759,7 @@ YearnV2Vault.Deposit.handler(async ({ event, context }) => {
     blockTimestamp: event.block.timestamp,
     blockHash: event.block.hash,
     transactionHash: event.transaction.hash,
+    transactionIndex: event.transaction.transactionIndex,
     transactionFrom: addr(event.transaction.from),
     logIndex: event.logIndex,
     recipient: getAddress(event.params.recipient),
@@ -699,6 +778,7 @@ YearnV2Vault.Withdraw.handler(async ({ event, context }) => {
     blockTimestamp: event.block.timestamp,
     blockHash: event.block.hash,
     transactionHash: event.transaction.hash,
+    transactionIndex: event.transaction.transactionIndex,
     transactionFrom: addr(event.transaction.from),
     logIndex: event.logIndex,
     recipient: getAddress(event.params.recipient),
@@ -707,6 +787,27 @@ YearnV2Vault.Withdraw.handler(async ({ event, context }) => {
   };
   context.V2Withdraw.set(entity);
 });
+
+YearnV2Vault.Sweep.handler(async ({ event, context }) => {
+  const entity: V2Sweep = {
+    ...eventCore(event),
+    vaultAddress: getAddress(event.srcAddress),
+    token: getAddress(event.params.token),
+    amount: event.params.amount,
+  };
+  context.V2Sweep.set(entity);
+});
+
+YearnV2Vault.LockedProfitDegradationUpdated.handler(
+  async ({ event, context }) => {
+    const entity: V2LockedProfitDegradationUpdated = {
+      ...eventCore(event),
+      vaultAddress: getAddress(event.srcAddress),
+      value: event.params.value,
+    };
+    context.V2LockedProfitDegradationUpdated.set(entity);
+  },
+);
 
 YearnV2Vault.StrategyReported.handler(async ({ event, context }) => {
   const entity: V2StrategyReported = {
@@ -717,6 +818,7 @@ YearnV2Vault.StrategyReported.handler(async ({ event, context }) => {
     blockTimestamp: event.block.timestamp,
     blockHash: event.block.hash,
     transactionHash: event.transaction.hash,
+    transactionIndex: event.transaction.transactionIndex,
     transactionFrom: addr(event.transaction.from),
     logIndex: event.logIndex,
     strategy: getAddress(event.params.strategy),
@@ -732,6 +834,29 @@ YearnV2Vault.StrategyReported.handler(async ({ event, context }) => {
   context.V2StrategyReported.set(entity);
 });
 
+YearnV2Vault.FeeReport.handler(async ({ event, context }) => {
+  const entity: V2FeeReport = {
+    ...eventCore(event),
+    vaultAddress: getAddress(event.srcAddress),
+    management_fee: event.params.management_fee,
+    performance_fee: event.params.performance_fee,
+    strategist_fee: event.params.strategist_fee,
+    duration: event.params.duration,
+  };
+  context.V2FeeReport.set(entity);
+});
+
+YearnV2Vault.WithdrawFromStrategy.handler(async ({ event, context }) => {
+  const entity: V2WithdrawFromStrategy = {
+    ...eventCore(event),
+    vaultAddress: getAddress(event.srcAddress),
+    strategy: getAddress(event.params.strategy),
+    totalDebt: event.params.totalDebt,
+    loss: event.params.loss,
+  };
+  context.V2WithdrawFromStrategy.set(entity);
+});
+
 YearnV2Vault.StrategyAdded.contractRegister(({ event, context }) => {
   context.addYearnV2Strategy(getAddress(event.params.strategy));
 });
@@ -745,6 +870,7 @@ YearnV2Vault.StrategyAdded.handler(async ({ event, context }) => {
     blockTimestamp: event.block.timestamp,
     blockHash: event.block.hash,
     transactionHash: event.transaction.hash,
+    transactionIndex: event.transaction.transactionIndex,
     transactionFrom: addr(event.transaction.from),
     logIndex: event.logIndex,
     strategy: getAddress(event.params.strategy),
@@ -755,6 +881,52 @@ YearnV2Vault.StrategyAdded.handler(async ({ event, context }) => {
   };
   context.V2StrategyAdded.set(entity);
 });
+
+YearnV2Vault.StrategyUpdateDebtRatio.handler(async ({ event, context }) => {
+  const entity: V2StrategyUpdateDebtRatio = {
+    ...eventCore(event),
+    vaultAddress: getAddress(event.srcAddress),
+    strategy: getAddress(event.params.strategy),
+    debtRatio: event.params.debtRatio,
+  };
+  context.V2StrategyUpdateDebtRatio.set(entity);
+});
+
+YearnV2Vault.StrategyUpdateMinDebtPerHarvest.handler(
+  async ({ event, context }) => {
+    const entity: V2StrategyUpdateMinDebtPerHarvest = {
+      ...eventCore(event),
+      vaultAddress: getAddress(event.srcAddress),
+      strategy: getAddress(event.params.strategy),
+      minDebtPerHarvest: event.params.minDebtPerHarvest,
+    };
+    context.V2StrategyUpdateMinDebtPerHarvest.set(entity);
+  },
+);
+
+YearnV2Vault.StrategyUpdateMaxDebtPerHarvest.handler(
+  async ({ event, context }) => {
+    const entity: V2StrategyUpdateMaxDebtPerHarvest = {
+      ...eventCore(event),
+      vaultAddress: getAddress(event.srcAddress),
+      strategy: getAddress(event.params.strategy),
+      maxDebtPerHarvest: event.params.maxDebtPerHarvest,
+    };
+    context.V2StrategyUpdateMaxDebtPerHarvest.set(entity);
+  },
+);
+
+YearnV2Vault.StrategyUpdatePerformanceFee.handler(
+  async ({ event, context }) => {
+    const entity: V2StrategyUpdatePerformanceFee = {
+      ...eventCore(event),
+      vaultAddress: getAddress(event.srcAddress),
+      strategy: getAddress(event.params.strategy),
+      performanceFee: event.params.performanceFee,
+    };
+    context.V2StrategyUpdatePerformanceFee.set(entity);
+  },
+);
 
 YearnV2Vault.StrategyMigrated.contractRegister(({ event, context }) => {
   context.addYearnV2Strategy(getAddress(event.params.newVersion));
@@ -769,6 +941,7 @@ YearnV2Vault.StrategyMigrated.handler(async ({ event, context }) => {
     blockTimestamp: event.block.timestamp,
     blockHash: event.block.hash,
     transactionHash: event.transaction.hash,
+    transactionIndex: event.transaction.transactionIndex,
     transactionFrom: addr(event.transaction.from),
     logIndex: event.logIndex,
     oldVersion: getAddress(event.params.oldVersion),
@@ -786,11 +959,39 @@ YearnV2Vault.StrategyRevoked.handler(async ({ event, context }) => {
     blockTimestamp: event.block.timestamp,
     blockHash: event.block.hash,
     transactionHash: event.transaction.hash,
+    transactionIndex: event.transaction.transactionIndex,
     transactionFrom: addr(event.transaction.from),
     logIndex: event.logIndex,
     strategy: getAddress(event.params.strategy),
   };
   context.V2StrategyRevoked.set(entity);
+});
+
+YearnV2Vault.StrategyRemovedFromQueue.handler(async ({ event, context }) => {
+  const entity: V2StrategyRemovedFromQueue = {
+    ...eventCore(event),
+    vaultAddress: getAddress(event.srcAddress),
+    strategy: getAddress(event.params.strategy),
+  };
+  context.V2StrategyRemovedFromQueue.set(entity);
+});
+
+YearnV2Vault.StrategyAddedToQueue.handler(async ({ event, context }) => {
+  const entity: V2StrategyAddedToQueue = {
+    ...eventCore(event),
+    vaultAddress: getAddress(event.srcAddress),
+    strategy: getAddress(event.params.strategy),
+  };
+  context.V2StrategyAddedToQueue.set(entity);
+});
+
+YearnV2Vault.NewPendingGovernance.handler(async ({ event, context }) => {
+  const entity: V2NewPendingGovernance = {
+    ...eventCore(event),
+    vaultAddress: getAddress(event.srcAddress),
+    pendingGovernance: getAddress(event.params.pendingGovernance),
+  };
+  context.V2NewPendingGovernance.set(entity);
 });
 
 YearnV2Vault.UpdateManagement.handler(async ({ event, context }) => {
@@ -802,6 +1003,7 @@ YearnV2Vault.UpdateManagement.handler(async ({ event, context }) => {
     blockTimestamp: event.block.timestamp,
     blockHash: event.block.hash,
     transactionHash: event.transaction.hash,
+    transactionIndex: event.transaction.transactionIndex,
     transactionFrom: addr(event.transaction.from),
     logIndex: event.logIndex,
     management: getAddress(event.params.management),
@@ -818,6 +1020,7 @@ YearnV2Vault.UpdateGovernance.handler(async ({ event, context }) => {
     blockTimestamp: event.block.timestamp,
     blockHash: event.block.hash,
     transactionHash: event.transaction.hash,
+    transactionIndex: event.transaction.transactionIndex,
     transactionFrom: addr(event.transaction.from),
     logIndex: event.logIndex,
     governance: getAddress(event.params.governance),
@@ -834,11 +1037,21 @@ YearnV2Vault.UpdateGuardian.handler(async ({ event, context }) => {
     blockTimestamp: event.block.timestamp,
     blockHash: event.block.hash,
     transactionHash: event.transaction.hash,
+    transactionIndex: event.transaction.transactionIndex,
     transactionFrom: addr(event.transaction.from),
     logIndex: event.logIndex,
     guardian: getAddress(event.params.guardian),
   };
   context.V2UpdateGuardian.set(entity);
+});
+
+YearnV2Vault.UpdateRewards.handler(async ({ event, context }) => {
+  const entity: V2UpdateRewards = {
+    ...eventCore(event),
+    vaultAddress: getAddress(event.srcAddress),
+    rewards: getAddress(event.params.rewards),
+  };
+  context.V2UpdateRewards.set(entity);
 });
 
 YearnV2Vault.UpdateDepositLimit.handler(async ({ event, context }) => {
@@ -850,6 +1063,7 @@ YearnV2Vault.UpdateDepositLimit.handler(async ({ event, context }) => {
     blockTimestamp: event.block.timestamp,
     blockHash: event.block.hash,
     transactionHash: event.transaction.hash,
+    transactionIndex: event.transaction.transactionIndex,
     transactionFrom: addr(event.transaction.from),
     logIndex: event.logIndex,
     depositLimit: event.params.depositLimit,
@@ -866,6 +1080,7 @@ YearnV2Vault.UpdatePerformanceFee.handler(async ({ event, context }) => {
     blockTimestamp: event.block.timestamp,
     blockHash: event.block.hash,
     transactionHash: event.transaction.hash,
+    transactionIndex: event.transaction.transactionIndex,
     transactionFrom: addr(event.transaction.from),
     logIndex: event.logIndex,
     performanceFee: event.params.performanceFee,
@@ -882,11 +1097,21 @@ YearnV2Vault.UpdateManagementFee.handler(async ({ event, context }) => {
     blockTimestamp: event.block.timestamp,
     blockHash: event.block.hash,
     transactionHash: event.transaction.hash,
+    transactionIndex: event.transaction.transactionIndex,
     transactionFrom: addr(event.transaction.from),
     logIndex: event.logIndex,
     managementFee: event.params.managementFee,
   };
   context.V2UpdateManagementFee.set(entity);
+});
+
+YearnV2Vault.UpdateWithdrawalQueue.handler(async ({ event, context }) => {
+  const entity: V2UpdateWithdrawalQueue = {
+    ...eventCore(event),
+    vaultAddress: getAddress(event.srcAddress),
+    queue: event.params.queue.map((a: string) => getAddress(a)),
+  };
+  context.V2UpdateWithdrawalQueue.set(entity);
 });
 
 YearnV2Vault.EmergencyShutdown.handler(async ({ event, context }) => {
@@ -898,6 +1123,7 @@ YearnV2Vault.EmergencyShutdown.handler(async ({ event, context }) => {
     blockTimestamp: event.block.timestamp,
     blockHash: event.block.hash,
     transactionHash: event.transaction.hash,
+    transactionIndex: event.transaction.transactionIndex,
     transactionFrom: addr(event.transaction.from),
     logIndex: event.logIndex,
     active: event.params.active,
@@ -917,6 +1143,7 @@ YearnGauge.Deposit.handler(async ({ event, context }) => {
     blockTimestamp: event.block.timestamp,
     blockHash: event.block.hash,
     transactionHash: event.transaction.hash,
+    transactionIndex: event.transaction.transactionIndex,
     transactionFrom: getAddress(event.transaction.from ?? event.params.sender),
     logIndex: event.logIndex,
     sender: getAddress(event.params.sender),
@@ -936,6 +1163,7 @@ YearnGauge.Withdraw.handler(async ({ event, context }) => {
     blockTimestamp: event.block.timestamp,
     blockHash: event.block.hash,
     transactionHash: event.transaction.hash,
+    transactionIndex: event.transaction.transactionIndex,
     transactionFrom: getAddress(event.transaction.from ?? event.params.sender),
     logIndex: event.logIndex,
     sender: getAddress(event.params.sender),
@@ -956,6 +1184,7 @@ YearnGauge.Transfer.handler(async ({ event, context }) => {
     blockTimestamp: event.block.timestamp,
     blockHash: event.block.hash,
     transactionHash: event.transaction.hash,
+    transactionIndex: event.transaction.transactionIndex,
     transactionFrom: getAddress(event.transaction.from ?? event.params.sender),
     logIndex: event.logIndex,
     sender: getAddress(event.params.sender),
@@ -976,6 +1205,7 @@ Erc4626Vault.Deposit.handler(async ({ event, context }) => {
     blockTimestamp: event.block.timestamp,
     blockHash: event.block.hash,
     transactionHash: event.transaction.hash,
+    transactionIndex: event.transaction.transactionIndex,
     transactionFrom: getAddress(event.transaction.from ?? event.params.sender),
     logIndex: event.logIndex,
     sender: getAddress(event.params.sender),
@@ -995,6 +1225,7 @@ Erc4626Vault.Withdraw.handler(async ({ event, context }) => {
     blockTimestamp: event.block.timestamp,
     blockHash: event.block.hash,
     transactionHash: event.transaction.hash,
+    transactionIndex: event.transaction.transactionIndex,
     transactionFrom: getAddress(event.transaction.from ?? event.params.sender),
     logIndex: event.logIndex,
     sender: getAddress(event.params.sender),
@@ -1015,6 +1246,7 @@ VotingEscrowFactory.VestingEscrowCreated.handler(async ({ event, context }) => {
     blockTimestamp: event.block.timestamp,
     blockHash: event.block.hash,
     transactionHash: event.transaction.hash,
+    transactionIndex: event.transaction.transactionIndex,
     transactionFrom: addr(event.transaction.from),
     logIndex: event.logIndex,
     funder: getAddress(event.params.funder),
@@ -1043,6 +1275,7 @@ YearnStakingRegistry.StakingPoolAdded.handler(async ({ event, context }) => {
     blockTimestamp: event.block.timestamp,
     blockHash: event.block.hash,
     transactionHash: event.transaction.hash,
+    transactionIndex: event.transaction.transactionIndex,
     transactionFrom: addr(event.transaction.from),
     logIndex: event.logIndex,
     token: getAddress(event.params.token),
@@ -1067,7 +1300,8 @@ YearnStakingRegistryIndexed.StakingPoolAdded.handler(
       blockTimestamp: event.block.timestamp,
       blockHash: event.block.hash,
       transactionHash: event.transaction.hash,
-      transactionFrom: addr(event.transaction.from),
+      transactionIndex: event.transaction.transactionIndex,
+    transactionFrom: addr(event.transaction.from),
       logIndex: event.logIndex,
       token: getAddress(event.params.token),
       stakingPool: getAddress(event.params.stakingPool),
@@ -1089,6 +1323,7 @@ YearnVeyfiRegistry.Register.handler(async ({ event, context }) => {
     blockTimestamp: event.block.timestamp,
     blockHash: event.block.hash,
     transactionHash: event.transaction.hash,
+    transactionIndex: event.transaction.transactionIndex,
     transactionFrom: addr(event.transaction.from),
     logIndex: event.logIndex,
     gauge: getAddress(event.params.gauge),
@@ -1110,6 +1345,7 @@ YearnV2Registry.NewVault.handler(async ({ event, context }) => {
     blockTimestamp: event.block.timestamp,
     blockHash: event.block.hash,
     transactionHash: event.transaction.hash,
+    transactionIndex: event.transaction.transactionIndex,
     transactionFrom: addr(event.transaction.from),
     logIndex: event.logIndex,
     token: getAddress(event.params.token),
@@ -1133,6 +1369,7 @@ YearnV2Registry.NewExperimentalVault.handler(async ({ event, context }) => {
     blockTimestamp: event.block.timestamp,
     blockHash: event.block.hash,
     transactionHash: event.transaction.hash,
+    transactionIndex: event.transaction.transactionIndex,
     transactionFrom: addr(event.transaction.from),
     logIndex: event.logIndex,
     token: getAddress(event.params.token),
@@ -1156,6 +1393,7 @@ YearnV2Registry2.NewVault.handler(async ({ event, context }) => {
     blockTimestamp: event.block.timestamp,
     blockHash: event.block.hash,
     transactionHash: event.transaction.hash,
+    transactionIndex: event.transaction.transactionIndex,
     transactionFrom: addr(event.transaction.from),
     logIndex: event.logIndex,
     token: getAddress(event.params.token),
@@ -1176,6 +1414,7 @@ YearnV2Strategy.Harvested.handler(async ({ event, context }) => {
     blockTimestamp: event.block.timestamp,
     blockHash: event.block.hash,
     transactionHash: event.transaction.hash,
+    transactionIndex: event.transaction.transactionIndex,
     transactionFrom: addr(event.transaction.from),
     logIndex: event.logIndex,
     profit: event.params.profit,
@@ -1184,6 +1423,37 @@ YearnV2Strategy.Harvested.handler(async ({ event, context }) => {
     debtOutstanding: event.params.debtOutstanding,
   };
   context.V2StrategyHarvested.set(entity);
+});
+
+const setTradeAddressEvent = (
+  event: any,
+  context: any,
+  eventName: string,
+  account: string,
+) => {
+  const entity: V2TradeAddressEvent = {
+    ...eventCore(event),
+    tradeHandlerAddress: getAddress(event.srcAddress),
+    eventName,
+    account: getAddress(account),
+  };
+  context.V2TradeAddressEvent.set(entity);
+};
+
+YearnV2TradeHandler.AddedMech.handler(async ({ event, context }) => {
+  setTradeAddressEvent(event, context, "AddedMech", event.params.mech);
+});
+
+YearnV2TradeHandler.AddedSolver.handler(async ({ event, context }) => {
+  setTradeAddressEvent(event, context, "AddedSolver", event.params.solver);
+});
+
+YearnV2TradeHandler.RemovedMech.handler(async ({ event, context }) => {
+  setTradeAddressEvent(event, context, "RemovedMech", event.params.mech);
+});
+
+YearnV2TradeHandler.RemovedSolver.handler(async ({ event, context }) => {
+  setTradeAddressEvent(event, context, "RemovedSolver", event.params.solver);
 });
 
 YearnV2TradeHandler.TradeEnabled.handler(async ({ event, context }) => {
@@ -1195,6 +1465,7 @@ YearnV2TradeHandler.TradeEnabled.handler(async ({ event, context }) => {
     blockTimestamp: event.block.timestamp,
     blockHash: event.block.hash,
     transactionHash: event.transaction.hash,
+    transactionIndex: event.transaction.transactionIndex,
     transactionFrom: addr(event.transaction.from),
     logIndex: event.logIndex,
     seller: getAddress(event.params.seller),
@@ -1213,6 +1484,7 @@ YearnV2TradeHandler.TradeDisabled.handler(async ({ event, context }) => {
     blockTimestamp: event.block.timestamp,
     blockHash: event.block.hash,
     transactionHash: event.transaction.hash,
+    transactionIndex: event.transaction.transactionIndex,
     transactionFrom: addr(event.transaction.from),
     logIndex: event.logIndex,
     seller: getAddress(event.params.seller),
@@ -1220,6 +1492,28 @@ YearnV2TradeHandler.TradeDisabled.handler(async ({ event, context }) => {
     tokenOut: getAddress(event.params.tokenOut),
   };
   context.V2TradeDisabled.set(entity);
+});
+
+YearnV2TradeHandler.UpdatedGovernance.handler(async ({ event, context }) => {
+  setTradeAddressEvent(
+    event,
+    context,
+    "UpdatedGovernance",
+    event.params.governance,
+  );
+});
+
+YearnV2TradeHandler.UpdatedSettlement.handler(async ({ event, context }) => {
+  setTradeAddressEvent(
+    event,
+    context,
+    "UpdatedSettlement",
+    event.params.settlement,
+  );
+});
+
+YearnV2TradeHandler.UpdatedTreasury.handler(async ({ event, context }) => {
+  setTradeAddressEvent(event, context, "UpdatedTreasury", event.params.treasury);
 });
 
 YearnV3Registry.NewEndorsedVault.contractRegister(({ event, context }) => {
@@ -1235,6 +1529,7 @@ YearnV3Registry.NewEndorsedVault.handler(async ({ event, context }) => {
     blockTimestamp: event.block.timestamp,
     blockHash: event.block.hash,
     transactionHash: event.transaction.hash,
+    transactionIndex: event.transaction.transactionIndex,
     transactionFrom: addr(event.transaction.from),
     logIndex: event.logIndex,
     vault: getAddress(event.params.vault),
@@ -1258,6 +1553,7 @@ YearnV3VaultFactory.NewVault.handler(async ({ event, context }) => {
     blockTimestamp: event.block.timestamp,
     blockHash: event.block.hash,
     transactionHash: event.transaction.hash,
+    transactionIndex: event.transaction.transactionIndex,
     transactionFrom: addr(event.transaction.from),
     logIndex: event.logIndex,
     vault_address: getAddress(event.params.vault_address),
@@ -1279,6 +1575,7 @@ YearnV3RoleManagerFactory.NewProject.handler(async ({ event, context }) => {
     blockTimestamp: event.block.timestamp,
     blockHash: event.block.hash,
     transactionHash: event.transaction.hash,
+    transactionIndex: event.transaction.transactionIndex,
     transactionFrom: addr(event.transaction.from),
     logIndex: event.logIndex,
     projectId: event.params.projectId,
@@ -1301,6 +1598,7 @@ YearnV3RoleManager.AddedNewVault.handler(async ({ event, context }) => {
     blockTimestamp: event.block.timestamp,
     blockHash: event.block.hash,
     transactionHash: event.transaction.hash,
+    transactionIndex: event.transaction.transactionIndex,
     transactionFrom: addr(event.transaction.from),
     logIndex: event.logIndex,
     vault: getAddress(event.params.vault),
@@ -1319,6 +1617,7 @@ YearnV3Accountant.VaultChanged.handler(async ({ event, context }) => {
     blockTimestamp: event.block.timestamp,
     blockHash: event.block.hash,
     transactionHash: event.transaction.hash,
+    transactionIndex: event.transaction.transactionIndex,
     transactionFrom: addr(event.transaction.from),
     logIndex: event.logIndex,
     vault: getAddress(event.params.vault),
@@ -1336,6 +1635,7 @@ YearnV3Strategy.Reported.handler(async ({ event, context }) => {
     blockTimestamp: event.block.timestamp,
     blockHash: event.block.hash,
     transactionHash: event.transaction.hash,
+    transactionIndex: event.transaction.transactionIndex,
     transactionFrom: addr(event.transaction.from),
     logIndex: event.logIndex,
     profit: event.params.profit,
@@ -1355,6 +1655,7 @@ YearnV3SplitterFactory.NewSplitter.handler(async ({ event, context }) => {
     blockTimestamp: event.block.timestamp,
     blockHash: event.block.hash,
     transactionHash: event.transaction.hash,
+    transactionIndex: event.transaction.transactionIndex,
     transactionFrom: addr(event.transaction.from),
     logIndex: event.logIndex,
     splitter: getAddress(event.params.splitter),
@@ -1382,7 +1683,8 @@ YearnV3YieldSplitterFactory.NewYieldSplitter.handler(
       blockTimestamp: event.block.timestamp,
       blockHash: event.block.hash,
       transactionHash: event.transaction.hash,
-      transactionFrom: addr(event.transaction.from),
+      transactionIndex: event.transaction.transactionIndex,
+    transactionFrom: addr(event.transaction.from),
       logIndex: event.logIndex,
       strategy: getAddress(event.params.strategy),
       vault: getAddress(event.params.vault),
@@ -1409,6 +1711,7 @@ DebtAllocatorFactory.NewDebtAllocator.handler(async ({ event, context }) => {
     blockTimestamp: event.block.timestamp,
     blockHash: event.block.hash,
     transactionHash: event.transaction.hash,
+    transactionIndex: event.transaction.transactionIndex,
     transactionFrom: addr(event.transaction.from),
     logIndex: event.logIndex,
     allocator: getAddress(event.params.allocator),
@@ -1428,6 +1731,7 @@ DebtAllocator.UpdateStrategyDebtRatios.handler(async ({ event, context }) => {
     blockTimestamp: event.block.timestamp,
     blockHash: event.block.hash,
     transactionHash: event.transaction.hash,
+    transactionIndex: event.transaction.transactionIndex,
     transactionFrom: addr(event.transaction.from),
     logIndex: event.logIndex,
     strategy: getAddress(event.params.strategy),
@@ -1447,6 +1751,7 @@ DebtAllocator.UpdateKeeper.handler(async ({ event, context }) => {
     blockTimestamp: event.block.timestamp,
     blockHash: event.block.hash,
     transactionHash: event.transaction.hash,
+    transactionIndex: event.transaction.transactionIndex,
     transactionFrom: addr(event.transaction.from),
     logIndex: event.logIndex,
     keeper: getAddress(event.params.keeper),
@@ -1464,6 +1769,7 @@ DebtAllocator.GovernanceTransferred.handler(async ({ event, context }) => {
     blockTimestamp: event.block.timestamp,
     blockHash: event.block.hash,
     transactionHash: event.transaction.hash,
+    transactionIndex: event.transaction.transactionIndex,
     transactionFrom: addr(event.transaction.from),
     logIndex: event.logIndex,
     previousGovernance: getAddress(event.params.previousGovernance),
@@ -1481,6 +1787,7 @@ DebtAllocator.UpdateMaxAcceptableBaseFee.handler(async ({ event, context }) => {
     blockTimestamp: event.block.timestamp,
     blockHash: event.block.hash,
     transactionHash: event.transaction.hash,
+    transactionIndex: event.transaction.transactionIndex,
     transactionFrom: addr(event.transaction.from),
     logIndex: event.logIndex,
     newMaxAcceptableBaseFee: event.params.newMaxAcceptableBaseFee,
@@ -1497,6 +1804,7 @@ DebtAllocator.UpdateMaxDebtUpdateLoss.handler(async ({ event, context }) => {
     blockTimestamp: event.block.timestamp,
     blockHash: event.block.hash,
     transactionHash: event.transaction.hash,
+    transactionIndex: event.transaction.transactionIndex,
     transactionFrom: addr(event.transaction.from),
     logIndex: event.logIndex,
     newMaxDebtUpdateLoss: event.params.newMaxDebtUpdateLoss,
@@ -1513,6 +1821,7 @@ DebtAllocator.UpdateMinimumChange.handler(async ({ event, context }) => {
     blockTimestamp: event.block.timestamp,
     blockHash: event.block.hash,
     transactionHash: event.transaction.hash,
+    transactionIndex: event.transaction.transactionIndex,
     transactionFrom: addr(event.transaction.from),
     logIndex: event.logIndex,
     newMinimumChange: event.params.newMinimumChange,
@@ -1529,6 +1838,7 @@ DebtAllocator.UpdateMinimumWait.handler(async ({ event, context }) => {
     blockTimestamp: event.block.timestamp,
     blockHash: event.block.hash,
     transactionHash: event.transaction.hash,
+    transactionIndex: event.transaction.transactionIndex,
     transactionFrom: addr(event.transaction.from),
     logIndex: event.logIndex,
     newMinimumWait: event.params.newMinimumWait,
@@ -1547,6 +1857,7 @@ MapleTimelock.ProposalScheduled.handler(async ({ event, context }) => {
     blockTimestamp: event.block.timestamp,
     blockHash: event.block.hash,
     transactionHash: event.transaction.hash,
+    transactionIndex: event.transaction.transactionIndex,
     transactionFrom: addr(event.transaction.from),
     logIndex: event.logIndex,
     operationId: event.params.proposalId.toString(),

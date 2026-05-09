@@ -6,6 +6,7 @@ type Deposit {
   blockTimestamp: Int! @index
   blockHash: String!
   transactionHash: String! @index
+  transactionIndex: Int!
   transactionFrom: String! @index
   logIndex: Int!
   sender: String!
@@ -22,6 +23,7 @@ type Withdraw {
   blockTimestamp: Int! @index
   blockHash: String!
   transactionHash: String! @index
+  transactionIndex: Int!
   transactionFrom: String! @index
   logIndex: Int!
   sender: String!
@@ -39,10 +41,27 @@ type Transfer {
   blockTimestamp: Int! @index
   blockHash: String!
   transactionHash: String! @index
+  transactionIndex: Int!
   transactionFrom: String! @index
   logIndex: Int!
   sender: String!
   receiver: String!
+  value: BigInt!
+}
+
+type Approval {
+  id: ID!
+  vaultAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionIndex: Int!
+  transactionFrom: String @index
+  logIndex: Int!
+  owner: String! @index
+  spender: String! @index
   value: BigInt!
 }
 
@@ -54,6 +73,7 @@ type StrategyReported {
   blockTimestamp: Int! @index
   blockHash: String!
   transactionHash: String! @index
+  transactionIndex: Int!
   transactionFrom: String @index
   logIndex: Int!
   strategy: String! @index
@@ -73,6 +93,7 @@ type DebtUpdated {
   blockTimestamp: Int! @index
   blockHash: String!
   transactionHash: String! @index
+  transactionIndex: Int!
   transactionFrom: String @index
   logIndex: Int!
   strategy: String! @index
@@ -88,6 +109,7 @@ type DebtPurchased {
   blockTimestamp: Int! @index
   blockHash: String!
   transactionHash: String! @index
+  transactionIndex: Int!
   transactionFrom: String @index
   logIndex: Int!
   strategy: String! @index
@@ -102,6 +124,7 @@ type StrategyChanged {
   blockTimestamp: Int! @index
   blockHash: String!
   transactionHash: String! @index
+  transactionIndex: Int!
   transactionFrom: String @index
   logIndex: Int!
   strategy: String! @index
@@ -116,6 +139,7 @@ type UpdatedMaxDebtForStrategy {
   blockTimestamp: Int! @index
   blockHash: String!
   transactionHash: String! @index
+  transactionIndex: Int!
   transactionFrom: String @index
   logIndex: Int!
   sender: String! @index
@@ -131,6 +155,7 @@ type RoleSet {
   blockTimestamp: Int! @index
   blockHash: String!
   transactionHash: String! @index
+  transactionIndex: Int!
   transactionFrom: String @index
   logIndex: Int!
   account: String! @index
@@ -145,6 +170,7 @@ type RoleStatusChanged {
   blockTimestamp: Int! @index
   blockHash: String!
   transactionHash: String! @index
+  transactionIndex: Int!
   transactionFrom: String @index
   logIndex: Int!
   role: BigInt! @index
@@ -159,6 +185,7 @@ type UpdateFutureRoleManager {
   blockTimestamp: Int! @index
   blockHash: String!
   transactionHash: String! @index
+  transactionIndex: Int!
   transactionFrom: String @index
   logIndex: Int!
   future_role_manager: String! @index
@@ -172,6 +199,7 @@ type UpdateRoleManager {
   blockTimestamp: Int! @index
   blockHash: String!
   transactionHash: String! @index
+  transactionIndex: Int!
   transactionFrom: String @index
   logIndex: Int!
   role_manager: String! @index
@@ -185,6 +213,7 @@ type UpdateAccountant {
   blockTimestamp: Int! @index
   blockHash: String!
   transactionHash: String! @index
+  transactionIndex: Int!
   transactionFrom: String @index
   logIndex: Int!
   accountant: String! @index
@@ -198,6 +227,7 @@ type UpdateDefaultQueue {
   blockTimestamp: Int! @index
   blockHash: String!
   transactionHash: String! @index
+  transactionIndex: Int!
   transactionFrom: String @index
   logIndex: Int!
   new_default_queue: [String!]!
@@ -211,6 +241,7 @@ type UpdateUseDefaultQueue {
   blockTimestamp: Int! @index
   blockHash: String!
   transactionHash: String! @index
+  transactionIndex: Int!
   transactionFrom: String @index
   logIndex: Int!
   use_default_queue: Boolean!
@@ -224,6 +255,7 @@ type UpdateAutoAllocate {
   blockTimestamp: Int! @index
   blockHash: String!
   transactionHash: String! @index
+  transactionIndex: Int!
   transactionFrom: String @index
   logIndex: Int!
   auto_allocate: Boolean!
@@ -237,6 +269,7 @@ type UpdateDepositLimit {
   blockTimestamp: Int! @index
   blockHash: String!
   transactionHash: String! @index
+  transactionIndex: Int!
   transactionFrom: String @index
   logIndex: Int!
   deposit_limit: BigInt!
@@ -250,6 +283,7 @@ type UpdateDepositLimitModule {
   blockTimestamp: Int! @index
   blockHash: String!
   transactionHash: String! @index
+  transactionIndex: Int!
   transactionFrom: String @index
   logIndex: Int!
   deposit_limit_module: String! @index
@@ -263,6 +297,7 @@ type UpdateWithdrawLimitModule {
   blockTimestamp: Int! @index
   blockHash: String!
   transactionHash: String! @index
+  transactionIndex: Int!
   transactionFrom: String @index
   logIndex: Int!
   withdraw_limit_module: String! @index
@@ -276,6 +311,7 @@ type UpdateMinimumTotalIdle {
   blockTimestamp: Int! @index
   blockHash: String!
   transactionHash: String! @index
+  transactionIndex: Int!
   transactionFrom: String @index
   logIndex: Int!
   minimum_total_idle: BigInt!
@@ -289,6 +325,7 @@ type UpdateProfitMaxUnlockTime {
   blockTimestamp: Int! @index
   blockHash: String!
   transactionHash: String! @index
+  transactionIndex: Int!
   transactionFrom: String @index
   logIndex: Int!
   profit_max_unlock_time: BigInt!
@@ -302,6 +339,7 @@ type Shutdown {
   blockTimestamp: Int! @index
   blockHash: String!
   transactionHash: String! @index
+  transactionIndex: Int!
   transactionFrom: String @index
   logIndex: Int!
 }
@@ -314,6 +352,7 @@ type ReferralDeposit {
   blockTimestamp: Int! @index
   blockHash: String!
   transactionHash: String! @index
+  transactionIndex: Int!
   transactionFrom: String @index
   logIndex: Int!
   receiver: String!
@@ -331,6 +370,7 @@ type VotingEscrowCreated {
   blockTimestamp: Int! @index
   blockHash: String!
   transactionHash: String! @index
+  transactionIndex: Int!
   transactionFrom: String @index
   logIndex: Int!
   funder: String! @index
@@ -352,6 +392,7 @@ type StakingPoolAdded {
   blockTimestamp: Int! @index
   blockHash: String!
   transactionHash: String! @index
+  transactionIndex: Int!
   transactionFrom: String @index
   logIndex: Int!
   token: String! @index
@@ -366,6 +407,7 @@ type VeyfiGaugeRegistered {
   blockTimestamp: Int! @index
   blockHash: String!
   transactionHash: String! @index
+  transactionIndex: Int!
   transactionFrom: String @index
   logIndex: Int!
   gauge: String! @index
@@ -380,6 +422,7 @@ type V2RegistryNewVault {
   blockTimestamp: Int! @index
   blockHash: String!
   transactionHash: String! @index
+  transactionIndex: Int!
   transactionFrom: String @index
   logIndex: Int!
   token: String! @index
@@ -396,6 +439,7 @@ type V2RegistryNewExperimentalVault {
   blockTimestamp: Int! @index
   blockHash: String!
   transactionHash: String! @index
+  transactionIndex: Int!
   transactionFrom: String @index
   logIndex: Int!
   token: String! @index
@@ -412,6 +456,7 @@ type V2Registry2NewVault {
   blockTimestamp: Int! @index
   blockHash: String!
   transactionHash: String! @index
+  transactionIndex: Int!
   transactionFrom: String @index
   logIndex: Int!
   token: String! @index
@@ -431,6 +476,7 @@ type V2Deposit {
   blockTimestamp: Int! @index
   blockHash: String!
   transactionHash: String! @index
+  transactionIndex: Int!
   transactionFrom: String @index
   logIndex: Int!
   recipient: String! @index
@@ -446,11 +492,41 @@ type V2Withdraw {
   blockTimestamp: Int! @index
   blockHash: String!
   transactionHash: String! @index
+  transactionIndex: Int!
   transactionFrom: String @index
   logIndex: Int!
   recipient: String! @index
   shares: BigInt!
   amount: BigInt!
+}
+
+type V2Sweep {
+  id: ID!
+  vaultAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionIndex: Int!
+  transactionFrom: String @index
+  logIndex: Int!
+  token: String! @index
+  amount: BigInt!
+}
+
+type V2LockedProfitDegradationUpdated {
+  id: ID!
+  vaultAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionIndex: Int!
+  transactionFrom: String @index
+  logIndex: Int!
+  value: BigInt!
 }
 
 type V2StrategyReported {
@@ -461,6 +537,7 @@ type V2StrategyReported {
   blockTimestamp: Int! @index
   blockHash: String!
   transactionHash: String! @index
+  transactionIndex: Int!
   transactionFrom: String @index
   logIndex: Int!
   strategy: String! @index
@@ -474,6 +551,39 @@ type V2StrategyReported {
   debtRatio: BigInt!
 }
 
+type V2FeeReport {
+  id: ID!
+  vaultAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionIndex: Int!
+  transactionFrom: String @index
+  logIndex: Int!
+  management_fee: BigInt!
+  performance_fee: BigInt!
+  strategist_fee: BigInt!
+  duration: BigInt!
+}
+
+type V2WithdrawFromStrategy {
+  id: ID!
+  vaultAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionIndex: Int!
+  transactionFrom: String @index
+  logIndex: Int!
+  strategy: String! @index
+  totalDebt: BigInt!
+  loss: BigInt!
+}
+
 type V2StrategyAdded {
   id: ID!
   vaultAddress: String! @index
@@ -482,12 +592,73 @@ type V2StrategyAdded {
   blockTimestamp: Int! @index
   blockHash: String!
   transactionHash: String! @index
+  transactionIndex: Int!
   transactionFrom: String @index
   logIndex: Int!
   strategy: String! @index
   debtRatio: BigInt!
   minDebtPerHarvest: BigInt!
   maxDebtPerHarvest: BigInt!
+  performanceFee: BigInt!
+}
+
+type V2StrategyUpdateDebtRatio {
+  id: ID!
+  vaultAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionIndex: Int!
+  transactionFrom: String @index
+  logIndex: Int!
+  strategy: String! @index
+  debtRatio: BigInt!
+}
+
+type V2StrategyUpdateMinDebtPerHarvest {
+  id: ID!
+  vaultAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionIndex: Int!
+  transactionFrom: String @index
+  logIndex: Int!
+  strategy: String! @index
+  minDebtPerHarvest: BigInt!
+}
+
+type V2StrategyUpdateMaxDebtPerHarvest {
+  id: ID!
+  vaultAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionIndex: Int!
+  transactionFrom: String @index
+  logIndex: Int!
+  strategy: String! @index
+  maxDebtPerHarvest: BigInt!
+}
+
+type V2StrategyUpdatePerformanceFee {
+  id: ID!
+  vaultAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionIndex: Int!
+  transactionFrom: String @index
+  logIndex: Int!
+  strategy: String! @index
   performanceFee: BigInt!
 }
 
@@ -499,6 +670,7 @@ type V2StrategyMigrated {
   blockTimestamp: Int! @index
   blockHash: String!
   transactionHash: String! @index
+  transactionIndex: Int!
   transactionFrom: String @index
   logIndex: Int!
   oldVersion: String! @index
@@ -513,9 +685,52 @@ type V2StrategyRevoked {
   blockTimestamp: Int! @index
   blockHash: String!
   transactionHash: String! @index
+  transactionIndex: Int!
   transactionFrom: String @index
   logIndex: Int!
   strategy: String! @index
+}
+
+type V2StrategyRemovedFromQueue {
+  id: ID!
+  vaultAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionIndex: Int!
+  transactionFrom: String @index
+  logIndex: Int!
+  strategy: String! @index
+}
+
+type V2StrategyAddedToQueue {
+  id: ID!
+  vaultAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionIndex: Int!
+  transactionFrom: String @index
+  logIndex: Int!
+  strategy: String! @index
+}
+
+type V2NewPendingGovernance {
+  id: ID!
+  vaultAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionIndex: Int!
+  transactionFrom: String @index
+  logIndex: Int!
+  pendingGovernance: String! @index
 }
 
 type V2UpdateManagement {
@@ -526,6 +741,7 @@ type V2UpdateManagement {
   blockTimestamp: Int! @index
   blockHash: String!
   transactionHash: String! @index
+  transactionIndex: Int!
   transactionFrom: String @index
   logIndex: Int!
   management: String! @index
@@ -539,6 +755,7 @@ type V2UpdateGovernance {
   blockTimestamp: Int! @index
   blockHash: String!
   transactionHash: String! @index
+  transactionIndex: Int!
   transactionFrom: String @index
   logIndex: Int!
   governance: String! @index
@@ -552,9 +769,24 @@ type V2UpdateGuardian {
   blockTimestamp: Int! @index
   blockHash: String!
   transactionHash: String! @index
+  transactionIndex: Int!
   transactionFrom: String @index
   logIndex: Int!
   guardian: String! @index
+}
+
+type V2UpdateRewards {
+  id: ID!
+  vaultAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionIndex: Int!
+  transactionFrom: String @index
+  logIndex: Int!
+  rewards: String! @index
 }
 
 type V2UpdateDepositLimit {
@@ -565,6 +797,7 @@ type V2UpdateDepositLimit {
   blockTimestamp: Int! @index
   blockHash: String!
   transactionHash: String! @index
+  transactionIndex: Int!
   transactionFrom: String @index
   logIndex: Int!
   depositLimit: BigInt!
@@ -578,6 +811,7 @@ type V2UpdatePerformanceFee {
   blockTimestamp: Int! @index
   blockHash: String!
   transactionHash: String! @index
+  transactionIndex: Int!
   transactionFrom: String @index
   logIndex: Int!
   performanceFee: BigInt!
@@ -591,9 +825,24 @@ type V2UpdateManagementFee {
   blockTimestamp: Int! @index
   blockHash: String!
   transactionHash: String! @index
+  transactionIndex: Int!
   transactionFrom: String @index
   logIndex: Int!
   managementFee: BigInt!
+}
+
+type V2UpdateWithdrawalQueue {
+  id: ID!
+  vaultAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionIndex: Int!
+  transactionFrom: String @index
+  logIndex: Int!
+  queue: [String!]!
 }
 
 type V2EmergencyShutdown {
@@ -604,6 +853,7 @@ type V2EmergencyShutdown {
   blockTimestamp: Int! @index
   blockHash: String!
   transactionHash: String! @index
+  transactionIndex: Int!
   transactionFrom: String @index
   logIndex: Int!
   active: Boolean!
@@ -617,6 +867,7 @@ type V2StrategyHarvested {
   blockTimestamp: Int! @index
   blockHash: String!
   transactionHash: String! @index
+  transactionIndex: Int!
   transactionFrom: String @index
   logIndex: Int!
   profit: BigInt!
@@ -633,6 +884,7 @@ type V2TradeEnabled {
   blockTimestamp: Int! @index
   blockHash: String!
   transactionHash: String! @index
+  transactionIndex: Int!
   transactionFrom: String @index
   logIndex: Int!
   seller: String! @index
@@ -648,11 +900,27 @@ type V2TradeDisabled {
   blockTimestamp: Int! @index
   blockHash: String!
   transactionHash: String! @index
+  transactionIndex: Int!
   transactionFrom: String @index
   logIndex: Int!
   seller: String! @index
   tokenIn: String! @index
   tokenOut: String! @index
+}
+
+type V2TradeAddressEvent {
+  id: ID!
+  tradeHandlerAddress: String! @index
+  eventName: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionIndex: Int!
+  transactionFrom: String @index
+  logIndex: Int!
+  account: String! @index
 }
 
 type V3RegistryNewEndorsedVault {
@@ -663,6 +931,7 @@ type V3RegistryNewEndorsedVault {
   blockTimestamp: Int! @index
   blockHash: String!
   transactionHash: String! @index
+  transactionIndex: Int!
   transactionFrom: String @index
   logIndex: Int!
   vault: String! @index
@@ -679,6 +948,7 @@ type V3VaultFactoryNewVault {
   blockTimestamp: Int! @index
   blockHash: String!
   transactionHash: String! @index
+  transactionIndex: Int!
   transactionFrom: String @index
   logIndex: Int!
   vault_address: String! @index
@@ -693,6 +963,7 @@ type V3RoleManagerFactoryNewProject {
   blockTimestamp: Int! @index
   blockHash: String!
   transactionHash: String! @index
+  transactionIndex: Int!
   transactionFrom: String @index
   logIndex: Int!
   projectId: String! @index
@@ -707,6 +978,7 @@ type V3RoleManagerAddedNewVault {
   blockTimestamp: Int! @index
   blockHash: String!
   transactionHash: String! @index
+  transactionIndex: Int!
   transactionFrom: String @index
   logIndex: Int!
   vault: String! @index
@@ -722,6 +994,7 @@ type V3AccountantVaultChanged {
   blockTimestamp: Int! @index
   blockHash: String!
   transactionHash: String! @index
+  transactionIndex: Int!
   transactionFrom: String @index
   logIndex: Int!
   vault: String! @index
@@ -736,6 +1009,7 @@ type V3StrategyReported {
   blockTimestamp: Int! @index
   blockHash: String!
   transactionHash: String! @index
+  transactionIndex: Int!
   transactionFrom: String @index
   logIndex: Int!
   profit: BigInt!
@@ -752,6 +1026,7 @@ type V3SplitterNewSplitter {
   blockTimestamp: Int! @index
   blockHash: String!
   transactionHash: String! @index
+  transactionIndex: Int!
   transactionFrom: String @index
   logIndex: Int!
   splitter: String! @index
@@ -768,6 +1043,7 @@ type V3YieldSplitterNewYieldSplitter {
   blockTimestamp: Int! @index
   blockHash: String!
   transactionHash: String! @index
+  transactionIndex: Int!
   transactionFrom: String @index
   logIndex: Int!
   strategy: String! @index
@@ -785,6 +1061,7 @@ type NewDebtAllocator {
   blockTimestamp: Int! @index
   blockHash: String!
   transactionHash: String! @index
+  transactionIndex: Int!
   transactionFrom: String @index
   logIndex: Int!
   allocator: String! @index
@@ -801,6 +1078,7 @@ type UpdateStrategyDebtRatios {
   blockTimestamp: Int! @index
   blockHash: String!
   transactionHash: String! @index
+  transactionIndex: Int!
   transactionFrom: String @index
   logIndex: Int!
   strategy: String! @index
@@ -817,6 +1095,7 @@ type UpdateKeeper {
   blockTimestamp: Int! @index
   blockHash: String!
   transactionHash: String! @index
+  transactionIndex: Int!
   transactionFrom: String @index
   logIndex: Int!
   keeper: String! @index
@@ -831,6 +1110,7 @@ type GovernanceTransferred {
   blockTimestamp: Int! @index
   blockHash: String!
   transactionHash: String! @index
+  transactionIndex: Int!
   transactionFrom: String @index
   logIndex: Int!
   previousGovernance: String! @index
@@ -845,6 +1125,7 @@ type UpdateMaxAcceptableBaseFee {
   blockTimestamp: Int! @index
   blockHash: String!
   transactionHash: String! @index
+  transactionIndex: Int!
   transactionFrom: String @index
   logIndex: Int!
   newMaxAcceptableBaseFee: BigInt!
@@ -858,6 +1139,7 @@ type UpdateMaxDebtUpdateLoss {
   blockTimestamp: Int! @index
   blockHash: String!
   transactionHash: String! @index
+  transactionIndex: Int!
   transactionFrom: String @index
   logIndex: Int!
   newMaxDebtUpdateLoss: BigInt!
@@ -871,6 +1153,7 @@ type UpdateMinimumChange {
   blockTimestamp: Int! @index
   blockHash: String!
   transactionHash: String! @index
+  transactionIndex: Int!
   transactionFrom: String @index
   logIndex: Int!
   newMinimumChange: BigInt!
@@ -884,6 +1167,7 @@ type UpdateMinimumWait {
   blockTimestamp: Int! @index
   blockHash: String!
   transactionHash: String! @index
+  transactionIndex: Int!
   transactionFrom: String @index
   logIndex: Int!
   newMinimumWait: BigInt!
@@ -899,6 +1183,7 @@ type TimelockEvent {
   blockTimestamp: Int! @index
   blockHash: String!
   transactionHash: String! @index
+  transactionIndex: Int!
   transactionFrom: String @index
   logIndex: Int!
   operationId: String @index
