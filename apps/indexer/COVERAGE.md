@@ -94,3 +94,6 @@ an evmlog-equivalence backfill that requires every ABI-declared log:
 The RPC-only list was produced by comparing the Kong ABI files under
 `packages/ingest/abis/**/abi.ts` to `apps/indexer/config.yaml` by event
 selector.
+
+RPC-only gaps were called out on Kong issue #402:
+https://github.com/yearn/kong/issues/402#issuecomment-4416633584
