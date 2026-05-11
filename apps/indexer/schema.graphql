@@ -49,22 +49,6 @@ type Transfer {
   value: BigInt!
 }
 
-type Approval {
-  id: ID!
-  vaultAddress: String! @index
-  chainId: Int! @index
-  blockNumber: Int! @index
-  blockTimestamp: Int! @index
-  blockHash: String!
-  transactionHash: String! @index
-  transactionIndex: Int!
-  transactionFrom: String @index
-  logIndex: Int!
-  owner: String! @index
-  spender: String! @index
-  value: BigInt!
-}
-
 type StrategyReported {
   id: ID!
   vaultAddress: String! @index
