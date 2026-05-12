@@ -1,7 +1,6 @@
 {
   "name": "envio-monitoring",
   "private": true,
-  "packageManager": "yarn@4.9.2",
   "type": "module",
   "scripts": {
     "start": "node server.js"

@@ -14,7 +14,7 @@ importers:
         specifier: 3.0.0-alpha.21
         version: 3.0.0-alpha.21(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(typescript@5.9.3)
       viem:
-        specifier: ^2.47.11
+        specifier: 2.47.11
         version: 2.47.11(typescript@5.9.3)
     optionalDependencies:
       generated:
@@ -25,13 +25,13 @@ importers:
         specifier: 20.17.0
         version: 20.17.0
       dotenv:
-        specifier: ^17.4.1
+        specifier: 17.4.1
         version: 17.4.1
       typescript:
         specifier: 5.9.3
         version: 5.9.3
       vitest:
-        specifier: ^3.1.1
+        specifier: 3.2.4
         version: 3.2.4(@types/node@20.17.0)(tsx@4.21.0)
 
   apps/indexer/generated:
