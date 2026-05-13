@@ -7,3 +7,7 @@ packages:
 
 savePrefix: ""
 minimumReleaseAge: 10080
+
+onlyBuiltDependencies:
+  - esbuild
+  - rescript
