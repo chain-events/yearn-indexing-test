@@ -13,7 +13,7 @@ ENV SSL_CERT_DIR=/etc/ssl/certs
 
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
-RUN npm install -g pnpm@9.7.1
+RUN corepack enable && corepack prepare pnpm@11.1.1 --activate
 
 # Build context is the monorepo root (see render.yaml: no rootDir on envio-indexer).
 WORKDIR /repo
