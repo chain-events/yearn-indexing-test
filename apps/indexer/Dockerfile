@@ -25,7 +25,9 @@ COPY apps/indexer/package.json ./apps/indexer/package.json
 COPY apps/monitoring/package.json ./apps/monitoring/package.json
 
 # Install only the indexer's dependency closure.
-RUN pnpm install --frozen-lockfile --filter envio-indexer...
+# pnpm 11 defaults strict-dep-builds=true; disable so esbuild/rescript build scripts run.
+RUN pnpm config set strict-dep-builds false && \
+    pnpm install --frozen-lockfile --filter envio-indexer...
 
 # Copy the full indexer source (generated/ is excluded via .dockerignore so
 # the container's codegen output is authoritative).
