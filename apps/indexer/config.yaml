@@ -90,10 +90,6 @@ contracts:
     handler: src/EventHandlers.ts
     events:
       - event: "QueueTransaction(bytes32 indexed txHash, address indexed target, uint value, string signature, bytes data, uint eta)"
-  - name: PufferTimelock
-    handler: src/EventHandlers.ts
-    events:
-      - event: "TransactionQueued(bytes32 indexed txHash, address indexed target, bytes callData, uint256 indexed operationId, uint256 lockedUntil)"
   - name: LidoTimelock
     handler: src/EventHandlers.ts
     events:
@@ -841,8 +837,6 @@ chains:
           - "0xd8236031d8279d82e615af2bfab5fc0127a329ab" # CAP TimelockController
           - "0x5d8a7dc9405f08f14541ba918c1bf7eb2dace556" # ETH+ Timelock
           - "0x055e84e7fe8955e2781010b866f10ef6e1e77e59" # LombardTimeLock
-          - "0xe1f03b7b0ebf84e9b9f62a1db40f1efb8faa7d22" # Silo TimelockController
-          - "0x81f6e9914136da1a1d3b1efd14f7e0761c3d4cc7" # Renzo(ezETH) TimelockController
           - "0x9f26d4c958fd811a1f59b01b86be7dffc9d20761" # EtherFiTimelock
           - "0x49bd9989e31ad35b0a62c20be86335196a3135b1" # KelpDAO(rsETH) Timelock
           - "0x3D18480CC32B6AB3B833dCabD80E76CfD41c48a9" # Infinifi Longtimelock
@@ -858,9 +852,6 @@ chains:
         address:
           - "0x6d903f6003cca6255d85cca4d3b5e5146dc33925" # Compound Timelock
           - "0x2386dc45added673317ef068992f19421b481f4c" # Fluid Timelock
-      - name: PufferTimelock
-        address:
-          - "0x3c28b7c7ba1a1f55c9ce66b263b33b204f2126ea" # Puffer Timelock
       - name: LidoTimelock
         address:
           - "0x2e59a20f205bb85a89c53f1936454680651e618e" # Lido Timelock
@@ -899,8 +890,6 @@ chains:
       - name: AaveTimelock
         address: []
       - name: CompoundTimelock
-        address: []
-      - name: PufferTimelock
         address: []
       - name: LidoTimelock
         address: []
@@ -1084,8 +1073,6 @@ chains:
         address: []
       - name: CompoundTimelock
         address: []
-      - name: PufferTimelock
-        address: []
       - name: LidoTimelock
         address: []
       - name: MapleTimelock
@@ -1152,8 +1139,6 @@ chains:
         address: []
       - name: CompoundTimelock
         address: []
-      - name: PufferTimelock
-        address: []
       - name: LidoTimelock
         address: []
       - name: MapleTimelock
@@ -1217,8 +1202,6 @@ chains:
       - name: AaveTimelock
         address: []
       - name: CompoundTimelock
-        address: []
-      - name: PufferTimelock
         address: []
       - name: LidoTimelock
         address: []
@@ -1312,8 +1295,6 @@ chains:
       - name: AaveTimelock
         address: []
       - name: CompoundTimelock
-        address: []
-      - name: PufferTimelock
         address: []
       - name: LidoTimelock
         address: []
@@ -1463,8 +1444,6 @@ chains:
         address: []
       - name: CompoundTimelock
         address: []
-      - name: PufferTimelock
-        address: []
       - name: LidoTimelock
         address: []
       - name: MapleTimelock
@@ -1595,8 +1574,6 @@ chains:
         address: []
       - name: CompoundTimelock
         address: []
-      - name: PufferTimelock
-        address: []
       - name: LidoTimelock
         address: []
       - name: MapleTimelock
@@ -1714,8 +1691,6 @@ chains:
         address: []
       - name: CompoundTimelock
         address: []
-      - name: PufferTimelock
-        address: []
       - name: LidoTimelock
         address: []
       - name: MapleTimelock
@@ -1778,8 +1753,6 @@ chains:
       - name: AaveTimelock
         address: []
       - name: CompoundTimelock
-        address: []
-      - name: PufferTimelock
         address: []
       - name: LidoTimelock
         address: []
