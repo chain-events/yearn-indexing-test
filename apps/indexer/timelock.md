@@ -2,11 +2,11 @@
 
 ## Indexed Contracts
 
-Five timelock contract types are indexed, each listening for a single event:
+Four timelock contract types are indexed, each listening for a single event:
 
 ### TimelockController (OpenZeppelin-style)
 
-Used by: CAP, ETH+, Lombard, Silo, Renzo (ezETH), EtherFi, KelpDAO (rsETH), Infinifi (Long + Short)
+Used by: CAP, ETH+, Lombard, EtherFi, KelpDAO (rsETH), Infinifi (Long + Short)
 
 ```
 CallScheduled(bytes32 indexed id, uint256 indexed index, address target, uint256 value, bytes data, bytes32 predecessor, uint256 delay)
@@ -34,16 +34,6 @@ QueueTransaction(bytes32 indexed txHash, address indexed target, uint value, str
 
 Compound's timelock includes the target address, value, calldata, and notably a human-readable function `signature` (e.g., `"transfer(address,uint256)"`). The `eta` field is the absolute Unix timestamp after which the transaction can be executed (as opposed to a relative delay).
 
-### PufferTimelock
-
-Used by: Puffer Finance
-
-```
-TransactionQueued(bytes32 indexed txHash, address indexed target, bytes callData, uint256 indexed operationId, uint256 lockedUntil)
-```
-
-Similar to the Compound pattern but uses `operationId` as a numeric identifier and `lockedUntil` as the absolute timestamp when the lock expires. The `callData` field holds the encoded function call.
-
 ### LidoTimelock (Aragon Voting)
 
 Used by: Lido DAO
@@ -56,13 +46,13 @@ Lido uses Aragon-based governance where votes are the timelock mechanism. The `S
 
 ## Unified `TimelockEvent` Schema
 
-All five events are mapped to this single GraphQL type defined in `schema.graphql`:
+All four events are mapped to this single GraphQL type defined in `schema.graphql`:
 
 ```graphql
 type TimelockEvent {
   id: ID!
   timelockAddress: String! @index
-  timelockType: String! @index       # "TimelockController", "Aave", "Compound", "Puffer", "Lido"
+  timelockType: String! @index       # "TimelockController", "Aave", "Compound", "Lido"
   eventName: String! @index          # Original event name
   chainId: Int! @index
   blockNumber: Int! @index
@@ -91,7 +81,7 @@ type TimelockEvent {
 Every `TimelockEvent` record includes these fields regardless of the source protocol:
 
 - **`timelockAddress`** -- The on-chain address of the timelock contract that emitted the event.
-- **`timelockType`** -- A human-readable discriminator: `"TimelockController"`, `"Aave"`, `"Compound"`, `"Puffer"`, or `"Lido"`.
+- **`timelockType`** -- A human-readable discriminator: `"TimelockController"`, `"Aave"`, `"Compound"`, or `"Lido"`.
 - **`eventName`** -- The original Solidity event name (e.g., `"CallScheduled"`, `"QueueTransaction"`).
 - **`operationId`** -- A unified identifier for the queued action, mapped from whichever field the protocol uses (`id`, `proposalId`, `txHash`, `voteId`).
 - Standard block/transaction metadata: `chainId`, `blockNumber`, `blockTimestamp`, `blockHash`, `transactionHash`, `transactionFrom`, `logIndex`.
@@ -100,22 +90,22 @@ Every `TimelockEvent` record includes these fields regardless of the source prot
 
 The table below shows exactly which original event parameter maps to which `TimelockEvent` field for each protocol. A dash (`-`) means the field is not applicable and will be `null`.
 
-| TimelockEvent Field | TimelockController | Aave | Compound | Puffer | Lido |
-|---|---|---|---|---|---|
-| `timelockType` | `"TimelockController"` | `"Aave"` | `"Compound"` | `"Puffer"` | `"Lido"` |
-| `eventName` | `"CallScheduled"` | `"ProposalQueued"` | `"QueueTransaction"` | `"TransactionQueued"` | `"StartVote"` |
-| `operationId` | `id` (bytes32) | `proposalId` (uint256) | `txHash` (bytes32) | `txHash` (bytes32) | `voteId` (uint256) |
-| `target` | `target` | - | `target` | `target` | - |
-| `value` | `value` | - | `value` | - | - |
-| `data` | `data` | - | `data` | `callData` | - |
-| `delay` | `delay` (relative seconds) | - | `eta` (absolute timestamp) | `lockedUntil` (absolute timestamp) | - |
-| `predecessor` | `predecessor` | - | - | - | - |
-| `index` | `index` | - | - | - | - |
-| `signature` | - | - | `signature` | - | - |
-| `creator` | - | - | - | - | `creator` |
-| `metadata` | - | - | - | - | `metadata` |
-| `votesFor` | - | `votesFor` | - | - | - |
-| `votesAgainst` | - | `votesAgainst` | - | - | - |
+| TimelockEvent Field | TimelockController | Aave | Compound | Lido |
+|---|---|---|---|---|
+| `timelockType` | `"TimelockController"` | `"Aave"` | `"Compound"` | `"Lido"` |
+| `eventName` | `"CallScheduled"` | `"ProposalQueued"` | `"QueueTransaction"` | `"StartVote"` |
+| `operationId` | `id` (bytes32) | `proposalId` (uint256) | `txHash` (bytes32) | `voteId` (uint256) |
+| `target` | `target` | - | `target` | - |
+| `value` | `value` | - | `value` | - |
+| `data` | `data` | - | `data` | - |
+| `delay` | `delay` (relative seconds) | - | `eta` (absolute timestamp) | - |
+| `predecessor` | `predecessor` | - | - | - |
+| `index` | `index` | - | - | - |
+| `signature` | - | - | `signature` | - |
+| `creator` | - | - | - | `creator` |
+| `metadata` | - | - | - | `metadata` |
+| `votesFor` | - | `votesFor` | - | - |
+| `votesAgainst` | - | `votesAgainst` | - | - |
 
 ### Important Notes on `delay`
 
@@ -123,7 +113,6 @@ The `delay` field has different semantics depending on the source:
 
 - **TimelockController**: A *relative* duration in seconds. The operation becomes executable at `blockTimestamp + delay`.
 - **Compound** (`eta`): An *absolute* Unix timestamp. The transaction can execute after this time.
-- **Puffer** (`lockedUntil`): An *absolute* Unix timestamp. The transaction is locked until this time.
 - **Aave** and **Lido**: Do not use a time-based delay in their queuing event. Aave proposals have a separate execution delay configured in the governance contract, and Lido votes are gated by vote outcome rather than time.
 
 ## Handler Implementation
@@ -179,7 +168,7 @@ The `id` for each record is `${chainId}_${blockNumber}_${logIndex}`, which guara
 
 ```graphql
 {
-  TimelockEvent(where: { timelockAddress: { _eq: "0x3c28b7c7ba1a1f55c9ce66b263b33b204f2126ea" } }) {
+  TimelockEvent(where: { timelockAddress: { _eq: "0xd8236031d8279d82e615af2bfab5fc0127a329ab" } }) {
     eventName
     operationId
     target
