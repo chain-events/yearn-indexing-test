@@ -51,6 +51,10 @@
   }
   .card .label { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; }
   .card .value { font-size: 28px; font-weight: 600; margin-top: 6px; }
+  .card .value.mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 22px; }
+  .card .value a { color: inherit; text-decoration: none; border-bottom: 1px dashed var(--border); }
+  .card .value a:hover { color: var(--accent); border-bottom-color: var(--accent); }
+  .commit-msg { color: var(--fg); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .card .sub { color: var(--muted); font-size: 12px; margin-top: 6px; }
 
   section.chains h2 {
@@ -142,6 +146,7 @@
     <h1>Envio Indexer Monitoring</h1>
     <div class="meta" id="meta">
       <span id="meta-version">envio: —</span>
+      <span id="meta-commit">commit: —</span>
       <span id="meta-path"></span>
       <span id="meta-updated">updated: —</span>
     </div>
@@ -158,6 +163,11 @@
       <div class="label">Envio version</div>
       <div class="value" id="summary-version">—</div>
       <div class="sub">from indexer project</div>
+    </div>
+    <div class="card">
+      <div class="label">Deployed commit</div>
+      <div class="value mono" id="summary-commit">—</div>
+      <div class="sub commit-msg" id="summary-commit-sub" title="">—</div>
     </div>
     <div class="card">
       <div class="label">Chains indexed</div>
@@ -197,6 +207,26 @@
     document.getElementById("meta-version").textContent = `envio: ${data.envioVersion ?? "unknown"}`;
     document.getElementById("meta-path").textContent = data.indexerProjectPath ? `project: ${data.indexerProjectPath}` : "";
     document.getElementById("meta-updated").textContent = `updated: ${new Date(data.fetchedAt).toLocaleTimeString()}`;
+
+    const commit = data.deployedCommit;
+    const summaryCommit = document.getElementById("summary-commit");
+    const summaryCommitSub = document.getElementById("summary-commit-sub");
+    const metaCommit = document.getElementById("meta-commit");
+    if (commit) {
+      const label = commit.shortSha + (commit.branch ? ` <span class="badge">${commit.branch}</span>` : "");
+      summaryCommit.innerHTML = commit.url
+        ? `<a href="${commit.url}" target="_blank" rel="noopener" title="${commit.sha}">${label}</a>`
+        : `<span title="${commit.sha}">${label}</span>`;
+      const when = commit.date ? new Date(commit.date).toLocaleString() : "";
+      const msg = commit.message || "(no message)";
+      summaryCommitSub.textContent = when ? `${msg} · ${when}` : msg;
+      summaryCommitSub.title = commit.author ? `${msg}\n${commit.author}` : msg;
+      metaCommit.textContent = `commit: ${commit.shortSha}${commit.branch ? ` (${commit.branch})` : ""}`;
+    } else {
+      summaryCommit.textContent = "—";
+      summaryCommitSub.textContent = "no commit info";
+      metaCommit.textContent = "commit: —";
+    }
 
     const { totals, chains } = data;
     document.getElementById("summary-chains").textContent = totals.chainCount;

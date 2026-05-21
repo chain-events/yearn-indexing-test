@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import { existsSync, readFileSync } from "node:fs";
 import { resolve, dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { execSync } from "node:child_process";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -60,6 +61,63 @@ const CHAIN_NAMES = {
   42161: "Arbitrum",
   747474: "Katana",
 };
+
+function readDeployedCommit() {
+  const envSha =
+    process.env.RENDER_GIT_COMMIT ||
+    process.env.GIT_COMMIT ||
+    process.env.COMMIT_SHA ||
+    process.env.SOURCE_COMMIT ||
+    process.env.VERCEL_GIT_COMMIT_SHA;
+  const envMessage =
+    process.env.RENDER_GIT_COMMIT_MESSAGE ||
+    process.env.GIT_COMMIT_MESSAGE ||
+    process.env.VERCEL_GIT_COMMIT_MESSAGE;
+  const envBranch =
+    process.env.RENDER_GIT_BRANCH ||
+    process.env.GIT_BRANCH ||
+    process.env.VERCEL_GIT_COMMIT_REF;
+  const repoUrl =
+    process.env.GIT_REPO_URL ||
+    process.env.RENDER_GIT_REPO_SLUG ||
+    process.env.GITHUB_REPOSITORY;
+
+  let sha = envSha || null;
+  let message = envMessage || null;
+  let branch = envBranch || null;
+  let date = null;
+  let author = null;
+
+  try {
+    const opts = { cwd: __dirname, stdio: ["ignore", "pipe", "ignore"] };
+    if (!sha) sha = execSync("git rev-parse HEAD", opts).toString().trim() || null;
+    if (sha) {
+      const fmt = execSync(`git show -s --format=%s%n%an%n%cI ${sha}`, opts)
+        .toString()
+        .split("\n");
+      message = message || fmt[0] || null;
+      author = fmt[1] || null;
+      date = fmt[2] || null;
+    }
+    if (!branch) {
+      branch = execSync("git rev-parse --abbrev-ref HEAD", opts).toString().trim() || null;
+    }
+  } catch {}
+
+  if (!sha) return null;
+  const shortSha = sha.slice(0, 7);
+  let url = null;
+  if (repoUrl) {
+    const slug = repoUrl
+      .replace(/^git@github\.com:/, "https://github.com/")
+      .replace(/^https?:\/\/github\.com\//, "https://github.com/")
+      .replace(/\.git$/, "");
+    url = slug.startsWith("http")
+      ? `${slug}/commit/${sha}`
+      : `https://github.com/${slug}/commit/${sha}`;
+  }
+  return { sha, shortSha, message, author, date, branch, url };
+}
 
 function readEnvioVersion() {
   const candidates = [
@@ -152,6 +210,7 @@ async function getStatus() {
 
   return {
     envioVersion: readEnvioVersion(),
+    deployedCommit: readDeployedCommit(),
     indexerProjectPath: INDEXER_PROJECT_PATH,
     fetchedAt: new Date().toISOString(),
     chains,
