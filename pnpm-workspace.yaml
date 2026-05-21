@@ -11,3 +11,7 @@ minimumReleaseAge: 10080
 onlyBuiltDependencies:
   - esbuild
   - rescript
+
+allowBuilds:
+  esbuild: true
+  rescript: true
