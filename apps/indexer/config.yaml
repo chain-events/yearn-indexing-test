@@ -1,6 +1,8 @@
 # yaml-language-server: $schema=./node_modules/envio/evm.schema.json
 name: yearn-v3-vault
 description: Yearn V3 Vault Indexer
+storage:
+  postgres: true
 field_selection:
   transaction_fields:
     - hash
