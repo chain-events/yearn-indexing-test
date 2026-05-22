@@ -10,7 +10,7 @@
     "codegen": "envio codegen",
     "dev": "envio dev",
     "migrate": "envio local db-migrate up",
-    "start": "node bin/start-envio.mjs",
+    "start": "envio start",
     "sync:vaults": "node scripts/update_kong_vaults.js",
     "test": "vitest run",
     "calc-fees": "tsc -p tsconfig.calc.json && node build/calc/calculate-depositor-fees.js",
@@ -19,15 +19,13 @@
   "devDependencies": {
     "@types/node": "20.17.0",
     "dotenv": "17.4.1",
-    "vitest": "3.2.4",
-    "typescript": "5.9.3"
+    "postgres": "3.4.9",
+    "typescript": "5.9.3",
+    "vitest": "3.2.4"
   },
   "dependencies": {
     "envio": "3.0.1",
     "viem": "2.47.11"
-  },
-  "optionalDependencies": {
-    "generated": "link:generated"
   },
   "engines": {
     "node": ">=22.0.0"

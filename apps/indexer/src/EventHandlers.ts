@@ -3,13 +3,36 @@ import {
   CompoundTimelock,
   DebtAllocator,
   DebtAllocatorFactory,
+  Erc4626Vault,
+  LidoTimelock,
+  MapleTimelock,
+  TimelockController,
+  VotingEscrowFactory,
+  YearnGauge,
+  YearnReferralWrapper,
+  YearnStakingRegistry,
+  YearnStakingRegistryIndexed,
+  YearnV2Registry,
+  YearnV2Registry2,
+  YearnV2Strategy,
+  YearnV2TradeHandler,
+  YearnV2Vault,
+  YearnV3Accountant,
+  YearnV3Registry,
+  YearnV3RoleManager,
+  YearnV3RoleManagerFactory,
+  YearnV3SplitterFactory,
+  YearnV3Strategy,
+  YearnV3Vault,
+  YearnV3VaultFactory,
+  YearnV3YieldSplitterFactory,
+  YearnVeyfiRegistry,
+} from "../generated/index.js";
+import type {
   DebtPurchased,
   DebtUpdated,
   Deposit,
-  Erc4626Vault,
   GovernanceTransferred,
-  LidoTimelock,
-  MapleTimelock,
   NewDebtAllocator,
   ReferralDeposit,
   RoleSet,
@@ -18,7 +41,6 @@ import {
   StakingPoolAdded,
   StrategyChanged,
   StrategyReported,
-  TimelockController,
   TimelockEvent,
   Transfer,
   UpdateAccountant,
@@ -82,28 +104,8 @@ import {
   V3YieldSplitterNewYieldSplitter,
   VeyfiGaugeRegistered,
   VotingEscrowCreated,
-  VotingEscrowFactory,
   Withdraw,
-  YearnGauge,
-  YearnReferralWrapper,
-  YearnStakingRegistry,
-  YearnStakingRegistryIndexed,
-  YearnV2Registry,
-  YearnV2Registry2,
-  YearnV2Strategy,
-  YearnV2TradeHandler,
-  YearnV2Vault,
-  YearnV3Accountant,
-  YearnV3Registry,
-  YearnV3RoleManager,
-  YearnV3RoleManagerFactory,
-  YearnV3SplitterFactory,
-  YearnV3Strategy,
-  YearnV3Vault,
-  YearnV3VaultFactory,
-  YearnV3YieldSplitterFactory,
-  YearnVeyfiRegistry
-} from "generated";
+} from "envio";
 import { getAddress } from "viem";
 
 const addr = (a: string | undefined): string | undefined =>
@@ -1247,7 +1249,7 @@ YearnStakingRegistryIndexed.StakingPoolAdded.handler(
       blockHash: event.block.hash,
       transactionHash: event.transaction.hash,
       transactionIndex: event.transaction.transactionIndex,
-    transactionFrom: addr(event.transaction.from),
+      transactionFrom: addr(event.transaction.from),
       logIndex: event.logIndex,
       token: getAddress(event.params.token),
       stakingPool: getAddress(event.params.stakingPool),
@@ -1459,7 +1461,12 @@ YearnV2TradeHandler.UpdatedSettlement.handler(async ({ event, context }) => {
 });
 
 YearnV2TradeHandler.UpdatedTreasury.handler(async ({ event, context }) => {
-  setTradeAddressEvent(event, context, "UpdatedTreasury", event.params.treasury);
+  setTradeAddressEvent(
+    event,
+    context,
+    "UpdatedTreasury",
+    event.params.treasury,
+  );
 });
 
 YearnV3Registry.NewEndorsedVault.contractRegister(({ event, context }) => {
@@ -1630,7 +1637,7 @@ YearnV3YieldSplitterFactory.NewYieldSplitter.handler(
       blockHash: event.block.hash,
       transactionHash: event.transaction.hash,
       transactionIndex: event.transaction.transactionIndex,
-    transactionFrom: addr(event.transaction.from),
+      transactionFrom: addr(event.transaction.from),
       logIndex: event.logIndex,
       strategy: getAddress(event.params.strategy),
       vault: getAddress(event.params.vault),
