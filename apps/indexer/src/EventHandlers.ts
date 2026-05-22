@@ -1,33 +1,4 @@
-import {
-  AaveTimelock,
-  CompoundTimelock,
-  DebtAllocator,
-  DebtAllocatorFactory,
-  Erc4626Vault,
-  LidoTimelock,
-  MapleTimelock,
-  TimelockController,
-  VotingEscrowFactory,
-  YearnGauge,
-  YearnReferralWrapper,
-  YearnStakingRegistry,
-  YearnStakingRegistryIndexed,
-  YearnV2Registry,
-  YearnV2Registry2,
-  YearnV2Strategy,
-  YearnV2TradeHandler,
-  YearnV2Vault,
-  YearnV3Accountant,
-  YearnV3Registry,
-  YearnV3RoleManager,
-  YearnV3RoleManagerFactory,
-  YearnV3SplitterFactory,
-  YearnV3Strategy,
-  YearnV3Vault,
-  YearnV3VaultFactory,
-  YearnV3YieldSplitterFactory,
-  YearnVeyfiRegistry,
-} from "../generated/index.js";
+import { indexer } from "envio";
 import type {
   DebtPurchased,
   DebtUpdated,
@@ -48,7 +19,6 @@ import type {
   UpdateDefaultQueue,
   UpdateDepositLimit,
   UpdateDepositLimitModule,
-  UpdatedMaxDebtForStrategy,
   UpdateFutureRoleManager,
   UpdateKeeper,
   UpdateMaxAcceptableBaseFee,
@@ -61,6 +31,7 @@ import type {
   UpdateStrategyDebtRatios,
   UpdateUseDefaultQueue,
   UpdateWithdrawLimitModule,
+  UpdatedMaxDebtForStrategy,
   V2Deposit,
   V2EmergencyShutdown,
   V2FeeReport,
@@ -129,7 +100,7 @@ const eventCore = (event: any) => ({
   logIndex: event.logIndex,
 });
 
-YearnV3Vault.Deposit.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "YearnV3Vault", event: "Deposit" }, async ({ event, context }) => {
   const entity: Deposit = {
     id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
     vaultAddress: getAddress(event.srcAddress),
@@ -149,7 +120,7 @@ YearnV3Vault.Deposit.handler(async ({ event, context }) => {
   context.Deposit.set(entity);
 });
 
-YearnV3Vault.Withdraw.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "YearnV3Vault", event: "Withdraw" }, async ({ event, context }) => {
   const entity: Withdraw = {
     id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
     vaultAddress: getAddress(event.srcAddress),
@@ -170,7 +141,7 @@ YearnV3Vault.Withdraw.handler(async ({ event, context }) => {
   context.Withdraw.set(entity);
 });
 
-YearnV3Vault.Transfer.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "YearnV3Vault", event: "Transfer" }, async ({ event, context }) => {
   const entity: Transfer = {
     id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
     vaultAddress: getAddress(event.srcAddress),
@@ -189,7 +160,7 @@ YearnV3Vault.Transfer.handler(async ({ event, context }) => {
   context.Transfer.set(entity);
 });
 
-YearnV3Vault.StrategyReported.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "YearnV3Vault", event: "StrategyReported" }, async ({ event, context }) => {
   const entity: StrategyReported = {
     id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
     vaultAddress: getAddress(event.srcAddress),
@@ -212,7 +183,7 @@ YearnV3Vault.StrategyReported.handler(async ({ event, context }) => {
   context.StrategyReported.set(entity);
 });
 
-YearnV3Vault.DebtUpdated.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "YearnV3Vault", event: "DebtUpdated" }, async ({ event, context }) => {
   const entity: DebtUpdated = {
     id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
     vaultAddress: getAddress(event.srcAddress),
@@ -231,7 +202,7 @@ YearnV3Vault.DebtUpdated.handler(async ({ event, context }) => {
   context.DebtUpdated.set(entity);
 });
 
-YearnV3Vault.DebtPurchased.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "YearnV3Vault", event: "DebtPurchased" }, async ({ event, context }) => {
   const entity: DebtPurchased = {
     id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
     vaultAddress: getAddress(event.srcAddress),
@@ -249,11 +220,11 @@ YearnV3Vault.DebtPurchased.handler(async ({ event, context }) => {
   context.DebtPurchased.set(entity);
 });
 
-YearnV3Vault.StrategyChanged.contractRegister(({ event, context }) => {
-  context.addYearnV3Strategy(getAddress(event.params.strategy));
+indexer.contractRegister({ contract: "YearnV3Vault", event: "StrategyChanged" }, async ({ event, context }) => {
+  context.chain.YearnV3Strategy.add(getAddress(event.params.strategy));
 });
 
-YearnV3Vault.StrategyChanged.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "YearnV3Vault", event: "StrategyChanged" }, async ({ event, context }) => {
   const entity: StrategyChanged = {
     id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
     vaultAddress: getAddress(event.srcAddress),
@@ -271,7 +242,7 @@ YearnV3Vault.StrategyChanged.handler(async ({ event, context }) => {
   context.StrategyChanged.set(entity);
 });
 
-YearnV3Vault.UpdatedMaxDebtForStrategy.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "YearnV3Vault", event: "UpdatedMaxDebtForStrategy" }, async ({ event, context }) => {
   const entity: UpdatedMaxDebtForStrategy = {
     id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
     vaultAddress: getAddress(event.srcAddress),
@@ -290,7 +261,7 @@ YearnV3Vault.UpdatedMaxDebtForStrategy.handler(async ({ event, context }) => {
   context.UpdatedMaxDebtForStrategy.set(entity);
 });
 
-YearnV3Vault.RoleSet.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "YearnV3Vault", event: "RoleSet" }, async ({ event, context }) => {
   const entity: RoleSet = {
     id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
     vaultAddress: getAddress(event.srcAddress),
@@ -308,7 +279,7 @@ YearnV3Vault.RoleSet.handler(async ({ event, context }) => {
   context.RoleSet.set(entity);
 });
 
-YearnV3Vault.RoleStatusChanged.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "YearnV3Vault", event: "RoleStatusChanged" }, async ({ event, context }) => {
   const entity: RoleStatusChanged = {
     id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
     vaultAddress: getAddress(event.srcAddress),
@@ -326,7 +297,7 @@ YearnV3Vault.RoleStatusChanged.handler(async ({ event, context }) => {
   context.RoleStatusChanged.set(entity);
 });
 
-YearnV3Vault.UpdateFutureRoleManager.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "YearnV3Vault", event: "UpdateFutureRoleManager" }, async ({ event, context }) => {
   const entity: UpdateFutureRoleManager = {
     id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
     vaultAddress: getAddress(event.srcAddress),
@@ -343,7 +314,7 @@ YearnV3Vault.UpdateFutureRoleManager.handler(async ({ event, context }) => {
   context.UpdateFutureRoleManager.set(entity);
 });
 
-YearnV3Vault.UpdateRoleManager.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "YearnV3Vault", event: "UpdateRoleManager" }, async ({ event, context }) => {
   const entity: UpdateRoleManager = {
     id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
     vaultAddress: getAddress(event.srcAddress),
@@ -360,7 +331,7 @@ YearnV3Vault.UpdateRoleManager.handler(async ({ event, context }) => {
   context.UpdateRoleManager.set(entity);
 });
 
-YearnV3Vault.UpdateAccountant.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "YearnV3Vault", event: "UpdateAccountant" }, async ({ event, context }) => {
   const entity: UpdateAccountant = {
     id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
     vaultAddress: getAddress(event.srcAddress),
@@ -377,7 +348,7 @@ YearnV3Vault.UpdateAccountant.handler(async ({ event, context }) => {
   context.UpdateAccountant.set(entity);
 });
 
-YearnV3Vault.UpdateDefaultQueue.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "YearnV3Vault", event: "UpdateDefaultQueue" }, async ({ event, context }) => {
   const entity: UpdateDefaultQueue = {
     id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
     vaultAddress: getAddress(event.srcAddress),
@@ -396,7 +367,7 @@ YearnV3Vault.UpdateDefaultQueue.handler(async ({ event, context }) => {
   context.UpdateDefaultQueue.set(entity);
 });
 
-YearnV3Vault.UpdateUseDefaultQueue.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "YearnV3Vault", event: "UpdateUseDefaultQueue" }, async ({ event, context }) => {
   const entity: UpdateUseDefaultQueue = {
     id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
     vaultAddress: getAddress(event.srcAddress),
@@ -413,7 +384,7 @@ YearnV3Vault.UpdateUseDefaultQueue.handler(async ({ event, context }) => {
   context.UpdateUseDefaultQueue.set(entity);
 });
 
-YearnV3Vault.UpdateAutoAllocate.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "YearnV3Vault", event: "UpdateAutoAllocate" }, async ({ event, context }) => {
   const entity: UpdateAutoAllocate = {
     id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
     vaultAddress: getAddress(event.srcAddress),
@@ -430,7 +401,7 @@ YearnV3Vault.UpdateAutoAllocate.handler(async ({ event, context }) => {
   context.UpdateAutoAllocate.set(entity);
 });
 
-YearnV3Vault.UpdateDepositLimit.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "YearnV3Vault", event: "UpdateDepositLimit" }, async ({ event, context }) => {
   const entity: UpdateDepositLimit = {
     id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
     vaultAddress: getAddress(event.srcAddress),
@@ -447,7 +418,7 @@ YearnV3Vault.UpdateDepositLimit.handler(async ({ event, context }) => {
   context.UpdateDepositLimit.set(entity);
 });
 
-YearnV3Vault.UpdateDepositLimitModule.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "YearnV3Vault", event: "UpdateDepositLimitModule" }, async ({ event, context }) => {
   const entity: UpdateDepositLimitModule = {
     id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
     vaultAddress: getAddress(event.srcAddress),
@@ -464,7 +435,7 @@ YearnV3Vault.UpdateDepositLimitModule.handler(async ({ event, context }) => {
   context.UpdateDepositLimitModule.set(entity);
 });
 
-YearnV3Vault.UpdateWithdrawLimitModule.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "YearnV3Vault", event: "UpdateWithdrawLimitModule" }, async ({ event, context }) => {
   const entity: UpdateWithdrawLimitModule = {
     id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
     vaultAddress: getAddress(event.srcAddress),
@@ -481,7 +452,7 @@ YearnV3Vault.UpdateWithdrawLimitModule.handler(async ({ event, context }) => {
   context.UpdateWithdrawLimitModule.set(entity);
 });
 
-YearnV3Vault.UpdateMinimumTotalIdle.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "YearnV3Vault", event: "UpdateMinimumTotalIdle" }, async ({ event, context }) => {
   const entity: UpdateMinimumTotalIdle = {
     id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
     vaultAddress: getAddress(event.srcAddress),
@@ -498,7 +469,7 @@ YearnV3Vault.UpdateMinimumTotalIdle.handler(async ({ event, context }) => {
   context.UpdateMinimumTotalIdle.set(entity);
 });
 
-YearnV3Vault.UpdateProfitMaxUnlockTime.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "YearnV3Vault", event: "UpdateProfitMaxUnlockTime" }, async ({ event, context }) => {
   const entity: UpdateProfitMaxUnlockTime = {
     id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
     vaultAddress: getAddress(event.srcAddress),
@@ -515,7 +486,7 @@ YearnV3Vault.UpdateProfitMaxUnlockTime.handler(async ({ event, context }) => {
   context.UpdateProfitMaxUnlockTime.set(entity);
 });
 
-YearnV3Vault.Shutdown.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "YearnV3Vault", event: "Shutdown" }, async ({ event, context }) => {
   const entity: Shutdown = {
     id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
     vaultAddress: getAddress(event.srcAddress),
@@ -533,7 +504,7 @@ YearnV3Vault.Shutdown.handler(async ({ event, context }) => {
 
 // ─── YearnReferralWrapper Handlers ───────────────────────────────────────────
 
-YearnReferralWrapper.ReferralDeposit.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "YearnReferralWrapper", event: "ReferralDeposit" }, async ({ event, context }) => {
   const entity: ReferralDeposit = {
     id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
     contractAddress: getAddress(event.srcAddress),
@@ -557,7 +528,7 @@ YearnReferralWrapper.ReferralDeposit.handler(async ({ event, context }) => {
 // ─── Unified Timelock Handlers ───────────────────────────────────────────────
 // All timelock events are mapped into a single TimelockEvent entity.
 
-TimelockController.CallScheduled.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "TimelockController", event: "CallScheduled" }, async ({ event, context }) => {
   const entity: TimelockEvent = {
     id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
     timelockAddress: getAddress(event.srcAddress),
@@ -587,7 +558,7 @@ TimelockController.CallScheduled.handler(async ({ event, context }) => {
   context.TimelockEvent.set(entity);
 });
 
-AaveTimelock.ProposalQueued.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "AaveTimelock", event: "ProposalQueued" }, async ({ event, context }) => {
   const entity: TimelockEvent = {
     id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
     timelockAddress: getAddress(event.srcAddress),
@@ -617,7 +588,7 @@ AaveTimelock.ProposalQueued.handler(async ({ event, context }) => {
   context.TimelockEvent.set(entity);
 });
 
-CompoundTimelock.QueueTransaction.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "CompoundTimelock", event: "QueueTransaction" }, async ({ event, context }) => {
   const entity: TimelockEvent = {
     id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
     timelockAddress: getAddress(event.srcAddress),
@@ -647,7 +618,7 @@ CompoundTimelock.QueueTransaction.handler(async ({ event, context }) => {
   context.TimelockEvent.set(entity);
 });
 
-LidoTimelock.StartVote.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "LidoTimelock", event: "StartVote" }, async ({ event, context }) => {
   const entity: TimelockEvent = {
     id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
     timelockAddress: getAddress(event.srcAddress),
@@ -679,7 +650,7 @@ LidoTimelock.StartVote.handler(async ({ event, context }) => {
 
 // ─── YearnV2Vault Handlers ──────────────────────────────────────────────────
 
-YearnV2Vault.Transfer.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "YearnV2Vault", event: "Transfer" }, async ({ event, context }) => {
   const entity: Transfer = {
     id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
     vaultAddress: getAddress(event.srcAddress),
@@ -698,7 +669,7 @@ YearnV2Vault.Transfer.handler(async ({ event, context }) => {
   context.Transfer.set(entity);
 });
 
-YearnV2Vault.Deposit.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "YearnV2Vault", event: "Deposit" }, async ({ event, context }) => {
   const entity: V2Deposit = {
     id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
     vaultAddress: getAddress(event.srcAddress),
@@ -717,7 +688,7 @@ YearnV2Vault.Deposit.handler(async ({ event, context }) => {
   context.V2Deposit.set(entity);
 });
 
-YearnV2Vault.Withdraw.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "YearnV2Vault", event: "Withdraw" }, async ({ event, context }) => {
   const entity: V2Withdraw = {
     id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
     vaultAddress: getAddress(event.srcAddress),
@@ -736,7 +707,7 @@ YearnV2Vault.Withdraw.handler(async ({ event, context }) => {
   context.V2Withdraw.set(entity);
 });
 
-YearnV2Vault.Sweep.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "YearnV2Vault", event: "Sweep" }, async ({ event, context }) => {
   const entity: V2Sweep = {
     ...eventCore(event),
     vaultAddress: getAddress(event.srcAddress),
@@ -746,7 +717,7 @@ YearnV2Vault.Sweep.handler(async ({ event, context }) => {
   context.V2Sweep.set(entity);
 });
 
-YearnV2Vault.LockedProfitDegradationUpdated.handler(
+indexer.onEvent({ contract: "YearnV2Vault", event: "LockedProfitDegradationUpdated" }, 
   async ({ event, context }) => {
     const entity: V2LockedProfitDegradationUpdated = {
       ...eventCore(event),
@@ -757,7 +728,7 @@ YearnV2Vault.LockedProfitDegradationUpdated.handler(
   },
 );
 
-YearnV2Vault.StrategyReported.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "YearnV2Vault", event: "StrategyReported" }, async ({ event, context }) => {
   const entity: V2StrategyReported = {
     id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
     vaultAddress: getAddress(event.srcAddress),
@@ -782,7 +753,7 @@ YearnV2Vault.StrategyReported.handler(async ({ event, context }) => {
   context.V2StrategyReported.set(entity);
 });
 
-YearnV2Vault.FeeReport.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "YearnV2Vault", event: "FeeReport" }, async ({ event, context }) => {
   const entity: V2FeeReport = {
     ...eventCore(event),
     vaultAddress: getAddress(event.srcAddress),
@@ -794,7 +765,7 @@ YearnV2Vault.FeeReport.handler(async ({ event, context }) => {
   context.V2FeeReport.set(entity);
 });
 
-YearnV2Vault.WithdrawFromStrategy.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "YearnV2Vault", event: "WithdrawFromStrategy" }, async ({ event, context }) => {
   const entity: V2WithdrawFromStrategy = {
     ...eventCore(event),
     vaultAddress: getAddress(event.srcAddress),
@@ -805,11 +776,11 @@ YearnV2Vault.WithdrawFromStrategy.handler(async ({ event, context }) => {
   context.V2WithdrawFromStrategy.set(entity);
 });
 
-YearnV2Vault.StrategyAdded.contractRegister(({ event, context }) => {
-  context.addYearnV2Strategy(getAddress(event.params.strategy));
+indexer.contractRegister({ contract: "YearnV2Vault", event: "StrategyAdded" }, async ({ event, context }) => {
+  context.chain.YearnV2Strategy.add(getAddress(event.params.strategy));
 });
 
-YearnV2Vault.StrategyAdded.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "YearnV2Vault", event: "StrategyAdded" }, async ({ event, context }) => {
   const entity: V2StrategyAdded = {
     id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
     vaultAddress: getAddress(event.srcAddress),
@@ -830,7 +801,7 @@ YearnV2Vault.StrategyAdded.handler(async ({ event, context }) => {
   context.V2StrategyAdded.set(entity);
 });
 
-YearnV2Vault.StrategyUpdateDebtRatio.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "YearnV2Vault", event: "StrategyUpdateDebtRatio" }, async ({ event, context }) => {
   const entity: V2StrategyUpdateDebtRatio = {
     ...eventCore(event),
     vaultAddress: getAddress(event.srcAddress),
@@ -840,7 +811,7 @@ YearnV2Vault.StrategyUpdateDebtRatio.handler(async ({ event, context }) => {
   context.V2StrategyUpdateDebtRatio.set(entity);
 });
 
-YearnV2Vault.StrategyUpdateMinDebtPerHarvest.handler(
+indexer.onEvent({ contract: "YearnV2Vault", event: "StrategyUpdateMinDebtPerHarvest" }, 
   async ({ event, context }) => {
     const entity: V2StrategyUpdateMinDebtPerHarvest = {
       ...eventCore(event),
@@ -852,7 +823,7 @@ YearnV2Vault.StrategyUpdateMinDebtPerHarvest.handler(
   },
 );
 
-YearnV2Vault.StrategyUpdateMaxDebtPerHarvest.handler(
+indexer.onEvent({ contract: "YearnV2Vault", event: "StrategyUpdateMaxDebtPerHarvest" }, 
   async ({ event, context }) => {
     const entity: V2StrategyUpdateMaxDebtPerHarvest = {
       ...eventCore(event),
@@ -864,7 +835,7 @@ YearnV2Vault.StrategyUpdateMaxDebtPerHarvest.handler(
   },
 );
 
-YearnV2Vault.StrategyUpdatePerformanceFee.handler(
+indexer.onEvent({ contract: "YearnV2Vault", event: "StrategyUpdatePerformanceFee" }, 
   async ({ event, context }) => {
     const entity: V2StrategyUpdatePerformanceFee = {
       ...eventCore(event),
@@ -876,11 +847,11 @@ YearnV2Vault.StrategyUpdatePerformanceFee.handler(
   },
 );
 
-YearnV2Vault.StrategyMigrated.contractRegister(({ event, context }) => {
-  context.addYearnV2Strategy(getAddress(event.params.newVersion));
+indexer.contractRegister({ contract: "YearnV2Vault", event: "StrategyMigrated" }, async ({ event, context }) => {
+  context.chain.YearnV2Strategy.add(getAddress(event.params.newVersion));
 });
 
-YearnV2Vault.StrategyMigrated.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "YearnV2Vault", event: "StrategyMigrated" }, async ({ event, context }) => {
   const entity: V2StrategyMigrated = {
     id: eventId(event),
     vaultAddress: getAddress(event.srcAddress),
@@ -898,7 +869,7 @@ YearnV2Vault.StrategyMigrated.handler(async ({ event, context }) => {
   context.V2StrategyMigrated.set(entity);
 });
 
-YearnV2Vault.StrategyRevoked.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "YearnV2Vault", event: "StrategyRevoked" }, async ({ event, context }) => {
   const entity: V2StrategyRevoked = {
     id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
     vaultAddress: getAddress(event.srcAddress),
@@ -915,7 +886,7 @@ YearnV2Vault.StrategyRevoked.handler(async ({ event, context }) => {
   context.V2StrategyRevoked.set(entity);
 });
 
-YearnV2Vault.StrategyRemovedFromQueue.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "YearnV2Vault", event: "StrategyRemovedFromQueue" }, async ({ event, context }) => {
   const entity: V2StrategyRemovedFromQueue = {
     ...eventCore(event),
     vaultAddress: getAddress(event.srcAddress),
@@ -924,7 +895,7 @@ YearnV2Vault.StrategyRemovedFromQueue.handler(async ({ event, context }) => {
   context.V2StrategyRemovedFromQueue.set(entity);
 });
 
-YearnV2Vault.StrategyAddedToQueue.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "YearnV2Vault", event: "StrategyAddedToQueue" }, async ({ event, context }) => {
   const entity: V2StrategyAddedToQueue = {
     ...eventCore(event),
     vaultAddress: getAddress(event.srcAddress),
@@ -933,7 +904,7 @@ YearnV2Vault.StrategyAddedToQueue.handler(async ({ event, context }) => {
   context.V2StrategyAddedToQueue.set(entity);
 });
 
-YearnV2Vault.NewPendingGovernance.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "YearnV2Vault", event: "NewPendingGovernance" }, async ({ event, context }) => {
   const entity: V2NewPendingGovernance = {
     ...eventCore(event),
     vaultAddress: getAddress(event.srcAddress),
@@ -942,7 +913,7 @@ YearnV2Vault.NewPendingGovernance.handler(async ({ event, context }) => {
   context.V2NewPendingGovernance.set(entity);
 });
 
-YearnV2Vault.UpdateManagement.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "YearnV2Vault", event: "UpdateManagement" }, async ({ event, context }) => {
   const entity: V2UpdateManagement = {
     id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
     vaultAddress: getAddress(event.srcAddress),
@@ -959,7 +930,7 @@ YearnV2Vault.UpdateManagement.handler(async ({ event, context }) => {
   context.V2UpdateManagement.set(entity);
 });
 
-YearnV2Vault.UpdateGovernance.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "YearnV2Vault", event: "UpdateGovernance" }, async ({ event, context }) => {
   const entity: V2UpdateGovernance = {
     id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
     vaultAddress: getAddress(event.srcAddress),
@@ -976,7 +947,7 @@ YearnV2Vault.UpdateGovernance.handler(async ({ event, context }) => {
   context.V2UpdateGovernance.set(entity);
 });
 
-YearnV2Vault.UpdateGuardian.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "YearnV2Vault", event: "UpdateGuardian" }, async ({ event, context }) => {
   const entity: V2UpdateGuardian = {
     id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
     vaultAddress: getAddress(event.srcAddress),
@@ -993,7 +964,7 @@ YearnV2Vault.UpdateGuardian.handler(async ({ event, context }) => {
   context.V2UpdateGuardian.set(entity);
 });
 
-YearnV2Vault.UpdateRewards.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "YearnV2Vault", event: "UpdateRewards" }, async ({ event, context }) => {
   const entity: V2UpdateRewards = {
     ...eventCore(event),
     vaultAddress: getAddress(event.srcAddress),
@@ -1002,7 +973,7 @@ YearnV2Vault.UpdateRewards.handler(async ({ event, context }) => {
   context.V2UpdateRewards.set(entity);
 });
 
-YearnV2Vault.UpdateDepositLimit.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "YearnV2Vault", event: "UpdateDepositLimit" }, async ({ event, context }) => {
   const entity: V2UpdateDepositLimit = {
     id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
     vaultAddress: getAddress(event.srcAddress),
@@ -1019,7 +990,7 @@ YearnV2Vault.UpdateDepositLimit.handler(async ({ event, context }) => {
   context.V2UpdateDepositLimit.set(entity);
 });
 
-YearnV2Vault.UpdatePerformanceFee.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "YearnV2Vault", event: "UpdatePerformanceFee" }, async ({ event, context }) => {
   const entity: V2UpdatePerformanceFee = {
     id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
     vaultAddress: getAddress(event.srcAddress),
@@ -1036,7 +1007,7 @@ YearnV2Vault.UpdatePerformanceFee.handler(async ({ event, context }) => {
   context.V2UpdatePerformanceFee.set(entity);
 });
 
-YearnV2Vault.UpdateManagementFee.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "YearnV2Vault", event: "UpdateManagementFee" }, async ({ event, context }) => {
   const entity: V2UpdateManagementFee = {
     id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
     vaultAddress: getAddress(event.srcAddress),
@@ -1053,7 +1024,7 @@ YearnV2Vault.UpdateManagementFee.handler(async ({ event, context }) => {
   context.V2UpdateManagementFee.set(entity);
 });
 
-YearnV2Vault.UpdateWithdrawalQueue.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "YearnV2Vault", event: "UpdateWithdrawalQueue" }, async ({ event, context }) => {
   const entity: V2UpdateWithdrawalQueue = {
     ...eventCore(event),
     vaultAddress: getAddress(event.srcAddress),
@@ -1062,7 +1033,7 @@ YearnV2Vault.UpdateWithdrawalQueue.handler(async ({ event, context }) => {
   context.V2UpdateWithdrawalQueue.set(entity);
 });
 
-YearnV2Vault.EmergencyShutdown.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "YearnV2Vault", event: "EmergencyShutdown" }, async ({ event, context }) => {
   const entity: V2EmergencyShutdown = {
     id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
     vaultAddress: getAddress(event.srcAddress),
@@ -1082,7 +1053,7 @@ YearnV2Vault.EmergencyShutdown.handler(async ({ event, context }) => {
 // ─── YearnGauge Handlers ────────────────────────────────────────────────────
 // Gauge events use the same structure as V3 vaults
 
-YearnGauge.Deposit.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "YearnGauge", event: "Deposit" }, async ({ event, context }) => {
   const entity: Deposit = {
     id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
     vaultAddress: getAddress(event.srcAddress),
@@ -1102,7 +1073,7 @@ YearnGauge.Deposit.handler(async ({ event, context }) => {
   context.Deposit.set(entity);
 });
 
-YearnGauge.Withdraw.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "YearnGauge", event: "Withdraw" }, async ({ event, context }) => {
   const entity: Withdraw = {
     id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
     vaultAddress: getAddress(event.srcAddress),
@@ -1123,7 +1094,7 @@ YearnGauge.Withdraw.handler(async ({ event, context }) => {
   context.Withdraw.set(entity);
 });
 
-YearnGauge.Transfer.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "YearnGauge", event: "Transfer" }, async ({ event, context }) => {
   const entity: Transfer = {
     id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
     vaultAddress: getAddress(event.srcAddress),
@@ -1144,7 +1115,7 @@ YearnGauge.Transfer.handler(async ({ event, context }) => {
 
 // ─── Additional Yearn Discovery And Strategy Handlers ───────────────────────
 
-Erc4626Vault.Deposit.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "Erc4626Vault", event: "Deposit" }, async ({ event, context }) => {
   const entity: Deposit = {
     id: eventId(event),
     vaultAddress: getAddress(event.srcAddress),
@@ -1164,7 +1135,7 @@ Erc4626Vault.Deposit.handler(async ({ event, context }) => {
   context.Deposit.set(entity);
 });
 
-Erc4626Vault.Withdraw.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "Erc4626Vault", event: "Withdraw" }, async ({ event, context }) => {
   const entity: Withdraw = {
     id: eventId(event),
     vaultAddress: getAddress(event.srcAddress),
@@ -1185,7 +1156,7 @@ Erc4626Vault.Withdraw.handler(async ({ event, context }) => {
   context.Withdraw.set(entity);
 });
 
-VotingEscrowFactory.VestingEscrowCreated.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "VotingEscrowFactory", event: "VestingEscrowCreated" }, async ({ event, context }) => {
   const entity: VotingEscrowCreated = {
     id: eventId(event),
     factoryAddress: getAddress(event.srcAddress),
@@ -1210,11 +1181,11 @@ VotingEscrowFactory.VestingEscrowCreated.handler(async ({ event, context }) => {
   context.VotingEscrowCreated.set(entity);
 });
 
-YearnStakingRegistry.StakingPoolAdded.contractRegister(({ event, context }) => {
-  context.addYearnGauge(getAddress(event.params.stakingPool));
+indexer.contractRegister({ contract: "YearnStakingRegistry", event: "StakingPoolAdded" }, async ({ event, context }) => {
+  context.chain.YearnGauge.add(getAddress(event.params.stakingPool));
 });
 
-YearnStakingRegistry.StakingPoolAdded.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "YearnStakingRegistry", event: "StakingPoolAdded" }, async ({ event, context }) => {
   const entity: StakingPoolAdded = {
     id: eventId(event),
     registryAddress: getAddress(event.srcAddress),
@@ -1232,13 +1203,13 @@ YearnStakingRegistry.StakingPoolAdded.handler(async ({ event, context }) => {
   context.StakingPoolAdded.set(entity);
 });
 
-YearnStakingRegistryIndexed.StakingPoolAdded.contractRegister(
-  ({ event, context }) => {
-    context.addYearnGauge(getAddress(event.params.stakingPool));
+indexer.contractRegister({ contract: "YearnStakingRegistryIndexed", event: "StakingPoolAdded" },
+  async ({ event, context }) => {
+    context.chain.YearnGauge.add(getAddress(event.params.stakingPool));
   },
 );
 
-YearnStakingRegistryIndexed.StakingPoolAdded.handler(
+indexer.onEvent({ contract: "YearnStakingRegistryIndexed", event: "StakingPoolAdded" }, 
   async ({ event, context }) => {
     const entity: StakingPoolAdded = {
       id: eventId(event),
@@ -1258,11 +1229,11 @@ YearnStakingRegistryIndexed.StakingPoolAdded.handler(
   },
 );
 
-YearnVeyfiRegistry.Register.contractRegister(({ event, context }) => {
-  context.addYearnGauge(getAddress(event.params.gauge));
+indexer.contractRegister({ contract: "YearnVeyfiRegistry", event: "Register" }, async ({ event, context }) => {
+  context.chain.YearnGauge.add(getAddress(event.params.gauge));
 });
 
-YearnVeyfiRegistry.Register.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "YearnVeyfiRegistry", event: "Register" }, async ({ event, context }) => {
   const entity: VeyfiGaugeRegistered = {
     id: eventId(event),
     registryAddress: getAddress(event.srcAddress),
@@ -1280,11 +1251,11 @@ YearnVeyfiRegistry.Register.handler(async ({ event, context }) => {
   context.VeyfiGaugeRegistered.set(entity);
 });
 
-YearnV2Registry.NewVault.contractRegister(({ event, context }) => {
-  context.addYearnV2Vault(getAddress(event.params.vault));
+indexer.contractRegister({ contract: "YearnV2Registry", event: "NewVault" }, async ({ event, context }) => {
+  context.chain.YearnV2Vault.add(getAddress(event.params.vault));
 });
 
-YearnV2Registry.NewVault.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "YearnV2Registry", event: "NewVault" }, async ({ event, context }) => {
   const entity: V2RegistryNewVault = {
     id: eventId(event),
     registryAddress: getAddress(event.srcAddress),
@@ -1304,11 +1275,11 @@ YearnV2Registry.NewVault.handler(async ({ event, context }) => {
   context.V2RegistryNewVault.set(entity);
 });
 
-YearnV2Registry.NewExperimentalVault.contractRegister(({ event, context }) => {
-  context.addYearnV2Vault(getAddress(event.params.vault));
+indexer.contractRegister({ contract: "YearnV2Registry", event: "NewExperimentalVault" }, async ({ event, context }) => {
+  context.chain.YearnV2Vault.add(getAddress(event.params.vault));
 });
 
-YearnV2Registry.NewExperimentalVault.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "YearnV2Registry", event: "NewExperimentalVault" }, async ({ event, context }) => {
   const entity: V2RegistryNewExperimentalVault = {
     id: eventId(event),
     registryAddress: getAddress(event.srcAddress),
@@ -1328,11 +1299,11 @@ YearnV2Registry.NewExperimentalVault.handler(async ({ event, context }) => {
   context.V2RegistryNewExperimentalVault.set(entity);
 });
 
-YearnV2Registry2.NewVault.contractRegister(({ event, context }) => {
-  context.addYearnV2Vault(getAddress(event.params.vault));
+indexer.contractRegister({ contract: "YearnV2Registry2", event: "NewVault" }, async ({ event, context }) => {
+  context.chain.YearnV2Vault.add(getAddress(event.params.vault));
 });
 
-YearnV2Registry2.NewVault.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "YearnV2Registry2", event: "NewVault" }, async ({ event, context }) => {
   const entity: V2Registry2NewVault = {
     id: eventId(event),
     registryAddress: getAddress(event.srcAddress),
@@ -1353,7 +1324,7 @@ YearnV2Registry2.NewVault.handler(async ({ event, context }) => {
   context.V2Registry2NewVault.set(entity);
 });
 
-YearnV2Strategy.Harvested.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "YearnV2Strategy", event: "Harvested" }, async ({ event, context }) => {
   const entity: V2StrategyHarvested = {
     id: eventId(event),
     strategyAddress: getAddress(event.srcAddress),
@@ -1388,23 +1359,23 @@ const setTradeAddressEvent = (
   context.V2TradeAddressEvent.set(entity);
 };
 
-YearnV2TradeHandler.AddedMech.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "YearnV2TradeHandler", event: "AddedMech" }, async ({ event, context }) => {
   setTradeAddressEvent(event, context, "AddedMech", event.params.mech);
 });
 
-YearnV2TradeHandler.AddedSolver.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "YearnV2TradeHandler", event: "AddedSolver" }, async ({ event, context }) => {
   setTradeAddressEvent(event, context, "AddedSolver", event.params.solver);
 });
 
-YearnV2TradeHandler.RemovedMech.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "YearnV2TradeHandler", event: "RemovedMech" }, async ({ event, context }) => {
   setTradeAddressEvent(event, context, "RemovedMech", event.params.mech);
 });
 
-YearnV2TradeHandler.RemovedSolver.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "YearnV2TradeHandler", event: "RemovedSolver" }, async ({ event, context }) => {
   setTradeAddressEvent(event, context, "RemovedSolver", event.params.solver);
 });
 
-YearnV2TradeHandler.TradeEnabled.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "YearnV2TradeHandler", event: "TradeEnabled" }, async ({ event, context }) => {
   const entity: V2TradeEnabled = {
     id: eventId(event),
     tradeHandlerAddress: getAddress(event.srcAddress),
@@ -1423,7 +1394,7 @@ YearnV2TradeHandler.TradeEnabled.handler(async ({ event, context }) => {
   context.V2TradeEnabled.set(entity);
 });
 
-YearnV2TradeHandler.TradeDisabled.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "YearnV2TradeHandler", event: "TradeDisabled" }, async ({ event, context }) => {
   const entity: V2TradeDisabled = {
     id: eventId(event),
     tradeHandlerAddress: getAddress(event.srcAddress),
@@ -1442,7 +1413,7 @@ YearnV2TradeHandler.TradeDisabled.handler(async ({ event, context }) => {
   context.V2TradeDisabled.set(entity);
 });
 
-YearnV2TradeHandler.UpdatedGovernance.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "YearnV2TradeHandler", event: "UpdatedGovernance" }, async ({ event, context }) => {
   setTradeAddressEvent(
     event,
     context,
@@ -1451,7 +1422,7 @@ YearnV2TradeHandler.UpdatedGovernance.handler(async ({ event, context }) => {
   );
 });
 
-YearnV2TradeHandler.UpdatedSettlement.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "YearnV2TradeHandler", event: "UpdatedSettlement" }, async ({ event, context }) => {
   setTradeAddressEvent(
     event,
     context,
@@ -1460,7 +1431,7 @@ YearnV2TradeHandler.UpdatedSettlement.handler(async ({ event, context }) => {
   );
 });
 
-YearnV2TradeHandler.UpdatedTreasury.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "YearnV2TradeHandler", event: "UpdatedTreasury" }, async ({ event, context }) => {
   setTradeAddressEvent(
     event,
     context,
@@ -1469,11 +1440,11 @@ YearnV2TradeHandler.UpdatedTreasury.handler(async ({ event, context }) => {
   );
 });
 
-YearnV3Registry.NewEndorsedVault.contractRegister(({ event, context }) => {
-  context.addYearnV3Vault(getAddress(event.params.vault));
+indexer.contractRegister({ contract: "YearnV3Registry", event: "NewEndorsedVault" }, async ({ event, context }) => {
+  context.chain.YearnV3Vault.add(getAddress(event.params.vault));
 });
 
-YearnV3Registry.NewEndorsedVault.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "YearnV3Registry", event: "NewEndorsedVault" }, async ({ event, context }) => {
   const entity: V3RegistryNewEndorsedVault = {
     id: eventId(event),
     registryAddress: getAddress(event.srcAddress),
@@ -1493,11 +1464,11 @@ YearnV3Registry.NewEndorsedVault.handler(async ({ event, context }) => {
   context.V3RegistryNewEndorsedVault.set(entity);
 });
 
-YearnV3VaultFactory.NewVault.contractRegister(({ event, context }) => {
-  context.addYearnV3Vault(getAddress(event.params.vault_address));
+indexer.contractRegister({ contract: "YearnV3VaultFactory", event: "NewVault" }, async ({ event, context }) => {
+  context.chain.YearnV3Vault.add(getAddress(event.params.vault_address));
 });
 
-YearnV3VaultFactory.NewVault.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "YearnV3VaultFactory", event: "NewVault" }, async ({ event, context }) => {
   const entity: V3VaultFactoryNewVault = {
     id: eventId(event),
     factoryAddress: getAddress(event.srcAddress),
@@ -1515,11 +1486,11 @@ YearnV3VaultFactory.NewVault.handler(async ({ event, context }) => {
   context.V3VaultFactoryNewVault.set(entity);
 });
 
-YearnV3RoleManagerFactory.NewProject.contractRegister(({ event, context }) => {
-  context.addYearnV3RoleManager(getAddress(event.params.roleManager));
+indexer.contractRegister({ contract: "YearnV3RoleManagerFactory", event: "NewProject" }, async ({ event, context }) => {
+  context.chain.YearnV3RoleManager.add(getAddress(event.params.roleManager));
 });
 
-YearnV3RoleManagerFactory.NewProject.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "YearnV3RoleManagerFactory", event: "NewProject" }, async ({ event, context }) => {
   const entity: V3RoleManagerFactoryNewProject = {
     id: eventId(event),
     factoryAddress: getAddress(event.srcAddress),
@@ -1537,12 +1508,12 @@ YearnV3RoleManagerFactory.NewProject.handler(async ({ event, context }) => {
   context.V3RoleManagerFactoryNewProject.set(entity);
 });
 
-YearnV3RoleManager.AddedNewVault.contractRegister(({ event, context }) => {
-  context.addYearnV3Vault(getAddress(event.params.vault));
-  context.addDebtAllocator(getAddress(event.params.debtAllocator));
+indexer.contractRegister({ contract: "YearnV3RoleManager", event: "AddedNewVault" }, async ({ event, context }) => {
+  context.chain.YearnV3Vault.add(getAddress(event.params.vault));
+  context.chain.DebtAllocator.add(getAddress(event.params.debtAllocator));
 });
 
-YearnV3RoleManager.AddedNewVault.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "YearnV3RoleManager", event: "AddedNewVault" }, async ({ event, context }) => {
   const entity: V3RoleManagerAddedNewVault = {
     id: eventId(event),
     roleManagerAddress: getAddress(event.srcAddress),
@@ -1561,7 +1532,7 @@ YearnV3RoleManager.AddedNewVault.handler(async ({ event, context }) => {
   context.V3RoleManagerAddedNewVault.set(entity);
 });
 
-YearnV3Accountant.VaultChanged.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "YearnV3Accountant", event: "VaultChanged" }, async ({ event, context }) => {
   const entity: V3AccountantVaultChanged = {
     id: eventId(event),
     accountantAddress: getAddress(event.srcAddress),
@@ -1579,7 +1550,7 @@ YearnV3Accountant.VaultChanged.handler(async ({ event, context }) => {
   context.V3AccountantVaultChanged.set(entity);
 });
 
-YearnV3Strategy.Reported.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "YearnV3Strategy", event: "Reported" }, async ({ event, context }) => {
   const entity: V3StrategyReported = {
     id: eventId(event),
     strategyAddress: getAddress(event.srcAddress),
@@ -1599,7 +1570,7 @@ YearnV3Strategy.Reported.handler(async ({ event, context }) => {
   context.V3StrategyReported.set(entity);
 });
 
-YearnV3SplitterFactory.NewSplitter.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "YearnV3SplitterFactory", event: "NewSplitter" }, async ({ event, context }) => {
   const entity: V3SplitterNewSplitter = {
     id: eventId(event),
     factoryAddress: getAddress(event.srcAddress),
@@ -1619,14 +1590,14 @@ YearnV3SplitterFactory.NewSplitter.handler(async ({ event, context }) => {
   context.V3SplitterNewSplitter.set(entity);
 });
 
-YearnV3YieldSplitterFactory.NewYieldSplitter.contractRegister(
-  ({ event, context }) => {
-    context.addYearnV3Strategy(getAddress(event.params.strategy));
-    context.addYearnV3Vault(getAddress(event.params.vault));
+indexer.contractRegister({ contract: "YearnV3YieldSplitterFactory", event: "NewYieldSplitter" },
+  async ({ event, context }) => {
+    context.chain.YearnV3Strategy.add(getAddress(event.params.strategy));
+    context.chain.YearnV3Vault.add(getAddress(event.params.vault));
   },
 );
 
-YearnV3YieldSplitterFactory.NewYieldSplitter.handler(
+indexer.onEvent({ contract: "YearnV3YieldSplitterFactory", event: "NewYieldSplitter" }, 
   async ({ event, context }) => {
     const entity: V3YieldSplitterNewYieldSplitter = {
       id: eventId(event),
@@ -1651,11 +1622,11 @@ YearnV3YieldSplitterFactory.NewYieldSplitter.handler(
 // Each NewDebtAllocator event registers a new DebtAllocator contract for
 // dynamic indexing.
 
-DebtAllocatorFactory.NewDebtAllocator.contractRegister(({ event, context }) => {
-  context.addDebtAllocator(getAddress(event.params.allocator));
+indexer.contractRegister({ contract: "DebtAllocatorFactory", event: "NewDebtAllocator" }, async ({ event, context }) => {
+  context.chain.DebtAllocator.add(getAddress(event.params.allocator));
 });
 
-DebtAllocatorFactory.NewDebtAllocator.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "DebtAllocatorFactory", event: "NewDebtAllocator" }, async ({ event, context }) => {
   const entity: NewDebtAllocator = {
     id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
     factoryAddress: getAddress(event.srcAddress),
@@ -1675,7 +1646,7 @@ DebtAllocatorFactory.NewDebtAllocator.handler(async ({ event, context }) => {
 
 // ─── DebtAllocator Handlers ─────────────────────────────────────────────────
 
-DebtAllocator.UpdateStrategyDebtRatios.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "DebtAllocator", event: "UpdateStrategyDebtRatios" }, async ({ event, context }) => {
   const entity: UpdateStrategyDebtRatios = {
     id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
     allocatorAddress: getAddress(event.srcAddress),
@@ -1695,7 +1666,7 @@ DebtAllocator.UpdateStrategyDebtRatios.handler(async ({ event, context }) => {
   context.UpdateStrategyDebtRatios.set(entity);
 });
 
-DebtAllocator.UpdateKeeper.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "DebtAllocator", event: "UpdateKeeper" }, async ({ event, context }) => {
   const entity: UpdateKeeper = {
     id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
     allocatorAddress: getAddress(event.srcAddress),
@@ -1713,7 +1684,7 @@ DebtAllocator.UpdateKeeper.handler(async ({ event, context }) => {
   context.UpdateKeeper.set(entity);
 });
 
-DebtAllocator.GovernanceTransferred.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "DebtAllocator", event: "GovernanceTransferred" }, async ({ event, context }) => {
   const entity: GovernanceTransferred = {
     id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
     allocatorAddress: getAddress(event.srcAddress),
@@ -1731,7 +1702,7 @@ DebtAllocator.GovernanceTransferred.handler(async ({ event, context }) => {
   context.GovernanceTransferred.set(entity);
 });
 
-DebtAllocator.UpdateMaxAcceptableBaseFee.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "DebtAllocator", event: "UpdateMaxAcceptableBaseFee" }, async ({ event, context }) => {
   const entity: UpdateMaxAcceptableBaseFee = {
     id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
     allocatorAddress: getAddress(event.srcAddress),
@@ -1748,7 +1719,7 @@ DebtAllocator.UpdateMaxAcceptableBaseFee.handler(async ({ event, context }) => {
   context.UpdateMaxAcceptableBaseFee.set(entity);
 });
 
-DebtAllocator.UpdateMaxDebtUpdateLoss.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "DebtAllocator", event: "UpdateMaxDebtUpdateLoss" }, async ({ event, context }) => {
   const entity: UpdateMaxDebtUpdateLoss = {
     id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
     allocatorAddress: getAddress(event.srcAddress),
@@ -1765,7 +1736,7 @@ DebtAllocator.UpdateMaxDebtUpdateLoss.handler(async ({ event, context }) => {
   context.UpdateMaxDebtUpdateLoss.set(entity);
 });
 
-DebtAllocator.UpdateMinimumChange.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "DebtAllocator", event: "UpdateMinimumChange" }, async ({ event, context }) => {
   const entity: UpdateMinimumChange = {
     id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
     allocatorAddress: getAddress(event.srcAddress),
@@ -1782,7 +1753,7 @@ DebtAllocator.UpdateMinimumChange.handler(async ({ event, context }) => {
   context.UpdateMinimumChange.set(entity);
 });
 
-DebtAllocator.UpdateMinimumWait.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "DebtAllocator", event: "UpdateMinimumWait" }, async ({ event, context }) => {
   const entity: UpdateMinimumWait = {
     id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
     allocatorAddress: getAddress(event.srcAddress),
@@ -1799,7 +1770,7 @@ DebtAllocator.UpdateMinimumWait.handler(async ({ event, context }) => {
   context.UpdateMinimumWait.set(entity);
 });
 
-MapleTimelock.ProposalScheduled.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "MapleTimelock", event: "ProposalScheduled" }, async ({ event, context }) => {
   const entity: TimelockEvent = {
     id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
     timelockAddress: getAddress(event.srcAddress),
