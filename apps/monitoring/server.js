@@ -175,7 +175,8 @@ async function getStatus() {
 
   const chains = (data.chain_metadata ?? []).map((c) => {
     const syncStart = c.first_event_block_number ?? c.start_block ?? 0;
-    const target = c.end_block ?? c.block_height ?? 0;
+    const head = Math.max(c.block_height ?? 0, c.latest_fetched_block_number ?? 0);
+    const target = c.end_block ?? head;
     const processed = c.latest_processed_block ?? 0;
     const totalRange = Math.max(0, target - syncStart);
     const doneRange = Math.max(0, processed - syncStart);
@@ -186,7 +187,7 @@ async function getStatus() {
     return {
       chainId: c.chain_id,
       chainName: CHAIN_NAMES[c.chain_id] ?? `Chain ${c.chain_id}`,
-      blockHeight: c.block_height,
+      blockHeight: head,
       startBlock: c.start_block,
       endBlock: c.end_block,
       firstEventBlock: c.first_event_block_number,
