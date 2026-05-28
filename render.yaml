@@ -115,6 +115,20 @@ services:
         value: "1000"
       - key: ENVIO_THROTTLE_JSON_FILE_BENCHMARK_INTERVAL_MILLIS
         value: "500"
+      - key: ENVIO_RPC_URL_ETHEREUM
+        sync: false
+      - key: ENVIO_RPC_URL_OPTIMISM
+        sync: false
+      - key: ENVIO_RPC_URL_GNOSIS
+        sync: false
+      - key: ENVIO_RPC_URL_BASE
+        sync: false
+      - key: ENVIO_RPC_URL_ARBITRUM
+        sync: false
+      - key: ENVIO_RPC_URL_POLYGON
+        sync: false
+      - key: ENVIO_RPC_URL_BERACHAIN
+        sync: false
       - key: ENVIO_RPC_URL_KATANA
         sync: false
       - key: TUI_OFF
