@@ -190,7 +190,8 @@ chains:
   - id: 1
     start_block: 0
     rpc:
-      url: ${ENVIO_RPC_URL_ETHEREUM}
+      - url: ${ENVIO_RPC_URL_ETHEREUM}
+        for: sync
     contracts:
       - name: Erc4626Vault
         address: []
@@ -891,7 +892,8 @@ chains:
   - id: 10  # Optimism
     start_block: 0
     rpc:
-      url: ${ENVIO_RPC_URL_OPTIMISM}
+      - url: ${ENVIO_RPC_URL_OPTIMISM}
+        for: sync
     contracts:
       - name: AaveTimelock
         address: []
@@ -1073,7 +1075,8 @@ chains:
   - id: 100  # Gnosis
     start_block: 0
     rpc:
-      url: ${ENVIO_RPC_URL_GNOSIS}
+      - url: ${ENVIO_RPC_URL_GNOSIS}
+        for: sync
     contracts:
       - name: TimelockController
         address: []
@@ -1141,7 +1144,8 @@ chains:
   - id: 8453  # Base
     start_block: 0
     rpc:
-      url: ${ENVIO_RPC_URL_BASE}
+      - url: ${ENVIO_RPC_URL_BASE}
+        for: sync
     contracts:
       - name: AaveTimelock
         address: []
@@ -1291,7 +1295,8 @@ chains:
   - id: 42161  # Arbitrum
     start_block: 0
     rpc:
-      url: ${ENVIO_RPC_URL_ARBITRUM}
+      - url: ${ENVIO_RPC_URL_ARBITRUM}
+        for: sync
     contracts:
       - name: AaveTimelock
         address: []
@@ -1423,7 +1428,8 @@ chains:
   - id: 137  # Polygon
     start_block: 0
     rpc:
-      url: ${ENVIO_RPC_URL_POLYGON}
+      - url: ${ENVIO_RPC_URL_POLYGON}
+        for: sync
     contracts:
       - name: AaveTimelock
         address: []
@@ -1540,7 +1546,8 @@ chains:
   - id: 80094  # Berachain
     start_block: 0
     rpc:
-      url: ${ENVIO_RPC_URL_BERACHAIN}
+      - url: ${ENVIO_RPC_URL_BERACHAIN}
+        for: sync
     contracts:
       - name: TimelockController
         address: []
@@ -1605,7 +1612,8 @@ chains:
   - id: 747474
     start_block: 0
     rpc:
-      url: ${ENVIO_RPC_URL_KATANA}
+      - url: ${ENVIO_RPC_URL_KATANA}
+        for: sync
     contracts:
       - name: AaveTimelock
         address: []
