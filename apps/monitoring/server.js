@@ -55,12 +55,56 @@ if (!GRAPHQL_URL) {
 const CHAIN_NAMES = {
   1: "Ethereum",
   10: "Optimism",
+  100: "Gnosis",
   137: "Polygon",
-  250: "Fantom",
   8453: "Base",
   42161: "Arbitrum",
+  80094: "Berachain",
   747474: "Katana",
 };
+
+// envio's chain_metadata.block_height tracks the last-processed block once a
+// chain looks caught up, so it can't reveal real lag. Query each chain's RPC
+// for the live head instead. Resolved from RPC_URL_<chainId>, falling back to
+// the indexer's ENVIO_RPC_URL_<NAME> naming.
+const RPC_NAME_BY_CHAIN = {
+  1: "ETHEREUM",
+  10: "OPTIMISM",
+  100: "GNOSIS",
+  137: "POLYGON",
+  8453: "BASE",
+  42161: "ARBITRUM",
+  80094: "BERACHAIN",
+  747474: "KATANA",
+};
+
+function rpcUrlForChain(chainId) {
+  const named = RPC_NAME_BY_CHAIN[chainId];
+  return (
+    process.env[`RPC_URL_${chainId}`] ||
+    (named ? process.env[`ENVIO_RPC_URL_${named}`] : null) ||
+    null
+  );
+}
+
+async function fetchChainHead(url) {
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "eth_blockNumber", params: [] }),
+      signal: AbortSignal.timeout(4000),
+    });
+    if (!res.ok) return null;
+    const json = await res.json();
+    const hex = json?.result;
+    if (typeof hex !== "string") return null;
+    const n = Number.parseInt(hex, 16);
+    return Number.isFinite(n) ? n : null;
+  } catch {
+    return null;
+  }
+}
 
 function readDeployedCommit() {
   const envSha =
@@ -173,9 +217,18 @@ async function getStatus() {
     }
   `);
 
-  const chains = (data.chain_metadata ?? []).map((c) => {
+  const metas = data.chain_metadata ?? [];
+  const rpcHeads = await Promise.all(
+    metas.map((c) => {
+      const url = rpcUrlForChain(c.chain_id);
+      return url ? fetchChainHead(url) : Promise.resolve(null);
+    }),
+  );
+
+  const chains = metas.map((c, i) => {
     const syncStart = c.first_event_block_number ?? c.start_block ?? 0;
-    const head = Math.max(c.block_height ?? 0, c.latest_fetched_block_number ?? 0);
+    const envioHead = Math.max(c.block_height ?? 0, c.latest_fetched_block_number ?? 0);
+    const head = rpcHeads[i] != null ? Math.max(rpcHeads[i], envioHead) : envioHead;
     const target = c.end_block ?? head;
     const processed = c.latest_processed_block ?? 0;
     const totalRange = Math.max(0, target - syncStart);
