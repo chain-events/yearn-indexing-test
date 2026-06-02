@@ -15,7 +15,6 @@ Configured chains include Kong's current Yearn chains:
 | 100 Gnosis | Configured |
 | 137 Polygon | Configured |
 | 146 Sonic | Configured |
-| 250 Fantom | Configured |
 | 8453 Base | Configured |
 | 42161 Arbitrum | Configured |
 | 80094 Berachain | Configured |

@@ -12,7 +12,7 @@ We're exceeding the Production Small plan on two hard limits (7 networks vs 5 ca
 
 | Small Plan Limit | Cap | Our Usage | Over Limit? |
 |---|---|---|---|
-| Networks | 5 | **7** (ETH, OP, Polygon, Fantom, Base, Arbitrum, Katana) | **Yes** |
+| Networks | 5 | **7** (ETH, OP, Polygon, Base, Arbitrum, Katana) | **Yes** |
 | Queries/min | 250 | **`[NOT MEASURED]`** — no rate-limit monitoring on hosted plan | Unknown |
 | Events storage | ~1M | **~3.59M events** (3,587,850 from Envio dashboard) | **Yes — 3.6x over** |
 | Indexing hours | 800/mo | **97 / 800 used** | No — 12% utilization |
@@ -84,7 +84,6 @@ The **exact same contracts and events** as our production Envio hosted setup —
 |---|---|---|---|---|---|
 | Ethereum | 1 | V3 Vaults, V2 Vaults, Timelocks, Gauges, Referral | 80+ | 515,640 | 517,065 |
 | Polygon | 137 | V3 Vaults | 10 | 2,233,963 | 2,234,605 |
-| Fantom | 250 | V2 Vaults | 4 | 95,218 | 227,283 |
 | Optimism | 10 | V2 Vaults | 3 | 51,267 | 51,302 |
 | Base | 8453 | V3 Vaults, Timelock, Referral | 8 | 49,545 | 50,086 |
 | Arbitrum | 42161 | V3 Vaults, Referral | 9 | 36,496 | 36,682 |
@@ -102,7 +101,6 @@ The **exact same contracts and events** as our production Envio hosted setup —
 ### Caveats
 
 - Self-hosted config excludes Katana (chain 747474) — it was commented out in config.yaml during the benchmark
-- Fantom event count differs significantly (95K vs 227K) — self-hosted was still catching up on historical sync
 - Ethereum was still syncing historical events during benchmark (515K vs 516K)
 
 ---
@@ -120,11 +118,10 @@ Both environments use HyperSync for chain data ingestion. Measured over 2.5 hour
 | Ethereum | 5.0 | 5 | Yes — both at chain head rate |
 | Optimism | 30.0 | 30 | Yes |
 | Polygon | 30.0 | 30 | Yes |
-| Fantom | 263.7 | 2 | Self-hosted catching up; hosted at head |
 | Base | 30.0 | 30 | Yes |
 | Arbitrum | 240.9 | 240 | Yes |
 
-**Finding:** Sync speed is effectively identical — both use HyperSync and keep pace with chain heads. The differences on Fantom/Arbitrum reflect historical catch-up vs steady-state, not a performance gap.
+**Finding:** Sync speed is effectively identical — both use HyperSync and keep pace with chain heads. The differences on Arbitrum reflect historical catch-up vs steady-state, not a performance gap.
 
 ### 4.2 Query Latency — Head-to-Head
 
@@ -302,7 +299,6 @@ Per-chain request breakdown:
 | Chain 1 (Ethereum) | 159 |
 | Chain 10 (Optimism) | 2,804 |
 | Chain 137 (Polygon) | 120 |
-| Chain 250 (Fantom) | 3,613 |
 | Chain 8453 (Base) | 52 |
 | Chain 42161 (Arbitrum) | 1,401 |
 
@@ -432,7 +428,7 @@ The 4-hour setup was dominated by debugging (SSL, plan names, Dockerfile, script
 ### Can we stay on the $70 plan and optimize?
 
 **No.** We exceed the Small plan on two hard limits:
-- 7 networks > 5 network cap (ETH, OP, Polygon, Fantom, Base, Arbitrum, Katana)
+- 7 networks > 5 network cap (ETH, OP, Polygon, Base, Arbitrum, Katana)
 - ~3.6M events >> ~1M storage cap (3.6x over)
 - Indexing hours are fine (97/800 = 12%) — not a factor
 

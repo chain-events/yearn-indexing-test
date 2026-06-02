@@ -14,7 +14,6 @@ const CHAIN_NAMES = {
   1: "Ethereum",
   10: "Optimism",
   137: "Polygon",
-  250: "Fantom",
   8453: "Base",
   42161: "Arbitrum",
   747474: "Katana",
