@@ -1333,8 +1333,7 @@ chains:
       - name: YearnV3Strategy
         address: []
       - name: YearnV3SplitterFactory
-        address:
-          - "0x444045c5C13C246e117eD36437303cac8E250aB0"
+        address: []
       - name: YearnV2Registry
         address:
           - "0x3199437193625DCcD6F9C9e98BDf93582200Eb1f"
@@ -1586,8 +1585,7 @@ chains:
       - name: YearnV3Strategy
         address: []
       - name: YearnV3SplitterFactory
-        address:
-          - "0xca12459a931643BF28388c67639b3F352fe9e5Ce"
+        address: []
   - id: 747474
     start_block: 0
     rpc:
