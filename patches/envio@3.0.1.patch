@@ -1,0 +1,15 @@
+diff --git a/src/Config.res.mjs b/src/Config.res.mjs
+index 6d749432fe0303f3037bf06160c179a0f39ac446..937d2b222becaa9362e56a8cfc056a5912c97e48 100644
+--- a/src/Config.res.mjs
++++ b/src/Config.res.mjs
+@@ -902,6 +902,10 @@ function diffPaths(stored, current) {
+ }
+ 
+ function throwIfIncompatible(changedPaths, resetCommand, runCommand, hasClickhouse) {
++  // PATCH: adding/removing a contract's static address list is treated as
++  // resumable instead of incompatible. New addresses index forward-only from
++  // the current checkpoint (no historical backfill without `envio start -r`).
++  changedPaths = changedPaths.filter(p => !/\.contracts\..*\.addresses\[\d+\]$/.test(p));
+   if (changedPaths.length === 0) {
+     return;
+   }

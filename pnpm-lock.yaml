@@ -4,6 +4,9 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+patchedDependencies:
+  envio@3.0.1: 1219baaf2b1443ae35158f21f3b90f8f720df6971365935ebea25c1d76ac4225
+
 importers:
 
   .: {}
@@ -12,7 +15,7 @@ importers:
     dependencies:
       envio:
         specifier: 3.0.1
-        version: 3.0.1(react-dom@19.2.5(react@19.2.5))(typescript@5.9.3)
+        version: 3.0.1(patch_hash=1219baaf2b1443ae35158f21f3b90f8f720df6971365935ebea25c1d76ac4225)(react-dom@19.2.5(react@19.2.5))(typescript@5.9.3)
       viem:
         specifier: 2.47.11
         version: 2.47.11(typescript@5.9.3)
@@ -2204,7 +2207,7 @@ snapshots:
   envio-linux-x64@3.0.1:
     optional: true
 
-  envio@3.0.1(react-dom@19.2.5(react@19.2.5))(typescript@5.9.3):
+  envio@3.0.1(patch_hash=1219baaf2b1443ae35158f21f3b90f8f720df6971365935ebea25c1d76ac4225)(react-dom@19.2.5(react@19.2.5))(typescript@5.9.3):
     dependencies:
       '@clickhouse/client': 1.17.0
       '@elastic/ecs-pino-format': 1.4.0
