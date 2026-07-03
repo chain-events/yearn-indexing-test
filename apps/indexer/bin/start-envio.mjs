@@ -44,6 +44,17 @@ console.log(
 );
 console.log(`Database config source: ${databaseUrlSource ?? "ENVIO_PG_*"}`);
 
+// Envio itself only reads HASURA_GRAPHQL_ENDPOINT (must be a full URL ending
+// in /v1/metadata) — it has no notion of HASURA_SERVICE_HOST/PORT. Render's
+// blueprint sets those two (see render.yaml) so the indexer can resolve
+// graphql-engine's internal hostname without hardcoding it; assemble them
+// into the URL envio actually expects.
+if (!env.HASURA_GRAPHQL_ENDPOINT && env.HASURA_SERVICE_HOST) {
+  const hasuraPort = env.HASURA_SERVICE_PORT || "8080";
+  env.HASURA_GRAPHQL_ENDPOINT = `http://${env.HASURA_SERVICE_HOST}:${hasuraPort}/v1/metadata`;
+  console.log(`Derived HASURA_GRAPHQL_ENDPOINT: ${env.HASURA_GRAPHQL_ENDPOINT}`);
+}
+
 // Both `envio local db-migrate up` and `envio start` independently check
 // config.yaml/schema.graphql against the already-indexed data and refuse to
 // resume when the change is incompatible (e.g. a new contract/event, not
