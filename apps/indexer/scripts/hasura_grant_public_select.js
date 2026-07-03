@@ -33,6 +33,20 @@ async function main() {
   const metadata = await metadataRequest({ type: "export_metadata", args: {} });
 
   const sources = metadata.sources || [];
+  const totalTables = sources.reduce((n, s) => n + (s.tables || []).length, 0);
+  console.log(`Found ${totalTables} table(s) tracked across ${sources.length} source(s).`);
+  if (totalTables === 0) {
+    console.error(
+      "No tables are tracked in Hasura at all, so there is nothing to grant. " +
+        "envio's own tracking step (which runs before this) likely failed silently — " +
+        "check that HASURA_GRAPHQL_ADMIN_SECRET is identical on the graphql-engine and " +
+        "envio-indexer services in Render, and that HASURA_GRAPHQL_ENDPOINT resolves " +
+        "to graphql-engine's internal hostname.",
+    );
+    process.exitCode = 1;
+    return;
+  }
+
   const bulkArgs = [];
 
   for (const source of sources) {
@@ -66,11 +80,11 @@ async function main() {
   }
 
   if (bulkArgs.length === 0) {
-    console.log("All tables already have public select permissions.");
+    console.log(`All tables already have ${ROLE} select permissions.`);
     return;
   }
 
-  console.log(`Granting public SELECT on ${bulkArgs.length} tables...`);
+  console.log(`Granting ${ROLE} SELECT on ${bulkArgs.length} tables...`);
   await metadataRequest({ type: "bulk", args: bulkArgs });
   console.log("Done.");
 }

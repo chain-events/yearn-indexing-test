@@ -145,6 +145,15 @@ const grantReadonlySelect = () => {
     ["scripts/hasura_grant_public_select.js", "readonly"],
     { env, stdio: "inherit" },
   );
+  // Without this, a spawn failure (e.g. "node" missing from PATH) emits an
+  // unhandled 'error' event, which Node treats as an uncaught exception and
+  // crashes the whole indexer process — this grant must never be able to
+  // take down `envio start`.
+  grant.on("error", (err) => {
+    console.warn(
+      `Failed to run the Hasura 'readonly' role grant: ${err.message} — the monitoring dashboard and graphiql may see "field not found" GraphQL errors until this is fixed.`,
+    );
+  });
   grant.on("close", (code) => {
     if (code !== 0) {
       console.warn(
