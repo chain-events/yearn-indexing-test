@@ -51,8 +51,18 @@ console.log(`Database config source: ${databaseUrlSource ?? "ENVIO_PG_*"}`);
 // just crashes the process forever until someone manually reruns with the
 // reset variant of the command. Detect that specific failure per-command and
 // reset automatically instead.
-const INCOMPATIBLE_CONFIG_MARKER =
-  "config changes are incompatible with the existing indexer data";
+//
+// envio's compatibility check doesn't flag *removing* a chain from
+// config.yaml as incompatible, but a later startup step still crashes trying
+// to resume the removed chain's leftover progress row ("No chain with id N
+// found in config.yaml") — treat that the same way: it only clears up with a
+// full reset, since a fresh init builds chain state from config.yaml alone.
+const RESET_TRIGGER_PATTERNS = [
+  /config changes are incompatible with the existing indexer data/,
+  /No chain with id \d+ found in config\.yaml/,
+];
+const needsReset = (output) =>
+  RESET_TRIGGER_PATTERNS.some((pattern) => pattern.test(output));
 
 const runPnpm = (args) =>
   new Promise((resolve) => {
@@ -83,9 +93,9 @@ const runPnpmWithReset = async (args, resetArgs) => {
     return;
   }
 
-  if (attempt.output.includes(INCOMPATIBLE_CONFIG_MARKER)) {
+  if (needsReset(attempt.output)) {
     console.warn(
-      `config.yaml (or schema.graphql) changed incompatibly with the existing indexed data — resetting the database and reindexing from scratch (\`pnpm ${resetArgs.join(" ")}\`).`,
+      `config.yaml (or schema.graphql) drifted from the existing indexed data — resetting the database and reindexing from scratch (\`pnpm ${resetArgs.join(" ")}\`).`,
     );
     const reset = await runPnpm(resetArgs);
     if (reset.code !== 0) {
