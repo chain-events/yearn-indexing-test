@@ -84,6 +84,18 @@ contracts:
     handler: src/EventHandlers.ts
     events:
       - event: "CallScheduled(bytes32 indexed id, uint256 indexed index, address target, uint256 value, bytes data, bytes32 predecessor, uint256 delay)"
+  - name: MorphoCredit
+    handler: src/EventHandlers.ts
+    events:
+      - event: "SetCreditLine(bytes32 indexed id, address indexed borrower, uint256 credit)"
+      - event: "Borrow(bytes32 indexed id, address caller, address indexed onBehalf, address indexed receiver, uint256 assets, uint256 shares)"
+      - event: "Repay(bytes32 indexed id, address indexed caller, address indexed onBehalf, uint256 assets, uint256 shares)"
+      - event: "PaymentCycleCreated(bytes32 indexed id, uint256 cycleId, uint256 startDate, uint256 endDate)"
+      - event: "RepaymentObligationPosted(bytes32 indexed id, address indexed borrower, uint256 amount, uint256 cycleId, uint256 endingBalance)"
+      - event: "RepaymentTracked(bytes32 indexed id, address indexed borrower, uint256 payment, uint256 remainingDue)"
+      - event: "DefaultStarted(bytes32 indexed id, address indexed borrower, uint256 timestamp)"
+      - event: "DefaultCleared(bytes32 indexed id, address indexed borrower)"
+      - event: "AccountSettled(bytes32 indexed id, address indexed settler, address indexed borrower, uint256 writtenOffAmount, uint256 writtenOffShares)"
   - name: AaveTimelock
     handler: src/EventHandlers.ts
     events:
@@ -848,6 +860,9 @@ chains:
           - "0x3D3C41419Ab401cd25055E8f9421D7D96d887885" # 3Jane 7d TimelockController
           - "0xb2a3cf69c97afd4de7882e5fee120e4efc77b706" # Strata 48h Timelock
           - "0x4f2682b78f37910704fb1aff29358a1da07e022d" # Strata 24h Timelock
+      - name: MorphoCredit
+        address:
+          - "0xDe6e08ac208088cc62812Ba30608D852c6B0EcBc" # 3Jane MorphoCredit
       - name: AaveTimelock
         address:
           - "0x9aee0b04504cef83a65ac3f0e838d0593bcb2bc7" # Aave Timelock
