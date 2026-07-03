@@ -1183,3 +1183,54 @@ type TimelockEvent {
   votesFor: BigInt
   votesAgainst: BigInt
 }
+
+type ThreeJaneBorrowerMarket {
+  id: ID!
+  morphoCreditAddress: String! @index
+  marketId: String! @index
+  borrower: String! @index
+  chainId: Int! @index
+  credit: BigInt!
+  amountDue: BigInt!
+  cycleId: BigInt!
+  cycleStart: Int!
+  cycleEnd: Int! @index
+  endingBalance: BigInt!
+  gracePeriod: Int!
+  delinquencyPeriod: Int!
+  graceEnd: Int!
+  defaultAt: Int! @index
+  secondsToDefault: Int!
+  secondsSinceDefault: Int!
+  repaymentStatus: String! @index
+  defaultBucket: String @index
+  settled: Boolean! @index
+  defaultStarted: Boolean! @index
+  lastEventName: String! @index
+  lastSeenBlock: Int! @index
+  lastSeenTimestamp: Int! @index
+  lastSeenTransactionHash: String! @index
+  lastSeenLogIndex: Int!
+  lastComputedBlock: Int! @index
+  lastComputedTimestamp: Int! @index
+}
+
+type ThreeJanePaymentCycle {
+  id: ID!
+  morphoCreditAddress: String! @index
+  marketId: String! @index
+  chainId: Int! @index
+  cycleId: BigInt! @index
+  startDate: Int!
+  endDate: Int! @index
+  borrowerMarketIds: [String!]!
+  createdBlock: Int! @index
+  createdTimestamp: Int! @index
+  createdTransactionHash: String! @index
+  createdLogIndex: Int!
+}
+
+type ThreeJaneBorrowerMarketIndex {
+  id: ID!
+  borrowerMarketIds: [String!]!
+}

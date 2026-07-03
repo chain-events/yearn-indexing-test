@@ -12,6 +12,9 @@ import type {
   StakingPoolAdded,
   StrategyChanged,
   StrategyReported,
+  ThreeJaneBorrowerMarket,
+  ThreeJaneBorrowerMarketIndex,
+  ThreeJanePaymentCycle,
   TimelockEvent,
   Transfer,
   UpdateAccountant,
@@ -99,6 +102,236 @@ const eventCore = (event: any) => ({
   transactionFrom: addr(event.transaction.from),
   logIndex: event.logIndex,
 });
+
+const SECONDS_PER_DAY = 86_400;
+const THREE_JANE_BORROWER_MARKET_INDEX_ID = "three_jane";
+
+const readPositiveIntEnv = (name: string, fallback: number): number => {
+  const value = process.env[name];
+  if (!value) return fallback;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : fallback;
+};
+
+const THREE_JANE_GRACE_PERIOD_SECONDS = readPositiveIntEnv(
+  "THREE_JANE_GRACE_PERIOD_SECONDS",
+  7 * SECONDS_PER_DAY,
+);
+const THREE_JANE_DELINQUENCY_PERIOD_SECONDS = readPositiveIntEnv(
+  "THREE_JANE_DELINQUENCY_PERIOD_SECONDS",
+  23 * SECONDS_PER_DAY,
+);
+const THREE_JANE_STATUS_BLOCK_INTERVAL = readPositiveIntEnv("THREE_JANE_STATUS_BLOCK_INTERVAL", 7_200);
+
+const REPAYMENT_STATUS_CURRENT = "Current";
+const REPAYMENT_STATUS_GRACE = "GracePeriod";
+const REPAYMENT_STATUS_DELINQUENT = "Delinquent";
+const REPAYMENT_STATUS_DEFAULT = "Default";
+const REPAYMENT_STATUS_UNKNOWN = "Unknown";
+
+const normalizedMarketId = (id: string): string => id.toLowerCase();
+
+const threeJaneBorrowerMarketId = (chainId: number, rawMarketId: string, borrower: string): string =>
+  `${chainId}_${normalizedMarketId(rawMarketId)}_${getAddress(borrower).toLowerCase()}`;
+
+const threeJanePaymentCycleId = (chainId: number, rawMarketId: string, cycleId: bigint | string): string =>
+  `${chainId}_${normalizedMarketId(rawMarketId)}_${cycleId.toString()}`;
+
+const selectThreeJaneDefaultBucket = (repaymentStatus: string, secondsToDefault: number): string | undefined => {
+  if (repaymentStatus === REPAYMENT_STATUS_DEFAULT) return "default";
+  if (repaymentStatus !== REPAYMENT_STATUS_DELINQUENT) return undefined;
+  if (secondsToDefault <= SECONDS_PER_DAY) return "1d";
+  if (secondsToDefault <= 3 * SECONDS_PER_DAY) return "3d";
+  if (secondsToDefault <= 7 * SECONDS_PER_DAY) return "7d";
+  if (secondsToDefault <= 14 * SECONDS_PER_DAY) return "14d";
+  return "delinquent";
+};
+
+const threeJaneRepaymentState = (
+  amountDue: bigint,
+  cycleEnd: number,
+  now: number,
+): Pick<
+  ThreeJaneBorrowerMarket,
+  | "gracePeriod"
+  | "delinquencyPeriod"
+  | "graceEnd"
+  | "defaultAt"
+  | "secondsToDefault"
+  | "secondsSinceDefault"
+  | "repaymentStatus"
+  | "defaultBucket"
+> => {
+  if (amountDue <= 0n) {
+    return {
+      gracePeriod: THREE_JANE_GRACE_PERIOD_SECONDS,
+      delinquencyPeriod: THREE_JANE_DELINQUENCY_PERIOD_SECONDS,
+      graceEnd: 0,
+      defaultAt: 0,
+      secondsToDefault: 0,
+      secondsSinceDefault: 0,
+      repaymentStatus: REPAYMENT_STATUS_CURRENT,
+      defaultBucket: undefined,
+    };
+  }
+
+  if (cycleEnd <= 0) {
+    return {
+      gracePeriod: THREE_JANE_GRACE_PERIOD_SECONDS,
+      delinquencyPeriod: THREE_JANE_DELINQUENCY_PERIOD_SECONDS,
+      graceEnd: 0,
+      defaultAt: 0,
+      secondsToDefault: 0,
+      secondsSinceDefault: 0,
+      repaymentStatus: REPAYMENT_STATUS_UNKNOWN,
+      defaultBucket: undefined,
+    };
+  }
+
+  const graceEnd = cycleEnd + THREE_JANE_GRACE_PERIOD_SECONDS;
+  const defaultAt = graceEnd + THREE_JANE_DELINQUENCY_PERIOD_SECONDS;
+  const secondsToDefault = defaultAt - now;
+  const secondsSinceDefault = Math.max(0, now - defaultAt);
+  let repaymentStatus: string;
+
+  if (now <= graceEnd) {
+    repaymentStatus = REPAYMENT_STATUS_GRACE;
+  } else if (now < defaultAt) {
+    repaymentStatus = REPAYMENT_STATUS_DELINQUENT;
+  } else {
+    repaymentStatus = REPAYMENT_STATUS_DEFAULT;
+  }
+
+  return {
+    gracePeriod: THREE_JANE_GRACE_PERIOD_SECONDS,
+    delinquencyPeriod: THREE_JANE_DELINQUENCY_PERIOD_SECONDS,
+    graceEnd,
+    defaultAt,
+    secondsToDefault,
+    secondsSinceDefault,
+    repaymentStatus,
+    defaultBucket: selectThreeJaneDefaultBucket(repaymentStatus, secondsToDefault),
+  };
+};
+
+const withThreeJaneRepaymentState = (
+  entity: ThreeJaneBorrowerMarket,
+  now: number,
+  computedBlock: number,
+): ThreeJaneBorrowerMarket => ({
+  ...entity,
+  ...threeJaneRepaymentState(entity.amountDue, entity.cycleEnd, now),
+  lastComputedBlock: computedBlock,
+  lastComputedTimestamp: now,
+});
+
+const threeJaneBorrowerMarketBase = (
+  event: any,
+  rawMarketId: string,
+  borrower: string,
+  existing?: ThreeJaneBorrowerMarket,
+): ThreeJaneBorrowerMarket => ({
+  id: threeJaneBorrowerMarketId(event.chainId, rawMarketId, borrower),
+  morphoCreditAddress: getAddress(event.srcAddress),
+  marketId: normalizedMarketId(rawMarketId),
+  borrower: getAddress(borrower),
+  chainId: event.chainId,
+  credit: existing?.credit ?? 0n,
+  amountDue: existing?.amountDue ?? 0n,
+  cycleId: existing?.cycleId ?? 0n,
+  cycleStart: existing?.cycleStart ?? 0,
+  cycleEnd: existing?.cycleEnd ?? 0,
+  endingBalance: existing?.endingBalance ?? 0n,
+  gracePeriod: existing?.gracePeriod ?? THREE_JANE_GRACE_PERIOD_SECONDS,
+  delinquencyPeriod: existing?.delinquencyPeriod ?? THREE_JANE_DELINQUENCY_PERIOD_SECONDS,
+  graceEnd: existing?.graceEnd ?? 0,
+  defaultAt: existing?.defaultAt ?? 0,
+  secondsToDefault: existing?.secondsToDefault ?? 0,
+  secondsSinceDefault: existing?.secondsSinceDefault ?? 0,
+  repaymentStatus: existing?.repaymentStatus ?? REPAYMENT_STATUS_CURRENT,
+  defaultBucket: existing?.defaultBucket,
+  settled: existing?.settled ?? false,
+  defaultStarted: existing?.defaultStarted ?? false,
+  lastEventName: existing?.lastEventName ?? "",
+  lastSeenBlock: event.block.number,
+  lastSeenTimestamp: event.block.timestamp,
+  lastSeenTransactionHash: event.transaction.hash,
+  lastSeenLogIndex: event.logIndex,
+  lastComputedBlock: existing?.lastComputedBlock ?? event.block.number,
+  lastComputedTimestamp: existing?.lastComputedTimestamp ?? event.block.timestamp,
+});
+
+const addThreeJaneBorrowerMarketToIndex = async (borrowerMarketId: string, context: any): Promise<void> => {
+  const existing = await context.ThreeJaneBorrowerMarketIndex.get(THREE_JANE_BORROWER_MARKET_INDEX_ID);
+  const borrowerMarketIds = existing?.borrowerMarketIds ?? [];
+  if (borrowerMarketIds.includes(borrowerMarketId)) return;
+
+  const entity: ThreeJaneBorrowerMarketIndex = {
+    id: THREE_JANE_BORROWER_MARKET_INDEX_ID,
+    borrowerMarketIds: [...borrowerMarketIds, borrowerMarketId],
+  };
+  context.ThreeJaneBorrowerMarketIndex.set(entity);
+};
+
+const threeJanePaymentCycleBase = (
+  event: any,
+  rawMarketId: string,
+  cycleId: bigint,
+  existing?: ThreeJanePaymentCycle,
+): ThreeJanePaymentCycle => ({
+  id: threeJanePaymentCycleId(event.chainId, rawMarketId, cycleId),
+  morphoCreditAddress: getAddress(event.srcAddress),
+  marketId: normalizedMarketId(rawMarketId),
+  chainId: event.chainId,
+  cycleId,
+  startDate: existing?.startDate ?? 0,
+  endDate: existing?.endDate ?? 0,
+  borrowerMarketIds: existing?.borrowerMarketIds ?? [],
+  createdBlock: existing?.createdBlock ?? event.block.number,
+  createdTimestamp: existing?.createdTimestamp ?? event.block.timestamp,
+  createdTransactionHash: existing?.createdTransactionHash ?? event.transaction.hash,
+  createdLogIndex: existing?.createdLogIndex ?? event.logIndex,
+});
+
+const addBorrowerMarketToThreeJanePaymentCycle = async (
+  event: any,
+  rawMarketId: string,
+  cycleId: bigint,
+  borrowerMarketId: string,
+  context: any,
+): Promise<ThreeJanePaymentCycle> => {
+  const id = threeJanePaymentCycleId(event.chainId, rawMarketId, cycleId);
+  const existing = await context.ThreeJanePaymentCycle.get(id);
+  const cycle = threeJanePaymentCycleBase(event, rawMarketId, cycleId, existing);
+  if (!cycle.borrowerMarketIds.includes(borrowerMarketId)) {
+    const updated = { ...cycle, borrowerMarketIds: [...cycle.borrowerMarketIds, borrowerMarketId] };
+    context.ThreeJanePaymentCycle.set(updated);
+    return updated;
+  }
+  context.ThreeJanePaymentCycle.set(cycle);
+  return cycle;
+};
+
+const updateThreeJaneBorrowerMarket = async (
+  event: any,
+  rawMarketId: string,
+  borrower: string,
+  eventName: string,
+  apply: (entity: ThreeJaneBorrowerMarket) => ThreeJaneBorrowerMarket,
+  context: any,
+): Promise<void> => {
+  const id = threeJaneBorrowerMarketId(event.chainId, rawMarketId, borrower);
+  const existing = await context.ThreeJaneBorrowerMarket.get(id);
+  const entity = threeJaneBorrowerMarketBase(event, rawMarketId, borrower, existing);
+  const updated = withThreeJaneRepaymentState(
+    apply({ ...entity, lastEventName: eventName }),
+    event.block.timestamp,
+    event.block.number,
+  );
+
+  context.ThreeJaneBorrowerMarket.set(updated);
+  await addThreeJaneBorrowerMarketToIndex(id, context);
+};
 
 indexer.onEvent({ contract: "YearnV3Vault", event: "Deposit" }, async ({ event, context }) => {
   const entity: Deposit = {
@@ -647,6 +880,219 @@ indexer.onEvent({ contract: "LidoTimelock", event: "StartVote" }, async ({ event
   };
   context.TimelockEvent.set(entity);
 });
+
+// ─── 3Jane MorphoCredit Handlers ────────────────────────────────────────────
+// Materializes borrower repayment/default risk for monitoring-scripts-py.
+
+indexer.onEvent({ contract: "MorphoCredit", event: "SetCreditLine" }, async ({ event, context }) => {
+  await updateThreeJaneBorrowerMarket(
+    event,
+    event.params.id,
+    event.params.borrower,
+    "SetCreditLine",
+    (entity) => ({
+      ...entity,
+      credit: event.params.credit,
+      settled: false,
+    }),
+    context,
+  );
+});
+
+indexer.onEvent({ contract: "MorphoCredit", event: "Borrow" }, async ({ event, context }) => {
+  await updateThreeJaneBorrowerMarket(
+    event,
+    event.params.id,
+    event.params.onBehalf,
+    "Borrow",
+    (entity) => ({
+      ...entity,
+      settled: false,
+    }),
+    context,
+  );
+});
+
+indexer.onEvent({ contract: "MorphoCredit", event: "Repay" }, async ({ event, context }) => {
+  await updateThreeJaneBorrowerMarket(
+    event,
+    event.params.id,
+    event.params.onBehalf,
+    "Repay",
+    (entity) => ({
+      ...entity,
+      settled: false,
+    }),
+    context,
+  );
+});
+
+indexer.onEvent({ contract: "MorphoCredit", event: "PaymentCycleCreated" }, async ({ event, context }) => {
+  const rawMarketId = event.params.id;
+  const id = threeJanePaymentCycleId(event.chainId, rawMarketId, event.params.cycleId);
+  const existing = await context.ThreeJanePaymentCycle.get(id);
+  const cycle: ThreeJanePaymentCycle = {
+    ...threeJanePaymentCycleBase(event, rawMarketId, event.params.cycleId, existing),
+    startDate: Number(event.params.startDate),
+    endDate: Number(event.params.endDate),
+    createdBlock: event.block.number,
+    createdTimestamp: event.block.timestamp,
+    createdTransactionHash: event.transaction.hash,
+    createdLogIndex: event.logIndex,
+  };
+
+  context.ThreeJanePaymentCycle.set(cycle);
+
+  for (const borrowerMarketId of cycle.borrowerMarketIds) {
+    const borrowerMarket = await context.ThreeJaneBorrowerMarket.get(borrowerMarketId);
+    if (!borrowerMarket) continue;
+
+    context.ThreeJaneBorrowerMarket.set(
+      withThreeJaneRepaymentState(
+        {
+          ...borrowerMarket,
+          cycleStart: cycle.startDate,
+          cycleEnd: cycle.endDate,
+          lastComputedBlock: event.block.number,
+          lastComputedTimestamp: event.block.timestamp,
+        },
+        event.block.timestamp,
+        event.block.number,
+      ),
+    );
+  }
+});
+
+indexer.onEvent({ contract: "MorphoCredit", event: "RepaymentObligationPosted" }, async ({ event, context }) => {
+  const borrowerMarketId = threeJaneBorrowerMarketId(event.chainId, event.params.id, event.params.borrower);
+  const existing = await context.ThreeJaneBorrowerMarket.get(borrowerMarketId);
+  const hasOpenObligation = (existing?.amountDue ?? 0n) > 0n;
+  const cycle = hasOpenObligation
+    ? undefined
+    : await addBorrowerMarketToThreeJanePaymentCycle(
+        event,
+        event.params.id,
+        event.params.cycleId,
+        borrowerMarketId,
+        context,
+      );
+
+  await updateThreeJaneBorrowerMarket(
+    event,
+    event.params.id,
+    event.params.borrower,
+    "RepaymentObligationPosted",
+    (entity) => ({
+      ...entity,
+      amountDue: event.params.amount,
+      cycleId: hasOpenObligation ? entity.cycleId : event.params.cycleId,
+      cycleStart: hasOpenObligation ? entity.cycleStart : (cycle?.startDate ?? 0),
+      cycleEnd: hasOpenObligation ? entity.cycleEnd : (cycle?.endDate ?? 0),
+      endingBalance: hasOpenObligation ? entity.endingBalance : event.params.endingBalance,
+      settled: false,
+    }),
+    context,
+  );
+});
+
+indexer.onEvent({ contract: "MorphoCredit", event: "RepaymentTracked" }, async ({ event, context }) => {
+  await updateThreeJaneBorrowerMarket(
+    event,
+    event.params.id,
+    event.params.borrower,
+    "RepaymentTracked",
+    (entity) => ({
+      ...entity,
+      amountDue: event.params.remainingDue,
+      settled: false,
+    }),
+    context,
+  );
+});
+
+indexer.onEvent({ contract: "MorphoCredit", event: "DefaultStarted" }, async ({ event, context }) => {
+  await updateThreeJaneBorrowerMarket(
+    event,
+    event.params.id,
+    event.params.borrower,
+    "DefaultStarted",
+    (entity) => ({
+      ...entity,
+      cycleEnd:
+        entity.cycleEnd ||
+        Math.max(
+          0,
+          Number(event.params.timestamp) -
+            THREE_JANE_GRACE_PERIOD_SECONDS -
+            THREE_JANE_DELINQUENCY_PERIOD_SECONDS,
+        ),
+      defaultStarted: true,
+      settled: false,
+    }),
+    context,
+  );
+});
+
+indexer.onEvent({ contract: "MorphoCredit", event: "DefaultCleared" }, async ({ event, context }) => {
+  await updateThreeJaneBorrowerMarket(
+    event,
+    event.params.id,
+    event.params.borrower,
+    "DefaultCleared",
+    (entity) => ({
+      ...entity,
+      amountDue: 0n,
+      defaultStarted: false,
+      settled: false,
+    }),
+    context,
+  );
+});
+
+indexer.onEvent({ contract: "MorphoCredit", event: "AccountSettled" }, async ({ event, context }) => {
+  await updateThreeJaneBorrowerMarket(
+    event,
+    event.params.id,
+    event.params.borrower,
+    "AccountSettled",
+    (entity) => ({
+      ...entity,
+      credit: 0n,
+      amountDue: 0n,
+      defaultStarted: false,
+      settled: true,
+    }),
+    context,
+  );
+});
+
+indexer.onBlock(
+  {
+    name: "ThreeJaneBorrowerMarketStatus",
+    where: ({ chain }) => {
+      if (chain.id !== 1) return false;
+      return {
+        block: {
+          number: {
+            _every: THREE_JANE_STATUS_BLOCK_INTERVAL,
+          },
+        },
+      };
+    },
+  },
+  async ({ block, context }) => {
+    const now = Math.floor(Date.now() / 1000);
+    const index = await context.ThreeJaneBorrowerMarketIndex.get(THREE_JANE_BORROWER_MARKET_INDEX_ID);
+    for (const borrowerMarketId of index?.borrowerMarketIds ?? []) {
+      const borrowerMarket = await context.ThreeJaneBorrowerMarket.get(borrowerMarketId);
+      if (!borrowerMarket || borrowerMarket.settled || borrowerMarket.amountDue <= 0n) continue;
+
+      context.ThreeJaneBorrowerMarket.set(
+        withThreeJaneRepaymentState(borrowerMarket, now, block.number),
+      );
+    }
+  },
+);
 
 // ─── YearnV2Vault Handlers ──────────────────────────────────────────────────
 
