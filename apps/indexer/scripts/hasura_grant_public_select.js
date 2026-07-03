@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 
-const dotenv = require("dotenv");
-dotenv.config();
+import "dotenv/config";
 
 const ROLE = process.argv[2] || "public";
 const HASURA_URL = process.env.HASURA_GRAPHQL_ENDPOINT || "https://graphql-engine-dxp4.onrender.com";

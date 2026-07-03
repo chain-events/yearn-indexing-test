@@ -75,7 +75,13 @@ const RESET_TRIGGER_PATTERNS = [
 const needsReset = (output) =>
   RESET_TRIGGER_PATTERNS.some((pattern) => pattern.test(output));
 
-const runPnpm = (args) =>
+// `envio start` runs for the life of the deploy, so accumulating its full
+// output here would leak memory. Only the tail matters — reset-trigger errors
+// appear right before the process exits, and the Hasura-tracking-done marker
+// (see below) is checked as it streams in — so keep a bounded window instead.
+const OUTPUT_TAIL_CHARS = 16_000;
+
+const runPnpm = (args, { onOutput } = {}) =>
   new Promise((resolve) => {
     const child = spawn("pnpm", args, {
       env,
@@ -85,8 +91,9 @@ const runPnpm = (args) =>
     let output = "";
     const relay = (source, dest) => {
       source.on("data", (chunk) => {
-        output += chunk;
         dest.write(chunk);
+        output = (output + chunk).slice(-OUTPUT_TAIL_CHARS);
+        onOutput?.(output);
       });
     };
     relay(child.stdout, process.stdout);
@@ -98,8 +105,8 @@ const runPnpm = (args) =>
 // Runs `pnpm <args>`; if it fails specifically because envio detected an
 // incompatible config change, reruns with `resetArgs` (which wipes and
 // reinitializes) instead. Any other failure just exits the process.
-const runPnpmWithReset = async (args, resetArgs) => {
-  const attempt = await runPnpm(args);
+const runPnpmWithReset = async (args, resetArgs, opts) => {
+  const attempt = await runPnpm(args, opts);
   if (attempt.code === 0) {
     return;
   }
@@ -108,7 +115,7 @@ const runPnpmWithReset = async (args, resetArgs) => {
     console.warn(
       `config.yaml (or schema.graphql) drifted from the existing indexed data — resetting the database and reindexing from scratch (\`pnpm ${resetArgs.join(" ")}\`).`,
     );
-    const reset = await runPnpm(resetArgs);
+    const reset = await runPnpm(resetArgs, opts);
     if (reset.code !== 0) {
       process.exit(reset.code ?? 1);
     }
@@ -116,6 +123,37 @@ const runPnpmWithReset = async (args, resetArgs) => {
   }
 
   process.exit(attempt.code ?? 1);
+};
+
+// envio wipes and rebuilds all Hasura metadata on every startup (clear then
+// re-track), but it only ever grants `select` to the `public` role —
+// hardcoded in its own Hasura.res.mjs, with no env var to change it. Clients
+// authenticated via HASURA_GRAPHQL_JWT (graphiql, apps/monitoring) are pinned
+// to the `readonly` role instead (see HASURA_GRAPHQL_JWT_SECRET's claims_map),
+// which never gets those grants and sees a GraphQL schema missing every
+// table. Once envio logs that tracking finished, grant `readonly` the same
+// select access as `public` so those clients aren't left broken after every
+// deploy or reset.
+const HASURA_TRACKING_DONE_PATTERN = /Hasura configuration completed/;
+let readonlyGrantTriggered = false;
+const grantReadonlySelect = () => {
+  if (readonlyGrantTriggered) return;
+  readonlyGrantTriggered = true;
+  console.log("Hasura tracking finished — granting the readonly role select access...");
+  const grant = spawn(
+    "node",
+    ["scripts/hasura_grant_public_select.js", "readonly"],
+    { env, stdio: "inherit" },
+  );
+  grant.on("close", (code) => {
+    if (code !== 0) {
+      console.warn(
+        `Failed to grant Hasura 'readonly' role select access (exit ${code}) — the monitoring dashboard and graphiql may see "field not found" GraphQL errors until this is fixed.`,
+      );
+    } else {
+      console.log("Granted Hasura 'readonly' role select access.");
+    }
+  });
 };
 
 await runPnpmWithReset(
@@ -163,5 +201,9 @@ if (existsSync(migrationsDir)) {
   }
 }
 
-await runPnpmWithReset(["envio", "start"], ["envio", "start", "-r"]);
+await runPnpmWithReset(["envio", "start"], ["envio", "start", "-r"], {
+  onOutput: (tail) => {
+    if (HASURA_TRACKING_DONE_PATTERN.test(tail)) grantReadonlySelect();
+  },
+});
 process.exit(0);
