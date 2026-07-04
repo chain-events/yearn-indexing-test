@@ -13,7 +13,6 @@ import type {
   StrategyChanged,
   StrategyReported,
   ThreeJaneBorrowerMarket,
-  ThreeJaneBorrowerMarketIndex,
   ThreeJanePaymentCycle,
   TimelockEvent,
   Transfer,
@@ -104,8 +103,6 @@ const eventCore = (event: any) => ({
 });
 
 const SECONDS_PER_DAY = 86_400;
-const THREE_JANE_BORROWER_MARKET_INDEX_ID = "three_jane";
-
 const readPositiveIntEnv = (name: string, fallback: number): number => {
   const value = process.env[name];
   if (!value) return fallback;
@@ -121,13 +118,6 @@ const THREE_JANE_DELINQUENCY_PERIOD_SECONDS = readPositiveIntEnv(
   "THREE_JANE_DELINQUENCY_PERIOD_SECONDS",
   23 * SECONDS_PER_DAY,
 );
-const THREE_JANE_STATUS_BLOCK_INTERVAL = readPositiveIntEnv("THREE_JANE_STATUS_BLOCK_INTERVAL", 7_200);
-
-const REPAYMENT_STATUS_CURRENT = "Current";
-const REPAYMENT_STATUS_GRACE = "GracePeriod";
-const REPAYMENT_STATUS_DELINQUENT = "Delinquent";
-const REPAYMENT_STATUS_DEFAULT = "Default";
-const REPAYMENT_STATUS_UNKNOWN = "Unknown";
 
 const normalizedMarketId = (id: string): string => id.toLowerCase();
 
@@ -137,92 +127,39 @@ const threeJaneBorrowerMarketId = (chainId: number, rawMarketId: string, borrowe
 const threeJanePaymentCycleId = (chainId: number, rawMarketId: string, cycleId: bigint | string): string =>
   `${chainId}_${normalizedMarketId(rawMarketId)}_${cycleId.toString()}`;
 
-const selectThreeJaneDefaultBucket = (repaymentStatus: string, secondsToDefault: number): string | undefined => {
-  if (repaymentStatus === REPAYMENT_STATUS_DEFAULT) return "default";
-  if (repaymentStatus !== REPAYMENT_STATUS_DELINQUENT) return undefined;
-  if (secondsToDefault <= SECONDS_PER_DAY) return "1d";
-  if (secondsToDefault <= 3 * SECONDS_PER_DAY) return "3d";
-  if (secondsToDefault <= 7 * SECONDS_PER_DAY) return "7d";
-  if (secondsToDefault <= 14 * SECONDS_PER_DAY) return "14d";
-  return "delinquent";
-};
-
-const threeJaneRepaymentState = (
+const threeJaneRepaymentSchedule = (
   amountDue: bigint,
   cycleEnd: number,
-  now: number,
 ): Pick<
   ThreeJaneBorrowerMarket,
   | "gracePeriod"
   | "delinquencyPeriod"
   | "graceEnd"
   | "defaultAt"
-  | "secondsToDefault"
-  | "secondsSinceDefault"
-  | "repaymentStatus"
-  | "defaultBucket"
 > => {
-  if (amountDue <= 0n) {
+  if (amountDue <= 0n || cycleEnd <= 0) {
     return {
       gracePeriod: THREE_JANE_GRACE_PERIOD_SECONDS,
       delinquencyPeriod: THREE_JANE_DELINQUENCY_PERIOD_SECONDS,
       graceEnd: 0,
       defaultAt: 0,
-      secondsToDefault: 0,
-      secondsSinceDefault: 0,
-      repaymentStatus: REPAYMENT_STATUS_CURRENT,
-      defaultBucket: undefined,
-    };
-  }
-
-  if (cycleEnd <= 0) {
-    return {
-      gracePeriod: THREE_JANE_GRACE_PERIOD_SECONDS,
-      delinquencyPeriod: THREE_JANE_DELINQUENCY_PERIOD_SECONDS,
-      graceEnd: 0,
-      defaultAt: 0,
-      secondsToDefault: 0,
-      secondsSinceDefault: 0,
-      repaymentStatus: REPAYMENT_STATUS_UNKNOWN,
-      defaultBucket: undefined,
     };
   }
 
   const graceEnd = cycleEnd + THREE_JANE_GRACE_PERIOD_SECONDS;
   const defaultAt = graceEnd + THREE_JANE_DELINQUENCY_PERIOD_SECONDS;
-  const secondsToDefault = defaultAt - now;
-  const secondsSinceDefault = Math.max(0, now - defaultAt);
-  let repaymentStatus: string;
-
-  if (now <= graceEnd) {
-    repaymentStatus = REPAYMENT_STATUS_GRACE;
-  } else if (now < defaultAt) {
-    repaymentStatus = REPAYMENT_STATUS_DELINQUENT;
-  } else {
-    repaymentStatus = REPAYMENT_STATUS_DEFAULT;
-  }
 
   return {
     gracePeriod: THREE_JANE_GRACE_PERIOD_SECONDS,
     delinquencyPeriod: THREE_JANE_DELINQUENCY_PERIOD_SECONDS,
     graceEnd,
     defaultAt,
-    secondsToDefault,
-    secondsSinceDefault,
-    repaymentStatus,
-    defaultBucket: selectThreeJaneDefaultBucket(repaymentStatus, secondsToDefault),
   };
 };
 
-const withThreeJaneRepaymentState = (
-  entity: ThreeJaneBorrowerMarket,
-  now: number,
-  computedBlock: number,
-): ThreeJaneBorrowerMarket => ({
+const withThreeJaneRepaymentSchedule = (entity: ThreeJaneBorrowerMarket): ThreeJaneBorrowerMarket => ({
   ...entity,
-  ...threeJaneRepaymentState(entity.amountDue, entity.cycleEnd, now),
-  lastComputedBlock: computedBlock,
-  lastComputedTimestamp: now,
+  ...threeJaneRepaymentSchedule(entity.amountDue, entity.cycleEnd),
 });
 
 const threeJaneBorrowerMarketBase = (
@@ -246,10 +183,6 @@ const threeJaneBorrowerMarketBase = (
   delinquencyPeriod: existing?.delinquencyPeriod ?? THREE_JANE_DELINQUENCY_PERIOD_SECONDS,
   graceEnd: existing?.graceEnd ?? 0,
   defaultAt: existing?.defaultAt ?? 0,
-  secondsToDefault: existing?.secondsToDefault ?? 0,
-  secondsSinceDefault: existing?.secondsSinceDefault ?? 0,
-  repaymentStatus: existing?.repaymentStatus ?? REPAYMENT_STATUS_CURRENT,
-  defaultBucket: existing?.defaultBucket,
   settled: existing?.settled ?? false,
   defaultStarted: existing?.defaultStarted ?? false,
   lastEventName: existing?.lastEventName ?? "",
@@ -257,21 +190,7 @@ const threeJaneBorrowerMarketBase = (
   lastSeenTimestamp: event.block.timestamp,
   lastSeenTransactionHash: event.transaction.hash,
   lastSeenLogIndex: event.logIndex,
-  lastComputedBlock: existing?.lastComputedBlock ?? event.block.number,
-  lastComputedTimestamp: existing?.lastComputedTimestamp ?? event.block.timestamp,
 });
-
-const addThreeJaneBorrowerMarketToIndex = async (borrowerMarketId: string, context: any): Promise<void> => {
-  const existing = await context.ThreeJaneBorrowerMarketIndex.get(THREE_JANE_BORROWER_MARKET_INDEX_ID);
-  const borrowerMarketIds = existing?.borrowerMarketIds ?? [];
-  if (borrowerMarketIds.includes(borrowerMarketId)) return;
-
-  const entity: ThreeJaneBorrowerMarketIndex = {
-    id: THREE_JANE_BORROWER_MARKET_INDEX_ID,
-    borrowerMarketIds: [...borrowerMarketIds, borrowerMarketId],
-  };
-  context.ThreeJaneBorrowerMarketIndex.set(entity);
-};
 
 const threeJanePaymentCycleBase = (
   event: any,
@@ -323,14 +242,9 @@ const updateThreeJaneBorrowerMarket = async (
   const id = threeJaneBorrowerMarketId(event.chainId, rawMarketId, borrower);
   const existing = await context.ThreeJaneBorrowerMarket.get(id);
   const entity = threeJaneBorrowerMarketBase(event, rawMarketId, borrower, existing);
-  const updated = withThreeJaneRepaymentState(
-    apply({ ...entity, lastEventName: eventName }),
-    event.block.timestamp,
-    event.block.number,
-  );
+  const updated = withThreeJaneRepaymentSchedule(apply({ ...entity, lastEventName: eventName }));
 
   context.ThreeJaneBorrowerMarket.set(updated);
-  await addThreeJaneBorrowerMarketToIndex(id, context);
 };
 
 indexer.onEvent({ contract: "YearnV3Vault", event: "Deposit" }, async ({ event, context }) => {
@@ -943,22 +857,18 @@ indexer.onEvent({ contract: "MorphoCredit", event: "PaymentCycleCreated" }, asyn
 
   context.ThreeJanePaymentCycle.set(cycle);
 
+  // RepaymentObligationPosted logs are emitted before PaymentCycleCreated in
+  // closeCycleAndPostObligations, so this backfills cycle dates onto borrowers.
   for (const borrowerMarketId of cycle.borrowerMarketIds) {
     const borrowerMarket = await context.ThreeJaneBorrowerMarket.get(borrowerMarketId);
     if (!borrowerMarket) continue;
 
     context.ThreeJaneBorrowerMarket.set(
-      withThreeJaneRepaymentState(
-        {
-          ...borrowerMarket,
-          cycleStart: cycle.startDate,
-          cycleEnd: cycle.endDate,
-          lastComputedBlock: event.block.number,
-          lastComputedTimestamp: event.block.timestamp,
-        },
-        event.block.timestamp,
-        event.block.number,
-      ),
+      withThreeJaneRepaymentSchedule({
+        ...borrowerMarket,
+        cycleStart: cycle.startDate,
+        cycleEnd: cycle.endDate,
+      }),
     );
   }
 });
@@ -966,6 +876,7 @@ indexer.onEvent({ contract: "MorphoCredit", event: "PaymentCycleCreated" }, asyn
 indexer.onEvent({ contract: "MorphoCredit", event: "RepaymentObligationPosted" }, async ({ event, context }) => {
   const borrowerMarketId = threeJaneBorrowerMarketId(event.chainId, event.params.id, event.params.borrower);
   const existing = await context.ThreeJaneBorrowerMarket.get(borrowerMarketId);
+  // MorphoCredit keeps the old obligation cycle active while amountDue > 0.
   const hasOpenObligation = (existing?.amountDue ?? 0n) > 0n;
   const cycle = hasOpenObligation
     ? undefined
@@ -1065,34 +976,6 @@ indexer.onEvent({ contract: "MorphoCredit", event: "AccountSettled" }, async ({ 
     context,
   );
 });
-
-indexer.onBlock(
-  {
-    name: "ThreeJaneBorrowerMarketStatus",
-    where: ({ chain }) => {
-      if (chain.id !== 1) return false;
-      return {
-        block: {
-          number: {
-            _every: THREE_JANE_STATUS_BLOCK_INTERVAL,
-          },
-        },
-      };
-    },
-  },
-  async ({ block, context }) => {
-    const now = Math.floor(Date.now() / 1000);
-    const index = await context.ThreeJaneBorrowerMarketIndex.get(THREE_JANE_BORROWER_MARKET_INDEX_ID);
-    for (const borrowerMarketId of index?.borrowerMarketIds ?? []) {
-      const borrowerMarket = await context.ThreeJaneBorrowerMarket.get(borrowerMarketId);
-      if (!borrowerMarket || borrowerMarket.settled || borrowerMarket.amountDue <= 0n) continue;
-
-      context.ThreeJaneBorrowerMarket.set(
-        withThreeJaneRepaymentState(borrowerMarket, now, block.number),
-      );
-    }
-  },
-);
 
 // ─── YearnV2Vault Handlers ──────────────────────────────────────────────────
 

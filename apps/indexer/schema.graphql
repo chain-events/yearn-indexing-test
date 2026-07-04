@@ -1200,10 +1200,6 @@ type ThreeJaneBorrowerMarket {
   delinquencyPeriod: Int!
   graceEnd: Int!
   defaultAt: Int! @index
-  secondsToDefault: Int!
-  secondsSinceDefault: Int!
-  repaymentStatus: String! @index
-  defaultBucket: String @index
   settled: Boolean! @index
   defaultStarted: Boolean! @index
   lastEventName: String! @index
@@ -1211,8 +1207,6 @@ type ThreeJaneBorrowerMarket {
   lastSeenTimestamp: Int! @index
   lastSeenTransactionHash: String! @index
   lastSeenLogIndex: Int!
-  lastComputedBlock: Int! @index
-  lastComputedTimestamp: Int! @index
 }
 
 type ThreeJanePaymentCycle {
@@ -1228,9 +1222,4 @@ type ThreeJanePaymentCycle {
   createdTimestamp: Int! @index
   createdTransactionHash: String! @index
   createdLogIndex: Int!
-}
-
-type ThreeJaneBorrowerMarketIndex {
-  id: ID!
-  borrowerMarketIds: [String!]!
 }
