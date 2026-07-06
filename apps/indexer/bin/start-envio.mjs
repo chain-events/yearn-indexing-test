@@ -89,17 +89,31 @@ const runPnpm = (args, { onOutput } = {}) =>
     });
 
     let output = "";
+    // The incompatible-config error prints its trigger line *first* and then
+    // dumps a diff of every changed entity/property — often hundreds of lines,
+    // far larger than OUTPUT_TAIL_CHARS. If we only test the bounded tail after
+    // the process closes, that diff has already pushed the trigger line out of
+    // the window and the reset never fires (exactly the production regression
+    // this guards against). Latch the match as it streams past instead: test
+    // both the raw chunk (in case the whole error arrives in one write) and the
+    // rolling tail (in case the trigger line spans a chunk boundary), while the
+    // trigger line is still visible.
+    let sawResetTrigger = false;
     const relay = (source, dest) => {
       source.on("data", (chunk) => {
         dest.write(chunk);
-        output = (output + chunk).slice(-OUTPUT_TAIL_CHARS);
+        const text = chunk.toString();
+        output = (output + text).slice(-OUTPUT_TAIL_CHARS);
+        if (!sawResetTrigger && (needsReset(text) || needsReset(output))) {
+          sawResetTrigger = true;
+        }
         onOutput?.(output);
       });
     };
     relay(child.stdout, process.stdout);
     relay(child.stderr, process.stderr);
 
-    child.on("close", (code) => resolve({ code, output }));
+    child.on("close", (code) => resolve({ code, output, sawResetTrigger }));
   });
 
 // Runs `pnpm <args>`; if it fails specifically because envio detected an
@@ -111,7 +125,7 @@ const runPnpmWithReset = async (args, resetArgs, opts) => {
     return;
   }
 
-  if (needsReset(attempt.output)) {
+  if (attempt.sawResetTrigger) {
     console.warn(
       `config.yaml (or schema.graphql) drifted from the existing indexed data — resetting the database and reindexing from scratch (\`pnpm ${resetArgs.join(" ")}\`).`,
     );
