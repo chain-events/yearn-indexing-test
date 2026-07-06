@@ -118,8 +118,11 @@ const runPnpm = (args, { onOutput } = {}) =>
 
 // Runs `pnpm <args>`; if it fails specifically because envio detected an
 // incompatible config change, reruns with `resetArgs` (which wipes and
-// reinitializes) instead. Any other failure just exits the process.
-const runPnpmWithReset = async (args, resetArgs, opts) => {
+// reinitializes) instead. Any other failure just exits the process. `onReset`
+// (if given) runs right before the reset attempt, so callers can re-arm any
+// once-per-startup side effect that must happen again against the freshly
+// reindexed data (see the readonly Hasura grant below).
+const runPnpmWithReset = async (args, resetArgs, opts, onReset) => {
   const attempt = await runPnpm(args, opts);
   if (attempt.code === 0) {
     return;
@@ -129,6 +132,7 @@ const runPnpmWithReset = async (args, resetArgs, opts) => {
     console.warn(
       `config.yaml (or schema.graphql) drifted from the existing indexed data — resetting the database and reindexing from scratch (\`pnpm ${resetArgs.join(" ")}\`).`,
     );
+    onReset?.();
     const reset = await runPnpm(resetArgs, opts);
     if (reset.code !== 0) {
       process.exit(reset.code ?? 1);
@@ -148,6 +152,11 @@ const runPnpmWithReset = async (args, resetArgs, opts) => {
 // table. Once envio logs that tracking finished, grant `readonly` the same
 // select access as `public` so those clients aren't left broken after every
 // deploy or reset.
+// This grant runs at most once per `envio start` invocation, but a reset
+// re-tracks Hasura from scratch (wiping the readonly role's grants along with
+// everything else), so the grant must run again against the new table set.
+// The reset path re-arms this latch (see runPnpmWithReset's onReset below) so
+// the post-reset "tracking done" marker re-triggers the grant.
 const HASURA_TRACKING_DONE_PATTERN = /Hasura configuration completed/;
 let readonlyGrantTriggered = false;
 const grantReadonlySelect = () => {
@@ -224,9 +233,18 @@ if (existsSync(migrationsDir)) {
   }
 }
 
-await runPnpmWithReset(["envio", "start"], ["envio", "start", "-r"], {
-  onOutput: (tail) => {
-    if (HASURA_TRACKING_DONE_PATTERN.test(tail)) grantReadonlySelect();
+await runPnpmWithReset(
+  ["envio", "start"],
+  ["envio", "start", "-r"],
+  {
+    onOutput: (tail) => {
+      if (HASURA_TRACKING_DONE_PATTERN.test(tail)) grantReadonlySelect();
+    },
   },
-});
+  // Re-arm the readonly grant: a reset re-tracks Hasura, so the grant must run
+  // again even if it already fired against the pre-reset tables.
+  () => {
+    readonlyGrantTriggered = false;
+  },
+);
 process.exit(0);
