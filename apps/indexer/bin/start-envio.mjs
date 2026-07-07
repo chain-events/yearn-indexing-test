@@ -148,21 +148,22 @@ const runPnpmWithReset = async (args, resetArgs, opts, onReset) => {
 // hardcoded in its own Hasura.res.mjs, with no env var to change it. Clients
 // authenticated via HASURA_GRAPHQL_JWT (graphiql, apps/monitoring) are pinned
 // to the `readonly` role instead (see HASURA_GRAPHQL_JWT_SECRET's claims_map),
-// which never gets those grants and sees a GraphQL schema missing every
-// table. Once envio logs that tracking finished, grant `readonly` the same
-// select access as `public` so those clients aren't left broken after every
-// deploy or reset.
-// This grant runs at most once per `envio start` invocation, but a reset
-// re-tracks Hasura from scratch (wiping the readonly role's grants along with
-// everything else), so the grant must run again against the new table set.
-// The reset path re-arms this latch (see runPnpmWithReset's onReset below) so
-// the post-reset "tracking done" marker re-triggers the grant.
+// which Hasura doesn't even know exists after a metadata wipe, so those clients
+// see a GraphQL schema missing every table. Once envio logs that tracking
+// finished, (re)create `readonly` as an inherited role of `public` so it
+// automatically has public's select on every table — see
+// scripts/hasura_grant_public_select.js.
+// This runs at most once per `envio start` invocation, but a reset re-tracks
+// Hasura from scratch (wiping the readonly inherited role along with everything
+// else), so it must run again against the new metadata. The reset path re-arms
+// this latch (see runPnpmWithReset's onReset below) so the post-reset "tracking
+// done" marker re-triggers it.
 const HASURA_TRACKING_DONE_PATTERN = /Hasura configuration completed/;
 let readonlyGrantTriggered = false;
 const grantReadonlySelect = () => {
   if (readonlyGrantTriggered) return;
   readonlyGrantTriggered = true;
-  console.log("Hasura tracking finished — granting the readonly role select access...");
+  console.log("Hasura tracking finished — creating the readonly inherited role...");
   const grant = spawn(
     "node",
     ["scripts/hasura_grant_public_select.js", "readonly"],
