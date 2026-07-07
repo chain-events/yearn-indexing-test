@@ -3,7 +3,9 @@
 import "dotenv/config";
 
 const ROLE = process.argv[2] || "public";
-const HASURA_URL = process.env.HASURA_GRAPHQL_ENDPOINT || "https://graphql-engine-dxp4.onrender.com";
+const HASURA_URL =
+  process.env.HASURA_GRAPHQL_ENDPOINT ||
+  "https://graphql-engine-3ljk.onrender.com/";
 const ADMIN_SECRET = process.env.HASURA_GRAPHQL_ADMIN_SECRET;
 
 if (!ADMIN_SECRET) {
