@@ -81,7 +81,7 @@ const needsReset = (output) =>
 // (see below) is checked as it streams in — so keep a bounded window instead.
 const OUTPUT_TAIL_CHARS = 16_000;
 
-const runPnpm = (args, { onOutput } = {}) =>
+const runPnpm = (args) =>
   new Promise((resolve) => {
     const child = spawn("pnpm", args, {
       env,
@@ -107,7 +107,6 @@ const runPnpm = (args, { onOutput } = {}) =>
         if (!sawResetTrigger && (needsReset(text) || needsReset(output))) {
           sawResetTrigger = true;
         }
-        onOutput?.(output);
       });
     };
     relay(child.stdout, process.stdout);
@@ -118,12 +117,9 @@ const runPnpm = (args, { onOutput } = {}) =>
 
 // Runs `pnpm <args>`; if it fails specifically because envio detected an
 // incompatible config change, reruns with `resetArgs` (which wipes and
-// reinitializes) instead. Any other failure just exits the process. `onReset`
-// (if given) runs right before the reset attempt, so callers can re-arm any
-// once-per-startup side effect that must happen again against the freshly
-// reindexed data (see the readonly Hasura grant below).
-const runPnpmWithReset = async (args, resetArgs, opts, onReset) => {
-  const attempt = await runPnpm(args, opts);
+// reinitializes) instead. Any other failure just exits the process.
+const runPnpmWithReset = async (args, resetArgs) => {
+  const attempt = await runPnpm(args);
   if (attempt.code === 0) {
     return;
   }
@@ -132,8 +128,7 @@ const runPnpmWithReset = async (args, resetArgs, opts, onReset) => {
     console.warn(
       `config.yaml (or schema.graphql) drifted from the existing indexed data — resetting the database and reindexing from scratch (\`pnpm ${resetArgs.join(" ")}\`).`,
     );
-    onReset?.();
-    const reset = await runPnpm(resetArgs, opts);
+    const reset = await runPnpm(resetArgs);
     if (reset.code !== 0) {
       process.exit(reset.code ?? 1);
     }
@@ -143,50 +138,114 @@ const runPnpmWithReset = async (args, resetArgs, opts, onReset) => {
   process.exit(attempt.code ?? 1);
 };
 
-// envio wipes and rebuilds all Hasura metadata on every startup (clear then
-// re-track), but it only ever grants `select` to the `public` role —
+// envio wipes and rebuilds all Hasura metadata on every startup/reset (clear
+// then re-track), but it only ever grants `select` to the `public` role —
 // hardcoded in its own Hasura.res.mjs, with no env var to change it. Clients
 // authenticated via HASURA_GRAPHQL_JWT (graphiql, apps/monitoring) are pinned
 // to the `readonly` role instead (see HASURA_GRAPHQL_JWT_SECRET's claims_map),
 // which Hasura doesn't even know exists after a metadata wipe, so those clients
-// see a GraphQL schema missing every table. Once envio logs that tracking
-// finished, (re)create `readonly` as an inherited role of `public` so it
-// automatically has public's select on every table — see
-// scripts/hasura_grant_public_select.js.
-// This runs at most once per `envio start` invocation, but a reset re-tracks
-// Hasura from scratch (wiping the readonly inherited role along with everything
-// else), so it must run again against the new metadata. The reset path re-arms
-// this latch (see runPnpmWithReset's onReset below) so the post-reset "tracking
-// done" marker re-triggers it.
-const HASURA_TRACKING_DONE_PATTERN = /Hasura configuration completed/;
-let readonlyGrantTriggered = false;
-const grantReadonlySelect = () => {
-  if (readonlyGrantTriggered) return;
-  readonlyGrantTriggered = true;
-  console.log("Hasura tracking finished — creating the readonly inherited role...");
-  const grant = spawn(
-    "node",
-    ["scripts/hasura_grant_public_select.js", "readonly"],
-    { env, stdio: "inherit" },
+// see a GraphQL schema missing every table. `readonly` must be recreated as an
+// inherited role of `public` (see scripts/hasura_grant_public_select.js) so it
+// automatically has public's select on every table.
+//
+// This used to be triggered by scraping envio's stdout for a "tracking done"
+// log line, but that marker never reliably fired in production (envio's exact
+// wording isn't guaranteed and a single miss leaves readonly broken). Instead,
+// reconcile against Hasura's actual state: poll its metadata while envio runs
+// and, whenever tables are tracked and `public` has been granted but the
+// readonly inherited role is missing, (re)create it. This self-heals across the
+// initial startup, resets (`envio start -r`), and any later metadata rebuild,
+// with no dependency on log wording.
+const HASURA_RECONCILE_INTERVAL_MS = 20_000;
+
+const hasuraMetadataUrl = () => {
+  const base = (env.HASURA_GRAPHQL_ENDPOINT || "").replace(/\/v1\/metadata\/?$/, "");
+  return base ? `${base}/v1/metadata` : undefined;
+};
+
+// One reconciliation pass. Returns without acting (and stays quiet) whenever
+// there's nothing to do, so the steady state is silent. Never throws — a
+// transient Hasura/network error just means we retry on the next tick.
+const reconcileReadonlyRoleOnce = async () => {
+  const url = hasuraMetadataUrl();
+  const secret = env.HASURA_GRAPHQL_ADMIN_SECRET;
+  if (!url || !secret) return;
+
+  let metadata;
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-hasura-admin-secret": secret,
+      },
+      body: JSON.stringify({ type: "export_metadata", args: {} }),
+    });
+    if (!res.ok) return;
+    metadata = await res.json();
+  } catch {
+    return;
+  }
+
+  const sources = metadata.sources || [];
+  // Only act once `public` actually has grants: envio applies them as part of
+  // tracking, and add_inherited_role fails if its parent role doesn't exist
+  // yet. This gate also means we wait out the brief post-clear window.
+  const publicHasSelect = sources.some((s) =>
+    (s.tables || []).some((t) =>
+      (t.select_permissions || []).some((p) => p.role === "public"),
+    ),
   );
-  // Without this, a spawn failure (e.g. "node" missing from PATH) emits an
-  // unhandled 'error' event, which Node treats as an uncaught exception and
-  // crashes the whole indexer process — this grant must never be able to
-  // take down `envio start`.
-  grant.on("error", (err) => {
-    console.warn(
-      `Failed to run the Hasura 'readonly' role grant: ${err.message} — the monitoring dashboard and graphiql may see "field not found" GraphQL errors until this is fixed.`,
+  if (!publicHasSelect) return;
+
+  const readonlyReady = (metadata.inherited_roles || []).some(
+    (r) => r.role_name === "readonly" && (r.role_set || []).includes("public"),
+  );
+  if (readonlyReady) return;
+
+  console.log(
+    "readonly inherited role missing from Hasura — creating it (inherits public)...",
+  );
+  await new Promise((resolve) => {
+    const grant = spawn(
+      "node",
+      ["scripts/hasura_grant_public_select.js", "readonly"],
+      { env, stdio: "inherit" },
     );
-  });
-  grant.on("close", (code) => {
-    if (code !== 0) {
+    // A spawn 'error' event is otherwise an uncaught exception that would crash
+    // the indexer — reconciling the readonly role must never take down envio.
+    grant.on("error", (err) => {
       console.warn(
-        `Failed to grant Hasura 'readonly' role select access (exit ${code}) — the monitoring dashboard and graphiql may see "field not found" GraphQL errors until this is fixed.`,
+        `Failed to spawn the readonly role reconciler: ${err.message} — graphiql and the monitoring dashboard may see "field not found" errors until this succeeds; retrying.`,
       );
-    } else {
-      console.log("Granted Hasura 'readonly' role select access.");
-    }
+      resolve();
+    });
+    grant.on("close", (code) => {
+      if (code !== 0) {
+        console.warn(
+          `readonly role reconciler exited ${code} — will retry on the next tick.`,
+        );
+      }
+      resolve();
+    });
   });
+};
+
+const startReadonlyRoleReconciler = () => {
+  let running = false;
+  const tick = async () => {
+    if (running) return; // never overlap passes (a create can outlast a tick)
+    running = true;
+    try {
+      await reconcileReadonlyRoleOnce();
+    } finally {
+      running = false;
+    }
+  };
+  tick();
+  // .unref() so this timer alone never keeps the process alive; `envio start`
+  // is what holds it open.
+  setInterval(tick, HASURA_RECONCILE_INTERVAL_MS).unref();
 };
 
 await runPnpmWithReset(
@@ -234,18 +293,9 @@ if (existsSync(migrationsDir)) {
   }
 }
 
-await runPnpmWithReset(
-  ["envio", "start"],
-  ["envio", "start", "-r"],
-  {
-    onOutput: (tail) => {
-      if (HASURA_TRACKING_DONE_PATTERN.test(tail)) grantReadonlySelect();
-    },
-  },
-  // Re-arm the readonly grant: a reset re-tracks Hasura, so the grant must run
-  // again even if it already fired against the pre-reset tables.
-  () => {
-    readonlyGrantTriggered = false;
-  },
-);
+// Reconcile the readonly inherited role in the background for the whole life of
+// the indexer — it survives the initial track, resets, and metadata rebuilds.
+startReadonlyRoleReconciler();
+
+await runPnpmWithReset(["envio", "start"], ["envio", "start", "-r"]);
 process.exit(0);
