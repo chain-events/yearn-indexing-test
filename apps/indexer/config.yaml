@@ -1604,6 +1604,8 @@ chains:
         address: []
   - id: 747474
     start_block: 0
+    hypersync_config:
+      url: https://katana.hypersync.xyz
     contracts:
       - name: AaveTimelock
         address: []
