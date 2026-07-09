@@ -1,8 +1,47 @@
+diff --git a/src/ChainManager.res.mjs b/src/ChainManager.res.mjs
+index 21d4971b88adbec8fa5281833cc828ac30e46c64..ed856ea59df04ff1861af2bb7f8dd14797cf094c 100644
+--- a/src/ChainManager.res.mjs
++++ b/src/ChainManager.res.mjs
+@@ -48,8 +48,15 @@ function makeFromDbState(initialState, config, registrations) {
+     let count = param.count;
+     Prometheus.EffectCacheCount.set(count, param.effectName);
+   });
+-  let isRealtime = !Env.updateSyncTimeOnRestart && initialState.chains.length !== 0 && initialState.chains.every(c => Stdlib_Option.isSome(c.timestampCaughtUpToHeadOrEndblock));
+-  let chainFetchersArr = initialState.chains.map(resumedChainState => {
++  // PATCH: a chain removed from config.yaml leaves an orphaned progress row in
++  // the DB. Resume only chains still present in the config; skipping the orphan
++  // avoids Config.getChain throwing "No chain with id N found in config.yaml",
++  // which would otherwise force a full reset/reindex of every chain. The orphan
++  // row is left untouched — its historical data stays queryable and it resumes
++  // from its checkpoint if the chain is added back later.
++  let resumableChains = initialState.chains.filter(c => ChainMap.has(config.chainMap, ChainMap.Chain.makeUnsafe(c.id)));
++  let isRealtime = !Env.updateSyncTimeOnRestart && resumableChains.length !== 0 && resumableChains.every(c => Stdlib_Option.isSome(c.timestampCaughtUpToHeadOrEndblock));
++  let chainFetchersArr = resumableChains.map(resumedChainState => {
+     let chain = Config.getChain(config, resumedChainState.id);
+     let chainConfig = ChainMap.get(config.chainMap, chain);
+     return [
 diff --git a/src/Config.res.mjs b/src/Config.res.mjs
-index 6d749432fe0303f3037bf06160c179a0f39ac446..937d2b222becaa9362e56a8cfc056a5912c97e48 100644
+index 6d749432fe0303f3037bf06160c179a0f39ac446..f17f0a1a7c33fdaf3888b229cb111aa62196b50e 100644
 --- a/src/Config.res.mjs
 +++ b/src/Config.res.mjs
-@@ -902,6 +902,10 @@ function diffPaths(stored, current) {
+@@ -814,6 +814,16 @@ function diffPaths(stored, current) {
+                 if (match$1 !== undefined) {
+                   return go(match, match$1, p);
+                 } else {
++                  // PATCH: a chain removed from config.yaml is resumable, not
++                  // incompatible — a chain present in the stored config but gone
++                  // from the current one no longer produces a diff path, so
++                  // throwIfIncompatible doesn't force a reset. makeFromDbState
++                  // then skips its orphaned progress row (see ChainManager.res.mjs).
++                  // Added chains (present in current, absent in stored) and
++                  // per-chain field changes still register as incompatible.
++                  if (/^(evm|fuel|svm)\.chains$/.test(prefix)) {
++                    return;
++                  }
+                   acc.push(p);
+                   return;
+                 }
+@@ -902,6 +912,10 @@ function diffPaths(stored, current) {
  }
  
  function throwIfIncompatible(changedPaths, resetCommand, runCommand, hasClickhouse) {
