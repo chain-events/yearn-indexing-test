@@ -8,6 +8,8 @@
 apps/indexer/build/
 apps/indexer/generated/
 apps/indexer/scripts/
+# bin/start-envio.mjs spawns this at runtime to reconcile the readonly Hasura role
+!apps/indexer/scripts/hasura_grant_public_select.js
 apps/monitoring/.env
 apps/monitoring/.env.example
 apps/monitoring/public/
