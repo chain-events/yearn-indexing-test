@@ -1604,9 +1604,6 @@ chains:
         address: []
   - id: 747474
     start_block: 0
-    rpc:
-      - url: ${ENVIO_RPC_URL_KATANA}
-        for: sync
     contracts:
       - name: AaveTimelock
         address: []
