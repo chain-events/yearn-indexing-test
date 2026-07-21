@@ -17,4 +17,4 @@ allowBuilds:
   rescript: true
 
 patchedDependencies:
-  envio@3.0.1: patches/envio@3.0.1.patch
+  envio@3.2.1: patches/envio@3.2.1.patch
