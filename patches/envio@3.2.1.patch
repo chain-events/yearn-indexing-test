@@ -1,8 +1,8 @@
 diff --git a/src/ChainManager.res.mjs b/src/ChainManager.res.mjs
-index 21d4971b88adbec8fa5281833cc828ac30e46c64..ed856ea59df04ff1861af2bb7f8dd14797cf094c 100644
+index 8de68f5791d2fec3dca50501e44e6c9aaae6c472..6d68538fdf2c6e56e24ac10bffd1c75e243e0c14 100644
 --- a/src/ChainManager.res.mjs
 +++ b/src/ChainManager.res.mjs
-@@ -48,8 +48,15 @@ function makeFromDbState(initialState, config, registrations) {
+@@ -48,8 +48,15 @@ function makeFromDbState(initialState, config, registrations, reducedPollingInte
      let count = param.count;
      Prometheus.EffectCacheCount.set(count, param.effectName);
    });
@@ -21,10 +21,10 @@ index 21d4971b88adbec8fa5281833cc828ac30e46c64..ed856ea59df04ff1861af2bb7f8dd147
      let chainConfig = ChainMap.get(config.chainMap, chain);
      return [
 diff --git a/src/Config.res.mjs b/src/Config.res.mjs
-index 6d749432fe0303f3037bf06160c179a0f39ac446..f17f0a1a7c33fdaf3888b229cb111aa62196b50e 100644
+index 415c2b641b0708497ce429441987e5000b0c379f..a017e94ba55fe859061ab2fe5f30d7fcc7f9e90e 100644
 --- a/src/Config.res.mjs
 +++ b/src/Config.res.mjs
-@@ -814,6 +814,16 @@ function diffPaths(stored, current) {
+@@ -864,6 +864,16 @@ function diffPaths(stored, current) {
                  if (match$1 !== undefined) {
                    return go(match, match$1, p);
                  } else {
@@ -41,7 +41,7 @@ index 6d749432fe0303f3037bf06160c179a0f39ac446..f17f0a1a7c33fdaf3888b229cb111aa6
                    acc.push(p);
                    return;
                  }
-@@ -902,6 +912,10 @@ function diffPaths(stored, current) {
+@@ -952,6 +962,10 @@ function diffPaths(stored, current) {
  }
  
  function throwIfIncompatible(changedPaths, resetCommand, runCommand, hasClickhouse) {
