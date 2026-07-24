@@ -3,6 +3,8 @@ import type {
   DebtPurchased,
   DebtUpdated,
   Deposit,
+  FrankencoinV1PositionOpened,
+  FrankencoinV2PositionOpened,
   GovernanceTransferred,
   NewDebtAllocator,
   ReferralDeposit,
@@ -2127,4 +2129,45 @@ indexer.onEvent({ contract: "MapleTimelock", event: "ProposalScheduled" }, async
     votesAgainst: undefined,
   };
   context.TimelockEvent.set(entity);
+});
+
+indexer.onEvent({ contract: "FrankencoinMintingHubV1", event: "PositionOpened" }, async ({ event, context }) => {
+  const entity: FrankencoinV1PositionOpened = {
+    id: eventId(event),
+    hubAddress: getAddress(event.srcAddress),
+    chainId: event.chainId,
+    blockNumber: event.block.number,
+    blockTimestamp: event.block.timestamp,
+    blockHash: event.block.hash,
+    transactionHash: event.transaction.hash,
+    transactionIndex: event.transaction.transactionIndex,
+    transactionFrom: addr(event.transaction.from),
+    logIndex: event.logIndex,
+    owner: getAddress(event.params.owner),
+    position: getAddress(event.params.position),
+    zchf: getAddress(event.params.zchf),
+    collateral: getAddress(event.params.collateral),
+    price: event.params.price,
+  };
+  context.FrankencoinV1PositionOpened.set(entity);
+});
+
+indexer.onEvent({ contract: "FrankencoinMintingHubV2", event: "PositionOpened" }, async ({ event, context }) => {
+  const entity: FrankencoinV2PositionOpened = {
+    id: eventId(event),
+    hubAddress: getAddress(event.srcAddress),
+    chainId: event.chainId,
+    blockNumber: event.block.number,
+    blockTimestamp: event.block.timestamp,
+    blockHash: event.block.hash,
+    transactionHash: event.transaction.hash,
+    transactionIndex: event.transaction.transactionIndex,
+    transactionFrom: addr(event.transaction.from),
+    logIndex: event.logIndex,
+    owner: getAddress(event.params.owner),
+    position: getAddress(event.params.position),
+    original: getAddress(event.params.original),
+    collateral: getAddress(event.params.collateral),
+  };
+  context.FrankencoinV2PositionOpened.set(entity);
 });

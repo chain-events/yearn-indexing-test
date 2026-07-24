@@ -1223,3 +1223,40 @@ type ThreeJanePaymentCycle {
   createdTransactionHash: String! @index
   createdLogIndex: Int!
 }
+
+# ─── Frankencoin Minting Hub Events ─────────────────────────────────────────
+
+type FrankencoinV1PositionOpened {
+  id: ID!
+  hubAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionIndex: Int!
+  transactionFrom: String @index
+  logIndex: Int!
+  owner: String! @index
+  position: String! @index
+  zchf: String! @index
+  collateral: String! @index
+  price: BigInt!
+}
+
+type FrankencoinV2PositionOpened {
+  id: ID!
+  hubAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionIndex: Int!
+  transactionFrom: String @index
+  logIndex: Int!
+  owner: String! @index
+  position: String! @index
+  original: String! @index
+  collateral: String! @index
+}

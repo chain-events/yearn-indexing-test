@@ -198,6 +198,14 @@ contracts:
     handler: src/EventHandlers.ts
     events:
       - event: "Register(address indexed gauge, uint256 idx)"
+  - name: FrankencoinMintingHubV1
+    handler: src/EventHandlers.ts
+    events:
+      - event: "PositionOpened(address indexed owner, address indexed position, address zchf, address collateral, uint256 price)"
+  - name: FrankencoinMintingHubV2
+    handler: src/EventHandlers.ts
+    events:
+      - event: "PositionOpened(address indexed owner, address indexed position, address original, address collateral)"
 chains:
   - id: 1
     start_block: 0
@@ -902,6 +910,14 @@ chains:
           - "0x38e3d865e34f7367a69f096c80a4fc329db38bf4" # yG-yvDAI-2
           - "0x8e2485942b399ea41f3c910c1bb8567128f79859" # yG-yvWETH-2
           - "0x71c3223d6f836f84caa7ab5a68aab6ece21a9f3b" # yG-yvcrvUSD-2
+      - name: FrankencoinMintingHubV1
+        address:
+          - "0x7546762fdb1a6d9146b33960545C3f6394265219" # Frankencoin V1 MintingHub
+        start_block: 18451536
+      - name: FrankencoinMintingHubV2
+        address:
+          - "0xDe12B620A8a714476A97EfD14E6F7180Ca653557" # Frankencoin V2 MintingHub
+        start_block: 21280757
   - id: 10  # Optimism
     start_block: 0
     contracts:
