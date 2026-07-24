@@ -3,8 +3,9 @@ import type {
   DebtPurchased,
   DebtUpdated,
   Deposit,
-  FrankencoinV1PositionOpened,
   FrankencoinV2PositionOpened,
+  FrankencoinYsyBoldAccount,
+  FrankencoinYsyBoldTotal,
   GovernanceTransferred,
   NewDebtAllocator,
   ReferralDeposit,
@@ -2131,26 +2132,147 @@ indexer.onEvent({ contract: "MapleTimelock", event: "ProposalScheduled" }, async
   context.TimelockEvent.set(entity);
 });
 
-indexer.onEvent({ contract: "FrankencoinMintingHubV1", event: "PositionOpened" }, async ({ event, context }) => {
-  const entity: FrankencoinV1PositionOpened = {
-    id: eventId(event),
-    hubAddress: getAddress(event.srcAddress),
+// ─── Frankencoin ysyBOLD collateral tracking (V2) ────────────────────────────
+// ysyBOLD (0x23346B04a7f55b8760E5860AA5A77383D63491cD, "Staked yBOLD") can be
+// used as collateral for Frankencoin V2 positions. We index the ysyBOLD Transfer
+// event to keep a per-account balance, and flag each V2 position at
+// PositionOpened so its balance feeds the running total. The initial deposit is
+// captured because it transfers into the position in the same transaction as
+// PositionOpened (just before it) and the ledger is bootstrapped at open time.
+// This is complete ground truth — openPosition deposits, donations, and every
+// collateral movement are Transfers — and needs no RPC.
+const YSYBOLD_COLLATERAL = "0x23346b04a7f55b8760e5860aa5a77383d63491cd";
+const ZERO_ADDRESS = getAddress("0x0000000000000000000000000000000000000000");
+
+const isYsyBoldCollateral = (collateral: string): boolean =>
+  getAddress(collateral) === getAddress(YSYBOLD_COLLATERAL);
+
+const ysyBoldAccountId = (chainId: number, address: string): string =>
+  `${chainId}_${getAddress(address).toLowerCase()}`;
+
+type YsyBoldEntityStore<T> = {
+  readonly get: (id: string) => Promise<T | undefined>;
+  readonly set: (entity: T) => void;
+};
+
+type YsyBoldContext = {
+  readonly FrankencoinYsyBoldAccount: YsyBoldEntityStore<FrankencoinYsyBoldAccount>;
+  readonly FrankencoinYsyBoldTotal: YsyBoldEntityStore<FrankencoinYsyBoldTotal>;
+};
+
+type YsyBoldEvent = {
+  readonly chainId: number;
+  readonly block: { readonly number: number };
+  readonly transaction: { readonly hash: string };
+};
+
+const getYsyBoldTotal = async (
+  event: YsyBoldEvent,
+  context: YsyBoldContext,
+): Promise<FrankencoinYsyBoldTotal> => {
+  const totalId = `${event.chainId}`;
+  const stored = await context.FrankencoinYsyBoldTotal.get(totalId);
+  return stored ?? {
+    id: totalId,
     chainId: event.chainId,
-    blockNumber: event.block.number,
-    blockTimestamp: event.block.timestamp,
-    blockHash: event.block.hash,
-    transactionHash: event.transaction.hash,
-    transactionIndex: event.transaction.transactionIndex,
-    transactionFrom: addr(event.transaction.from),
-    logIndex: event.logIndex,
-    owner: getAddress(event.params.owner),
-    position: getAddress(event.params.position),
-    zchf: getAddress(event.params.zchf),
-    collateral: getAddress(event.params.collateral),
-    price: event.params.price,
+    totalCollateralBalance: 0n,
+    positionCount: 0,
+    lastUpdateBlock: 0,
+    lastUpdateTransactionHash: "",
   };
-  context.FrankencoinV1PositionOpened.set(entity);
-});
+};
+
+const adjustTotal = async (
+  event: YsyBoldEvent,
+  context: YsyBoldContext,
+  balanceDelta: bigint,
+  positionDelta: number,
+): Promise<void> => {
+  const total = await getYsyBoldTotal(event, context);
+  const next = total.totalCollateralBalance + balanceDelta;
+  if (next < 0n) {
+    throw new Error(
+      `Frankencoin ysyBOLD total would go negative at block ${event.block.number}`,
+    );
+  }
+  await context.FrankencoinYsyBoldTotal.set({
+    ...total,
+    totalCollateralBalance: next,
+    positionCount: total.positionCount + positionDelta,
+    lastUpdateBlock: event.block.number,
+    lastUpdateTransactionHash: event.transaction.hash,
+  });
+};
+
+// Apply a signed ysyBOLD balance delta to an account; if it's a known Frankencoin
+// position, move the backing total by the same delta.
+const applyYsyBoldDelta = async (
+  event: YsyBoldEvent,
+  context: YsyBoldContext,
+  address: string,
+  delta: bigint,
+): Promise<void> => {
+  const id = ysyBoldAccountId(event.chainId, address);
+  const existing = await context.FrankencoinYsyBoldAccount.get(id);
+  const account: FrankencoinYsyBoldAccount = existing ?? {
+    id,
+    chainId: event.chainId,
+    address: getAddress(address),
+    balance: 0n,
+    isPosition: false,
+    hubVersion: undefined,
+    owner: undefined,
+    openedBlock: undefined,
+    openedTransactionHash: undefined,
+    lastTransferBlock: 0,
+    lastTransferTransactionHash: "",
+  };
+  await context.FrankencoinYsyBoldAccount.set({
+    ...account,
+    balance: account.balance + delta,
+    lastTransferBlock: event.block.number,
+    lastTransferTransactionHash: event.transaction.hash,
+  });
+  if (account.isPosition) {
+    await adjustTotal(event, context, delta, 0);
+  }
+};
+
+// Flag an address as a Frankencoin V2 position and bootstrap the total with its
+// current (pre-existing) ysyBOLD balance — which includes the initial deposit
+// transferred in the same transaction just before PositionOpened.
+const markYsyBoldPosition = async (
+  event: YsyBoldEvent,
+  context: YsyBoldContext,
+  owner: string,
+  position: string,
+): Promise<void> => {
+  const id = ysyBoldAccountId(event.chainId, position);
+  const existing = await context.FrankencoinYsyBoldAccount.get(id);
+  if (existing?.isPosition) return;
+  const account: FrankencoinYsyBoldAccount = existing ?? {
+    id,
+    chainId: event.chainId,
+    address: getAddress(position),
+    balance: 0n,
+    isPosition: false,
+    hubVersion: undefined,
+    owner: undefined,
+    openedBlock: undefined,
+    openedTransactionHash: undefined,
+    lastTransferBlock: 0,
+    lastTransferTransactionHash: "",
+  };
+  await adjustTotal(event, context, account.balance, 1);
+  await context.FrankencoinYsyBoldAccount.set({
+    ...account,
+    isPosition: true,
+    hubVersion: 2,
+    owner: getAddress(owner),
+    openedBlock: event.block.number,
+    openedTransactionHash: event.transaction.hash,
+  });
+};
 
 indexer.onEvent({ contract: "FrankencoinMintingHubV2", event: "PositionOpened" }, async ({ event, context }) => {
   const entity: FrankencoinV2PositionOpened = {
@@ -2170,4 +2292,19 @@ indexer.onEvent({ contract: "FrankencoinMintingHubV2", event: "PositionOpened" }
     collateral: getAddress(event.params.collateral),
   };
   context.FrankencoinV2PositionOpened.set(entity);
+  if (isYsyBoldCollateral(event.params.collateral)) {
+    await markYsyBoldPosition(event, context, event.params.owner, event.params.position);
+  }
+});
+
+indexer.onEvent({ contract: "YsyBoldToken", event: "Transfer" }, async ({ event, context }) => {
+  const value = event.params.value;
+  const from = getAddress(event.params.from);
+  const to = getAddress(event.params.to);
+  if (from !== ZERO_ADDRESS) {
+    await applyYsyBoldDelta(event, context, from, -value);
+  }
+  if (to !== ZERO_ADDRESS) {
+    await applyYsyBoldDelta(event, context, to, value);
+  }
 });
