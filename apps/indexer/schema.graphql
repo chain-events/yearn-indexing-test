@@ -1223,3 +1223,50 @@ type ThreeJanePaymentCycle {
   createdTransactionHash: String! @index
   createdLogIndex: Int!
 }
+
+# ─── Frankencoin Minting Hub Events ─────────────────────────────────────────
+
+type FrankencoinV2PositionOpened {
+  id: ID!
+  hubAddress: String! @index
+  chainId: Int! @index
+  blockNumber: Int! @index
+  blockTimestamp: Int! @index
+  blockHash: String!
+  transactionHash: String! @index
+  transactionIndex: Int!
+  transactionFrom: String @index
+  logIndex: Int!
+  owner: String! @index
+  position: String! @index
+  original: String! @index
+  collateral: String! @index
+}
+
+# ─── Frankencoin ysyBOLD Collateral Tracking ─────────────────────────────────
+
+# Per-account ysyBOLD ledger. Every account that has held ysyBOLD gets a row;
+# Frankencoin positions are flagged (isPosition=true) so their balances feed the total.
+type FrankencoinYsyBoldAccount {
+  id: ID!                          # "<chainId>_<address-lowercase>"
+  chainId: Int! @index
+  address: String! @index
+  balance: BigInt!                 # net ysyBOLD held (Transfers in - out)
+  isPosition: Boolean! @index      # true once seen as a Frankencoin position (PositionOpened)
+  hubVersion: Int                  # 1 or 2 (positions only)
+  owner: String @index             # position owner (positions only)
+  openedBlock: Int                 # position creation block (positions only)
+  openedTransactionHash: String    # position creation tx (positions only)
+  lastTransferBlock: Int!
+  lastTransferTransactionHash: String!
+}
+
+# Running total of ysyBOLD locked as Frankencoin collateral (one row per chain).
+type FrankencoinYsyBoldTotal {
+  id: ID!                          # "<chainId>"
+  chainId: Int! @index
+  totalCollateralBalance: BigInt!
+  positionCount: Int!
+  lastUpdateBlock: Int!
+  lastUpdateTransactionHash: String!
+}
