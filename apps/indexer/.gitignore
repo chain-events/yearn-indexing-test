@@ -50,3 +50,4 @@ venv/
 generated/
 
 .env.local
+.envio/
