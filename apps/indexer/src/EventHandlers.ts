@@ -2297,10 +2297,13 @@ indexer.onEvent({ contract: "FrankencoinMintingHubV2", event: "PositionOpened" }
   }
 });
 
-indexer.onEvent({ contract: "YsyBoldToken", event: "Transfer" }, async ({ event, context }) => {
+indexer.onEvent({ contract: "YearnV3Vault", event: "Transfer" }, async ({ event, context }) => {
+  // ysyBOLD (Staked yBOLD) shares its address with the YearnV3Vault binding; only
+  // its Transfers drive the Frankencoin collateral ledger, so skip all other vaults.
+  if (!isYsyBoldCollateral(event.srcAddress)) return;
   const value = event.params.value;
-  const from = getAddress(event.params.from);
-  const to = getAddress(event.params.to);
+  const from = getAddress(event.params.sender);
+  const to = getAddress(event.params.receiver);
   if (from !== ZERO_ADDRESS) {
     await applyYsyBoldDelta(event, context, from, -value);
   }

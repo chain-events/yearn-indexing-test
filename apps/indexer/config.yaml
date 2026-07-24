@@ -202,10 +202,6 @@ contracts:
     handler: src/EventHandlers.ts
     events:
       - event: "PositionOpened(address indexed owner, address indexed position, address original, address collateral)"
-  - name: YsyBoldToken
-    handler: src/EventHandlers.ts
-    events:
-      - event: "Transfer(address indexed from, address indexed to, uint256 value)"
 chains:
   - id: 1
     start_block: 0
@@ -914,10 +910,6 @@ chains:
         address:
           - "0xDe12B620A8a714476A97EfD14E6F7180Ca653557" # Frankencoin V2 MintingHub
         start_block: 21280757
-      - name: YsyBoldToken
-        address:
-          - "0x23346B04a7f55b8760E5860AA5A77383D63491cD" # ysyBOLD - Staked yBOLD
-        start_block: 22576980
   - id: 10  # Optimism
     start_block: 0
     contracts:
