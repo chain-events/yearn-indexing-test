@@ -138,6 +138,84 @@ const runPnpmWithReset = async (args, resetArgs) => {
   process.exit(attempt.code ?? 1);
 };
 
+// A deploy can request one explicit full reindex by advancing this generation.
+// The marker lives outside ENVIO_PG_PUBLIC_SCHEMA because `db-migrate setup`
+// drops that entire schema. Once initialization and our SQL migrations finish,
+// the generation is marked complete; ordinary worker restarts then resume the
+// new index instead of wiping it again.
+const REINDEX_GENERATION = "2026-07-26-history-recovery-v1";
+if (!/^[a-z0-9-]+$/.test(REINDEX_GENERATION)) {
+  console.error(`Invalid reindex generation: ${REINDEX_GENERATION}`);
+  process.exit(1);
+}
+
+const psqlConnectionArgs = [
+  "--host",
+  env.ENVIO_PG_HOST,
+  "--port",
+  env.ENVIO_PG_PORT,
+  "--username",
+  env.ENVIO_PG_USER,
+  "--dbname",
+  env.ENVIO_PG_DATABASE,
+  "--set",
+  "ON_ERROR_STOP=1",
+];
+
+const runControlSql = (sql) =>
+  spawnSync(
+    "psql",
+    [
+      ...psqlConnectionArgs,
+      "--quiet",
+      "--tuples-only",
+      "--no-align",
+      "--command",
+      sql,
+    ],
+    {
+      env: {
+        ...env,
+        PGPASSWORD: env.ENVIO_POSTGRES_PASSWORD,
+      },
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "inherit"],
+    },
+  );
+
+const claimReindexGeneration = () => {
+  const result = runControlSql(`
+    CREATE SCHEMA IF NOT EXISTS envio_ops;
+    CREATE TABLE IF NOT EXISTS envio_ops.reindex_generations (
+      generation text PRIMARY KEY,
+      state text NOT NULL CHECK (state IN ('pending', 'initialized')),
+      requested_at timestamptz NOT NULL DEFAULT now(),
+      initialized_at timestamptz
+    );
+    INSERT INTO envio_ops.reindex_generations (generation, state)
+    VALUES ('${REINDEX_GENERATION}', 'pending')
+    ON CONFLICT (generation) DO NOTHING;
+    SELECT state
+    FROM envio_ops.reindex_generations
+    WHERE generation = '${REINDEX_GENERATION}';
+  `);
+  if (result.status !== 0) {
+    process.exit(result.status ?? 1);
+  }
+  return result.stdout.trim().split(/\s+/).at(-1);
+};
+
+const completeReindexGeneration = () => {
+  const result = runControlSql(`
+    UPDATE envio_ops.reindex_generations
+    SET state = 'initialized', initialized_at = now()
+    WHERE generation = '${REINDEX_GENERATION}';
+  `);
+  if (result.status !== 0) {
+    process.exit(result.status ?? 1);
+  }
+};
+
 // envio wipes and rebuilds all Hasura metadata on every startup/reset (clear
 // then re-track), but it only ever grants `select` to the `public` role —
 // hardcoded in its own Hasura.res.mjs, with no env var to change it. Clients
@@ -248,10 +326,23 @@ const startReadonlyRoleReconciler = () => {
   setInterval(tick, HASURA_RECONCILE_INTERVAL_MS).unref();
 };
 
-await runPnpmWithReset(
-  ["envio", "local", "db-migrate", "up"],
-  ["envio", "local", "db-migrate", "setup"],
-);
+const reindexState = claimReindexGeneration();
+const shouldForceReindex = reindexState !== "initialized";
+
+if (shouldForceReindex) {
+  console.warn(
+    `Reindex generation ${REINDEX_GENERATION} is pending — resetting the Envio schema exactly once.`,
+  );
+  const reset = await runPnpm(["envio", "local", "db-migrate", "setup"]);
+  if (reset.code !== 0) {
+    process.exit(reset.code ?? 1);
+  }
+} else {
+  await runPnpmWithReset(
+    ["envio", "local", "db-migrate", "up"],
+    ["envio", "local", "db-migrate", "setup"],
+  );
+}
 
 const migrationsDir = join(process.cwd(), "migrations");
 if (existsSync(migrationsDir)) {
@@ -265,16 +356,7 @@ if (existsSync(migrationsDir)) {
     const result = spawnSync(
       "psql",
       [
-        "--host",
-        env.ENVIO_PG_HOST,
-        "--port",
-        env.ENVIO_PG_PORT,
-        "--username",
-        env.ENVIO_PG_USER,
-        "--dbname",
-        env.ENVIO_PG_DATABASE,
-        "--set",
-        "ON_ERROR_STOP=1",
+        ...psqlConnectionArgs,
         "--file",
         migrationPath,
       ],
@@ -291,6 +373,13 @@ if (existsSync(migrationsDir)) {
       process.exit(result.status ?? 1);
     }
   }
+}
+
+if (shouldForceReindex) {
+  completeReindexGeneration();
+  console.log(
+    `Reindex generation ${REINDEX_GENERATION} initialized — subsequent restarts will resume it.`,
+  );
 }
 
 // Reconcile the readonly inherited role in the background for the whole life of
