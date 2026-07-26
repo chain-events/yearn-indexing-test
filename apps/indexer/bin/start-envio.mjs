@@ -1,7 +1,6 @@
 import { spawn, spawnSync } from "node:child_process";
 import { existsSync, readdirSync } from "node:fs";
 import { join } from "node:path";
-import postgres from "postgres";
 
 const env = { ...process.env };
 const databaseUrlSource = env.ENVIO_DATABASE_URL
@@ -45,66 +44,6 @@ console.log(
 );
 console.log(`Database config source: ${databaseUrlSource ?? "ENVIO_PG_*"}`);
 
-// Render briefly overlaps the old and new worker during a deploy. A reset from
-// the new worker can therefore race with a final write from the old worker:
-// the old process restores its at-head progress into the freshly-created
-// schema, and the new process then resumes at head without replaying handlers.
-//
-// Hold one session-level advisory lock for this wrapper's entire lifetime.
-// Once every deployed worker uses this fence, a replacement cannot migrate or
-// reset until its predecessor has fully disconnected from Postgres.
-const DEPLOYMENT_FENCE_VERSION = "v1";
-const DEPLOYMENT_LOCK_NAMESPACE = 2_030_734_894;
-const DEPLOYMENT_LOCK_ID = 1;
-const deploymentLockSql = postgres(databaseUrl, {
-  max: 1,
-  idle_timeout: 0,
-  max_lifetime: null,
-  application_name: "envio-indexer-deployment-lock",
-  ssl: env.ENVIO_PG_SSL_MODE === "true" ? "require" : false,
-});
-const deploymentLockConnection = await deploymentLockSql.reserve();
-
-console.log("Waiting for exclusive indexer deployment lock...");
-await deploymentLockConnection`
-  SELECT pg_advisory_lock(
-    ${DEPLOYMENT_LOCK_NAMESPACE},
-    ${DEPLOYMENT_LOCK_ID}
-  )
-`;
-const [{ backend_pid: deploymentLockBackendPid }] =
-  await deploymentLockConnection`
-    SELECT pg_backend_pid() AS backend_pid
-  `;
-await deploymentLockConnection.unsafe(`
-  CREATE SCHEMA IF NOT EXISTS envio_ops;
-  CREATE TABLE IF NOT EXISTS envio_ops.runtime_fence (
-    singleton boolean PRIMARY KEY DEFAULT true CHECK (singleton),
-    fence_version text NOT NULL,
-    backend_pid integer NOT NULL,
-    acquired_at timestamptz NOT NULL
-  );
-  INSERT INTO envio_ops.runtime_fence (
-    singleton,
-    fence_version,
-    backend_pid,
-    acquired_at
-  )
-  VALUES (
-    true,
-    '${DEPLOYMENT_FENCE_VERSION}',
-    ${deploymentLockBackendPid},
-    now()
-  )
-  ON CONFLICT (singleton) DO UPDATE
-  SET fence_version = EXCLUDED.fence_version,
-      backend_pid = EXCLUDED.backend_pid,
-      acquired_at = EXCLUDED.acquired_at;
-`);
-console.log(
-  `Acquired exclusive indexer deployment lock (fence ${DEPLOYMENT_FENCE_VERSION}, backend ${deploymentLockBackendPid}).`,
-);
-
 // Envio itself only reads HASURA_GRAPHQL_ENDPOINT (must be a full URL ending
 // in /v1/metadata) — it has no notion of HASURA_SERVICE_HOST/PORT. Render's
 // blueprint sets those two (see render.yaml) so the indexer can resolve
@@ -119,10 +58,9 @@ if (!env.HASURA_GRAPHQL_ENDPOINT && env.HASURA_SERVICE_HOST) {
 // Both `envio local db-migrate up` and `envio start` independently check
 // config.yaml/schema.graphql against the already-indexed data and refuse to
 // resume when the change is incompatible (e.g. a new contract/event, not
-// just an address-list tweak — see patches/envio@3.0.1.patch). Normally that
-// just crashes the process forever until someone manually reruns with the
-// reset variant of the command. Detect that specific failure per-command and
-// reset automatically instead.
+// just an address-list tweak). Normally that just crashes the process forever
+// until someone manually reruns with the reset variant of the command. Detect
+// that specific failure per-command and reset automatically instead.
 //
 // envio's compatibility check doesn't flag *removing* a chain from
 // config.yaml as incompatible, but a later startup step still crashes trying
@@ -138,8 +76,7 @@ const needsReset = (output) =>
 
 // `envio start` runs for the life of the deploy, so accumulating its full
 // output here would leak memory. Only the tail matters — reset-trigger errors
-// appear right before the process exits, and the Hasura-tracking-done marker
-// (see below) is checked as it streams in — so keep a bounded window instead.
+// appear right before the process exits — so keep a bounded window instead.
 const OUTPUT_TAIL_CHARS = 16_000;
 
 const runPnpm = (args) =>
@@ -197,84 +134,6 @@ const runPnpmWithReset = async (args, resetArgs) => {
   }
 
   process.exit(attempt.code ?? 1);
-};
-
-// A deploy can request one explicit full reindex by advancing this generation.
-// The marker lives outside ENVIO_PG_PUBLIC_SCHEMA because `db-migrate setup`
-// drops that entire schema. Once initialization and our SQL migrations finish,
-// the generation is marked complete; ordinary worker restarts then resume the
-// new index instead of wiping it again.
-const REINDEX_GENERATION = "2026-07-26-history-recovery-v2";
-if (!/^[a-z0-9-]+$/.test(REINDEX_GENERATION)) {
-  console.error(`Invalid reindex generation: ${REINDEX_GENERATION}`);
-  process.exit(1);
-}
-
-const psqlConnectionArgs = [
-  "--host",
-  env.ENVIO_PG_HOST,
-  "--port",
-  env.ENVIO_PG_PORT,
-  "--username",
-  env.ENVIO_PG_USER,
-  "--dbname",
-  env.ENVIO_PG_DATABASE,
-  "--set",
-  "ON_ERROR_STOP=1",
-];
-
-const runControlSql = (sql) =>
-  spawnSync(
-    "psql",
-    [
-      ...psqlConnectionArgs,
-      "--quiet",
-      "--tuples-only",
-      "--no-align",
-      "--command",
-      sql,
-    ],
-    {
-      env: {
-        ...env,
-        PGPASSWORD: env.ENVIO_POSTGRES_PASSWORD,
-      },
-      encoding: "utf8",
-      stdio: ["ignore", "pipe", "inherit"],
-    },
-  );
-
-const claimReindexGeneration = () => {
-  const result = runControlSql(`
-    CREATE SCHEMA IF NOT EXISTS envio_ops;
-    CREATE TABLE IF NOT EXISTS envio_ops.reindex_generations (
-      generation text PRIMARY KEY,
-      state text NOT NULL CHECK (state IN ('pending', 'initialized')),
-      requested_at timestamptz NOT NULL DEFAULT now(),
-      initialized_at timestamptz
-    );
-    INSERT INTO envio_ops.reindex_generations (generation, state)
-    VALUES ('${REINDEX_GENERATION}', 'pending')
-    ON CONFLICT (generation) DO NOTHING;
-    SELECT state
-    FROM envio_ops.reindex_generations
-    WHERE generation = '${REINDEX_GENERATION}';
-  `);
-  if (result.status !== 0) {
-    process.exit(result.status ?? 1);
-  }
-  return result.stdout.trim().split(/\s+/).at(-1);
-};
-
-const completeReindexGeneration = () => {
-  const result = runControlSql(`
-    UPDATE envio_ops.reindex_generations
-    SET state = 'initialized', initialized_at = now()
-    WHERE generation = '${REINDEX_GENERATION}';
-  `);
-  if (result.status !== 0) {
-    process.exit(result.status ?? 1);
-  }
 };
 
 // envio wipes and rebuilds all Hasura metadata on every startup/reset (clear
@@ -387,23 +246,10 @@ const startReadonlyRoleReconciler = () => {
   setInterval(tick, HASURA_RECONCILE_INTERVAL_MS).unref();
 };
 
-const reindexState = claimReindexGeneration();
-const shouldForceReindex = reindexState !== "initialized";
-
-if (shouldForceReindex) {
-  console.warn(
-    `Reindex generation ${REINDEX_GENERATION} is pending — resetting the Envio schema exactly once.`,
-  );
-  const reset = await runPnpm(["envio", "local", "db-migrate", "setup"]);
-  if (reset.code !== 0) {
-    process.exit(reset.code ?? 1);
-  }
-} else {
-  await runPnpmWithReset(
-    ["envio", "local", "db-migrate", "up"],
-    ["envio", "local", "db-migrate", "setup"],
-  );
-}
+await runPnpmWithReset(
+  ["envio", "local", "db-migrate", "up"],
+  ["envio", "local", "db-migrate", "setup"],
+);
 
 const migrationsDir = join(process.cwd(), "migrations");
 if (existsSync(migrationsDir)) {
@@ -417,7 +263,16 @@ if (existsSync(migrationsDir)) {
     const result = spawnSync(
       "psql",
       [
-        ...psqlConnectionArgs,
+        "--host",
+        env.ENVIO_PG_HOST,
+        "--port",
+        env.ENVIO_PG_PORT,
+        "--username",
+        env.ENVIO_PG_USER,
+        "--dbname",
+        env.ENVIO_PG_DATABASE,
+        "--set",
+        "ON_ERROR_STOP=1",
         "--file",
         migrationPath,
       ],
@@ -434,13 +289,6 @@ if (existsSync(migrationsDir)) {
       process.exit(result.status ?? 1);
     }
   }
-}
-
-if (shouldForceReindex) {
-  completeReindexGeneration();
-  console.log(
-    `Reindex generation ${REINDEX_GENERATION} initialized — subsequent restarts will resume it.`,
-  );
 }
 
 // Reconcile the readonly inherited role in the background for the whole life of
