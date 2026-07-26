@@ -166,9 +166,12 @@ services:
     runtime: node
     region: virginia
     plan: starter
-    rootDir: apps/monitoring
+    # Keep this service on the same repository revision as the indexer. Setting
+    # rootDir would prevent indexer-only commits from redeploying the monitor,
+    # leaving its displayed Envio version and commit stale.
+    autoDeployTrigger: commit
     buildCommand: echo "no build step"
-    startCommand: node server.js
+    startCommand: node apps/monitoring/server.js
     healthCheckPath: /healthz
     envVars:
       - key: NODE_VERSION
