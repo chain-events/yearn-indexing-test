@@ -1,6 +1,6 @@
 # yaml-language-server: $schema=./node_modules/envio/evm.schema.json
 name: yearn-v3-vault
-description: Yearn V3 Vault Indexer
+description: Yearn V3 Vault Indexer (full reindex 2026-07-25)
 storage:
   postgres: true
 field_selection:
