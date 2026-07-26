@@ -19,6 +19,3 @@ onlyBuiltDependencies:
 allowBuilds:
   esbuild: true
   rescript: true
-
-patchedDependencies:
-  envio@3.2.1: patches/envio@3.2.1.patch

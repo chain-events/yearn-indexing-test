@@ -58,10 +58,9 @@ if (!env.HASURA_GRAPHQL_ENDPOINT && env.HASURA_SERVICE_HOST) {
 // Both `envio local db-migrate up` and `envio start` independently check
 // config.yaml/schema.graphql against the already-indexed data and refuse to
 // resume when the change is incompatible (e.g. a new contract/event, not
-// just an address-list tweak — see patches/envio@3.0.1.patch). Normally that
-// just crashes the process forever until someone manually reruns with the
-// reset variant of the command. Detect that specific failure per-command and
-// reset automatically instead.
+// just an address-list tweak). Normally that just crashes the process forever
+// until someone manually reruns with the reset variant of the command. Detect
+// that specific failure per-command and reset automatically instead.
 //
 // envio's compatibility check doesn't flag *removing* a chain from
 // config.yaml as incompatible, but a later startup step still crashes trying
@@ -77,8 +76,7 @@ const needsReset = (output) =>
 
 // `envio start` runs for the life of the deploy, so accumulating its full
 // output here would leak memory. Only the tail matters — reset-trigger errors
-// appear right before the process exits, and the Hasura-tracking-done marker
-// (see below) is checked as it streams in — so keep a bounded window instead.
+// appear right before the process exits — so keep a bounded window instead.
 const OUTPUT_TAIL_CHARS = 16_000;
 
 const runPnpm = (args) =>

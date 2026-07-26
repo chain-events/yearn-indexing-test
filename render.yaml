@@ -52,6 +52,7 @@ services:
     runtime: docker
     region: virginia
     plan: standard
+    numInstances: 1
     # Build context is the monorepo root so the Dockerfile can read
     # pnpm-workspace.yaml + the root lockfile.
     dockerfilePath: ./apps/indexer/Dockerfile

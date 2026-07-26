@@ -23,9 +23,6 @@ WORKDIR /repo
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY apps/indexer/package.json ./apps/indexer/package.json
 COPY apps/monitoring/package.json ./apps/monitoring/package.json
-# patches/ is referenced by pnpm-workspace.yaml (patchedDependencies); it must
-# be present before install or --frozen-lockfile fails with ENOENT on the patch.
-COPY patches ./patches
 
 # Install only the indexer's dependency closure. pnpm-workspace.yaml explicitly
 # permits lifecycle scripts only for esbuild and rescript.
@@ -37,10 +34,6 @@ COPY apps/indexer ./apps/indexer
 
 WORKDIR /repo/apps/indexer
 
-# Codegen parses config.yaml, schema.graphql, and the event handler source to
-# produce generated/src/Index.res.mjs (the start entry point). It doesn't
-# connect, so a placeholder RPC URL is fine at build time.
-ARG ENVIO_RPC_URL_KATANA=$ENVIO_RPC_URL_KATANA
 RUN pnpm envio codegen
 
 CMD ["pnpm", "start"]
