@@ -38,10 +38,6 @@ COPY apps/indexer ./apps/indexer
 
 WORKDIR /repo/apps/indexer
 
-# Codegen parses config.yaml, schema.graphql, and the event handler source to
-# produce generated/src/Index.res.mjs (the start entry point). It doesn't
-# connect, so a placeholder RPC URL is fine at build time.
-ARG ENVIO_RPC_URL_KATANA=$ENVIO_RPC_URL_KATANA
 RUN pnpm envio codegen
 
 CMD ["pnpm", "start"]
