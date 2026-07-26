@@ -27,10 +27,9 @@ COPY apps/monitoring/package.json ./apps/monitoring/package.json
 # be present before install or --frozen-lockfile fails with ENOENT on the patch.
 COPY patches ./patches
 
-# Install only the indexer's dependency closure.
-# pnpm 11 defaults strict-dep-builds=true; disable so esbuild/rescript build scripts run.
-RUN pnpm config set strict-dep-builds false && \
-    pnpm install --frozen-lockfile --filter envio-indexer...
+# Install only the indexer's dependency closure. pnpm-workspace.yaml explicitly
+# permits lifecycle scripts only for esbuild and rescript.
+RUN pnpm install --frozen-lockfile --filter envio-indexer...
 
 # Copy the full indexer source (generated/ is excluded via .dockerignore so
 # the container's codegen output is authoritative).

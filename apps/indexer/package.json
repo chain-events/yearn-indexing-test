@@ -5,6 +5,7 @@
   "scripts": {
     "clean": "tsc --clean",
     "build": "tsc --build",
+    "check:config": "node scripts/check_envio_config_compatibility.mjs",
     "watch": "tsc --watch",
     "mocha": "vitest run",
     "codegen": "envio codegen",
