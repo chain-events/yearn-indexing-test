@@ -204,7 +204,7 @@ const runPnpmWithReset = async (args, resetArgs) => {
 // drops that entire schema. Once initialization and our SQL migrations finish,
 // the generation is marked complete; ordinary worker restarts then resume the
 // new index instead of wiping it again.
-const REINDEX_GENERATION = "2026-07-26-history-recovery-v1";
+const REINDEX_GENERATION = "2026-07-26-history-recovery-v2";
 if (!/^[a-z0-9-]+$/.test(REINDEX_GENERATION)) {
   console.error(`Invalid reindex generation: ${REINDEX_GENERATION}`);
   process.exit(1);
