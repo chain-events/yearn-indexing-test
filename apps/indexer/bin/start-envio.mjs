@@ -1,6 +1,7 @@
 import { spawn, spawnSync } from "node:child_process";
 import { existsSync, readdirSync } from "node:fs";
 import { join } from "node:path";
+import postgres from "postgres";
 
 const env = { ...process.env };
 const databaseUrlSource = env.ENVIO_DATABASE_URL
@@ -43,6 +44,66 @@ console.log(
   `Starting Envio with Postgres ${env.ENVIO_PG_USER}@${env.ENVIO_PG_HOST}:${env.ENVIO_PG_PORT}/${env.ENVIO_PG_DATABASE}`,
 );
 console.log(`Database config source: ${databaseUrlSource ?? "ENVIO_PG_*"}`);
+
+// Render briefly overlaps the old and new worker during a deploy. A reset from
+// the new worker can therefore race with a final write from the old worker:
+// the old process restores its at-head progress into the freshly-created
+// schema, and the new process then resumes at head without replaying handlers.
+//
+// Hold one session-level advisory lock for this wrapper's entire lifetime.
+// Once every deployed worker uses this fence, a replacement cannot migrate or
+// reset until its predecessor has fully disconnected from Postgres.
+const DEPLOYMENT_FENCE_VERSION = "v1";
+const DEPLOYMENT_LOCK_NAMESPACE = 2_030_734_894;
+const DEPLOYMENT_LOCK_ID = 1;
+const deploymentLockSql = postgres(databaseUrl, {
+  max: 1,
+  idle_timeout: 0,
+  max_lifetime: null,
+  application_name: "envio-indexer-deployment-lock",
+  ssl: env.ENVIO_PG_SSL_MODE === "true" ? "require" : false,
+});
+const deploymentLockConnection = await deploymentLockSql.reserve();
+
+console.log("Waiting for exclusive indexer deployment lock...");
+await deploymentLockConnection`
+  SELECT pg_advisory_lock(
+    ${DEPLOYMENT_LOCK_NAMESPACE},
+    ${DEPLOYMENT_LOCK_ID}
+  )
+`;
+const [{ backend_pid: deploymentLockBackendPid }] =
+  await deploymentLockConnection`
+    SELECT pg_backend_pid() AS backend_pid
+  `;
+await deploymentLockConnection.unsafe(`
+  CREATE SCHEMA IF NOT EXISTS envio_ops;
+  CREATE TABLE IF NOT EXISTS envio_ops.runtime_fence (
+    singleton boolean PRIMARY KEY DEFAULT true CHECK (singleton),
+    fence_version text NOT NULL,
+    backend_pid integer NOT NULL,
+    acquired_at timestamptz NOT NULL
+  );
+  INSERT INTO envio_ops.runtime_fence (
+    singleton,
+    fence_version,
+    backend_pid,
+    acquired_at
+  )
+  VALUES (
+    true,
+    '${DEPLOYMENT_FENCE_VERSION}',
+    ${deploymentLockBackendPid},
+    now()
+  )
+  ON CONFLICT (singleton) DO UPDATE
+  SET fence_version = EXCLUDED.fence_version,
+      backend_pid = EXCLUDED.backend_pid,
+      acquired_at = EXCLUDED.acquired_at;
+`);
+console.log(
+  `Acquired exclusive indexer deployment lock (fence ${DEPLOYMENT_FENCE_VERSION}, backend ${deploymentLockBackendPid}).`,
+);
 
 // Envio itself only reads HASURA_GRAPHQL_ENDPOINT (must be a full URL ending
 // in /v1/metadata) — it has no notion of HASURA_SERVICE_HOST/PORT. Render's
