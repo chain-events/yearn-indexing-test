@@ -116,6 +116,15 @@ services:
         value: "1000"
       - key: ENVIO_THROTTLE_JSON_FILE_BENCHMARK_INTERVAL_MILLIS
         value: "500"
+      # A HyperIndex partition can stop advancing while the process continues
+      # polling other chains. Exit after a sustained partial stall so Render
+      # restarts the one worker from its existing database checkpoint.
+      - key: ENVIO_STALL_WATCHDOG_INTERVAL_MILLIS
+        value: "60000"
+      - key: ENVIO_STALL_WATCHDOG_TIMEOUT_MILLIS
+        value: "1800000"
+      - key: ENVIO_STALL_WATCHDOG_MIN_BLOCK_LAG
+        value: "10000"
       - key: ENVIO_RPC_URL_ETHEREUM
         sync: false
       - key: ENVIO_RPC_URL_OPTIMISM

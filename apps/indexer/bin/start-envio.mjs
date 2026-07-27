@@ -1,6 +1,8 @@
 import { spawn, spawnSync } from "node:child_process";
 import { existsSync, readdirSync } from "node:fs";
 import { join } from "node:path";
+import postgres from "postgres";
+import { ChainProgressTracker } from "./chain-progress-tracker.mjs";
 
 const env = { ...process.env };
 const databaseUrlSource = env.ENVIO_DATABASE_URL
@@ -79,12 +81,54 @@ const needsReset = (output) =>
 // appear right before the process exits — so keep a bounded window instead.
 const OUTPUT_TAIL_CHARS = 16_000;
 
+let activeIndexerChild;
+let watchdogRestartRequested = false;
+
+const isIndexerStart = (args) =>
+  args[0] === "envio" && args[1] === "start";
+
+const terminateIndexerProcessGroup = (child) => {
+  if (!child || child.exitCode !== null) return;
+
+  const signal = (name) => {
+    try {
+      if (process.platform === "win32") {
+        child.kill(name);
+      } else {
+        process.kill(-child.pid, name);
+      }
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  if (!signal("SIGTERM")) {
+    child.kill("SIGTERM");
+  }
+
+  setTimeout(() => {
+    if (child.exitCode === null && !signal("SIGKILL")) {
+      child.kill("SIGKILL");
+    }
+  }, 15_000).unref();
+};
+
 const runPnpm = (args) =>
   new Promise((resolve) => {
+    const startsIndexer = isIndexerStart(args);
     const child = spawn("pnpm", args, {
       env,
       stdio: ["inherit", "pipe", "pipe"],
+      // Give the long-running pnpm/envio process tree its own group so the
+      // watchdog can terminate both processes. Killing only pnpm can orphan
+      // the actual indexer and leave two workers writing to the same database.
+      detached: startsIndexer && process.platform !== "win32",
     });
+    if (startsIndexer) {
+      activeIndexerChild = child;
+      watchdogRestartRequested = false;
+    }
 
     let output = "";
     // The incompatible-config error prints its trigger line *first* and then
@@ -110,7 +154,16 @@ const runPnpm = (args) =>
     relay(child.stdout, process.stdout);
     relay(child.stderr, process.stderr);
 
-    child.on("close", (code) => resolve({ code, output, sawResetTrigger }));
+    child.on("close", (code) => {
+      if (activeIndexerChild === child) {
+        activeIndexerChild = undefined;
+      }
+      resolve({
+        code: watchdogRestartRequested ? 1 : code,
+        output,
+        sawResetTrigger,
+      });
+    });
   });
 
 // Runs `pnpm <args>`; if it fails specifically because envio detected an
@@ -246,6 +299,106 @@ const startReadonlyRoleReconciler = () => {
   setInterval(tick, HASURA_RECONCILE_INTERVAL_MS).unref();
 };
 
+// HyperIndex fetches each chain through multiple address partitions. During a
+// large unordered multi-chain backfill, a worker can remain healthy and keep
+// fetching other chains/partitions while one chain's durable cursor stops
+// advancing. Render therefore sees a live worker even though user-facing
+// history on that chain is silently becoming stale.
+//
+// Render already restarts a process that exits. This watchdog turns that
+// otherwise-invisible partial stall into a normal process restart, preserving
+// the existing checkpoint. It deliberately considers all three durable
+// progress counters so a slow handler or a fetch-heavy phase is not mistaken
+// for a stall, and ignores chains close to their observed head.
+const WATCHDOG_INTERVAL_MS = Number(
+  env.ENVIO_STALL_WATCHDOG_INTERVAL_MILLIS || 60_000,
+);
+const WATCHDOG_TIMEOUT_MS = Number(
+  env.ENVIO_STALL_WATCHDOG_TIMEOUT_MILLIS || 0,
+);
+const WATCHDOG_MIN_BLOCK_LAG = Number(
+  env.ENVIO_STALL_WATCHDOG_MIN_BLOCK_LAG || 10_000,
+);
+
+const startChainProgressWatchdog = () => {
+  if (!Number.isFinite(WATCHDOG_TIMEOUT_MS) || WATCHDOG_TIMEOUT_MS <= 0) {
+    return;
+  }
+
+  const schema = env.ENVIO_PG_PUBLIC_SCHEMA || "envio";
+  if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(schema)) {
+    console.warn(
+      `Chain progress watchdog disabled: invalid ENVIO_PG_PUBLIC_SCHEMA ${JSON.stringify(schema)}.`,
+    );
+    return;
+  }
+
+  const sql = postgres({
+    host: env.ENVIO_PG_HOST,
+    port: Number(env.ENVIO_PG_PORT),
+    database: env.ENVIO_PG_DATABASE,
+    username: env.ENVIO_PG_USER,
+    password: env.ENVIO_POSTGRES_PASSWORD,
+    ssl: env.ENVIO_PG_SSL_MODE === "false" ? false : "require",
+    max: 1,
+    connect_timeout: 10,
+    idle_timeout: 20,
+  });
+
+  const tracker = new ChainProgressTracker({
+    timeoutMs: WATCHDOG_TIMEOUT_MS,
+    minBlockLag: WATCHDOG_MIN_BLOCK_LAG,
+  });
+  let checking = false;
+
+  const check = async () => {
+    const child = activeIndexerChild;
+    if (!child || child.exitCode !== null || checking) return;
+
+    checking = true;
+    try {
+      const rows = await sql`
+        SELECT
+          chain_id,
+          block_height,
+          latest_processed_block,
+          latest_fetched_block_number,
+          num_events_processed
+        FROM ${sql(schema)}.${sql("chain_metadata")}
+      `;
+      for (const {
+        chainId,
+        lag,
+        processed,
+        fetched,
+        events,
+        stalledFor,
+      } of tracker.observe(rows)) {
+        watchdogRestartRequested = true;
+        console.error(
+          `Chain ${chainId} is ${lag} blocks behind and made no durable progress for ${Math.round(stalledFor / 60_000)} minutes ` +
+            `(processed=${processed}, fetched=${fetched}, events=${events}). Restarting Envio from its existing checkpoint.`,
+        );
+        terminateIndexerProcessGroup(child);
+        return;
+      }
+    } catch (error) {
+      // Database maintenance and short connection failures must never take the
+      // indexer down. A successful later pass resumes the same observations.
+      console.warn(
+        `Chain progress watchdog could not read chain_metadata: ${error.message}`,
+      );
+    } finally {
+      checking = false;
+    }
+  };
+
+  console.log(
+    `Chain progress watchdog enabled: restart after ${Math.round(WATCHDOG_TIMEOUT_MS / 60_000)} minutes without progress while at least ${WATCHDOG_MIN_BLOCK_LAG} blocks behind.`,
+  );
+  setInterval(check, WATCHDOG_INTERVAL_MS).unref();
+};
+
 await runPnpmWithReset(
   ["envio", "local", "db-migrate", "up"],
   ["envio", "local", "db-migrate", "setup"],
@@ -294,6 +447,7 @@ if (existsSync(migrationsDir)) {
 // Reconcile the readonly inherited role in the background for the whole life of
 // the indexer — it survives the initial track, resets, and metadata rebuilds.
 startReadonlyRoleReconciler();
+startChainProgressWatchdog();
 
 await runPnpmWithReset(["envio", "start"], ["envio", "start", "-r"]);
 process.exit(0);
