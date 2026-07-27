@@ -78,6 +78,25 @@ const RPC_NAME_BY_CHAIN = {
   747474: "KATANA",
 };
 
+// /healthz sanity-checks that the indexer is still ingesting real vault activity,
+// not just advancing block_height. envio reports a chain as "caught up" even when a
+// sync/build has silently stalled and no new events are landing, so for each canary
+// vault below the newest Deposit or Withdraw must be no older than
+// HEALTH_MAX_DATA_AGE_DAYS (default 30). A stale or missing latest event fails the
+// check, and a GraphQL/transport error propagates to the outer handler as a 5xx:
+// both are deliberately fail-closed, so /healthz only returns "ok" when the data is
+// provably fresh. Addresses are EIP-55 checksummed to match how the indexer stores
+// vaultAddress (viem getAddress). Edit the list to add more canary vaults.
+const HEALTH_CHECK_VAULTS = [
+  { vaultAddress: "0xBe53A109B494E5c9f97b9Cd39Fe969BE68BF6204", chainId: 1, label: "yvUSDC-1" },
+  { vaultAddress: "0x9F4330700a36B29952869fac9b33f45EEdd8A3d8", chainId: 1, label: "yBOLD" },
+  { vaultAddress: "0x80c34BD3A3569E126e7055831036aa7b212cB159", chainId: 747474, label: "yvvbUSDC" },
+  { vaultAddress: "0xc3BD0A2193c8F027B82ddE3611D18589ef3f62a9", chainId: 8453, label: "yvUSDC-H" },
+];
+const HEALTH_MAX_DATA_AGE_DAYS = Number(process.env.HEALTH_MAX_DATA_AGE_DAYS || 30);
+const HEALTH_MAX_DATA_AGE_MS = HEALTH_MAX_DATA_AGE_DAYS * 24 * 60 * 60 * 1000;
+const ADDRESS_RE = /^0x[0-9a-fA-F]{40}$/;
+
 function rpcUrlForChain(chainId) {
   const named = RPC_NAME_BY_CHAIN[chainId];
   return (
@@ -277,6 +296,53 @@ async function getStatus() {
   };
 }
 
+// Newest blockTimestamp (epoch seconds) across the latest Deposit and Withdraw for
+// a single vault+chain, or null if neither table has a matching row.
+async function latestVaultEventTimestamp(vaultAddress, chainId) {
+  if (!ADDRESS_RE.test(vaultAddress)) {
+    throw new Error(`invalid vault address: ${vaultAddress}`);
+  }
+  const filter = `vaultAddress: { _eq: "${vaultAddress}" } chainId: { _eq: ${chainId} }`;
+  const data = await queryGraphQL(`{
+    Deposit(where: { ${filter} }, order_by: { blockTimestamp: desc }, limit: 1) { blockTimestamp }
+    Withdraw(where: { ${filter} }, order_by: { blockTimestamp: desc }, limit: 1) { blockTimestamp }
+  }`);
+  const timestamps = [
+    ...(data.Deposit ?? []),
+    ...(data.Withdraw ?? []),
+  ].map((row) => Number(row.blockTimestamp));
+  return timestamps.length ? Math.max(...timestamps) : null;
+}
+
+// Runs every canary-vault freshness check in parallel. Returns { ok, maxAgeDays,
+// results } so the caller can render a human-readable failure body on 503.
+async function runHealthChecks() {
+  const results = await Promise.all(
+    HEALTH_CHECK_VAULTS.map(async (vault) => {
+      const latest = await latestVaultEventTimestamp(vault.vaultAddress, vault.chainId);
+      let ok;
+      let detail;
+      if (latest == null) {
+        ok = false;
+        detail = "no deposit/withdraw events indexed for this vault";
+      } else {
+        const ageMs = Date.now() - latest * 1000;
+        const ageDays = ageMs / (24 * 60 * 60 * 1000);
+        ok = ageMs <= HEALTH_MAX_DATA_AGE_MS;
+        detail = `latest event ${new Date(latest * 1000).toISOString()} (${ageDays.toFixed(1)} days ago)`;
+      }
+      return {
+        label: vault.label,
+        vaultAddress: vault.vaultAddress,
+        chainId: vault.chainId,
+        ok,
+        detail,
+      };
+    }),
+  );
+  return { ok: results.every((r) => r.ok), maxAgeDays: HEALTH_MAX_DATA_AGE_DAYS, results };
+}
+
 const server = createServer(async (req, res) => {
   try {
     if (req.url === "/api/status") {
@@ -286,8 +352,20 @@ const server = createServer(async (req, res) => {
       return;
     }
     if (req.url === "/healthz") {
-      res.writeHead(200, { "Content-Type": "text/plain" });
-      res.end("ok");
+      const health = await runHealthChecks();
+      if (health.ok) {
+        res.writeHead(200, { "Content-Type": "text/plain" });
+        res.end("ok");
+      } else {
+        const failing = health.results
+          .filter((r) => !r.ok)
+          .map((r) => `- ${r.label} (${r.vaultAddress}, chain ${r.chainId}): ${r.detail}`)
+          .join("\n");
+        res.writeHead(503, { "Content-Type": "text/plain" });
+        res.end(
+          `not ok: vault data not fresh within ${health.maxAgeDays} days\n${failing}\n`,
+        );
+      }
       return;
     }
     if (req.url === "/" || req.url === "/index.html") {
