@@ -55,6 +55,18 @@ Copy `.env.example` to `.env` and fill in values as needed:
 
 The indexer start script derives `ENVIO_PG_*` from Render's `ENVIO_DATABASE_URL`, runs `envio local db-migrate up`, then runs `envio start` in the same environment. This keeps Envio's entity and history tables in sync with `schema.graphql` before rollback/reorg handling can touch them.
 
+The indexer is pinned to Envio 3.3, which includes upstream multichain and
+factory-indexer scheduler/stability improvements.
+
+On Render, the same start script monitors `chain_metadata` while Envio runs.
+If a chain is at least 10,000 blocks behind and its processed block, fetched
+block, and event count all remain unchanged for 30 minutes, it terminates the
+single worker process. Render then restarts it from the existing checkpoint;
+the watchdog does not reset or modify the database. The interval, timeout, and
+minimum lag are configured by `ENVIO_STALL_WATCHDOG_INTERVAL_MILLIS`,
+`ENVIO_STALL_WATCHDOG_TIMEOUT_MILLIS`, and
+`ENVIO_STALL_WATCHDOG_MIN_BLOCK_LAG`.
+
 - `ENVIO_API_TOKEN`
 - `HASURA_GRAPHQL_ADMIN_SECRET`
 - `HASURA_GRAPHQL_JWT_SECRET`

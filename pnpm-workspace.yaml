@@ -8,6 +8,10 @@ packages:
 savePrefix: ""
 minimumReleaseAge: 10080
 
+# Fail installation when a dependency requests a lifecycle script unless it is
+# explicitly approved below.
+strictDepBuilds: true
+
 onlyBuiltDependencies:
   - esbuild
   - rescript
