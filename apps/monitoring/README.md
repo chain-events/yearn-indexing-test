@@ -27,6 +27,7 @@ Open <http://localhost:4100>. The page auto-refreshes every 5 seconds.
 | `GRAPHQL_HOST` | — | Alternative to `GRAPHQL_URL`; bare hostname combined with `:8080/v1/graphql` (used by Render's `fromService` wiring) |
 | `INDEXER_PROJECT_PATH` | `../indexer` | Path to the indexer app (used to read the envio version) |
 | `PORT` | `4100` | Dashboard port |
+| `HEALTH_MAX_DATA_AGE_DAYS` | `30` | Max age (days) of the newest deposit/withdraw for the `/healthz` canary vaults before the endpoint reports `not ok` (503) |
 
 ## How sync % is computed
 
