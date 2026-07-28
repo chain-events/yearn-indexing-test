@@ -55,6 +55,11 @@ Copy `.env.example` to `.env` and fill in values as needed:
 
 The indexer start script derives `ENVIO_PG_*` from Render's `ENVIO_DATABASE_URL`, runs `envio local db-migrate up`, then runs `envio start` in the same environment. This keeps Envio's entity and history tables in sync with `schema.graphql` before rollback/reorg handling can touch them.
 
+The start script has no automatic database-reset path. Persisted-config
+incompatibilities, missing-chain rows, watchdog restarts, database failures,
+and all other startup errors fail closed and preserve PostgreSQL for
+investigation.
+
 The indexer is pinned to Envio 3.3, which includes upstream multichain and
 factory-indexer scheduler/stability improvements.
 
