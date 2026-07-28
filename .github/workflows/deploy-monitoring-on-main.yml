@@ -1,0 +1,124 @@
+name: Ensure monitoring deploy on main
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+# This workflow does not need GITHUB_TOKEN access. Its only credential is the
+# service-scoped Render deploy hook stored in Actions secrets.
+permissions: {}
+
+concurrency:
+  group: render-monitoring-production
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Deploy and verify monitoring
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      MONITORING_URL: https://envio-monitoring.yearn.dev
+
+    steps:
+      - name: Allow Render native auto-deploy to finish
+        id: native-deploy
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          # Render normally deploys Git-backed services itself. Give it a short
+          # window first so this workflow does not create a duplicate deploy
+          # when the Dashboard configuration is correct.
+          for attempt in {1..12}; do
+            status_json="$(
+              curl --silent --show-error \
+                --connect-timeout 10 \
+                --max-time 20 \
+                "${MONITORING_URL}/api/status" || true
+            )"
+            deployed_sha="$(
+              jq --raw-output '.deployedCommit.sha // empty' \
+                <<<"${status_json}" 2>/dev/null || true
+            )"
+
+            if [[ "${deployed_sha}" == "${GITHUB_SHA}" ]]; then
+              echo "already_current=true" >>"${GITHUB_OUTPUT}"
+              echo "Render already deployed ${GITHUB_SHA}."
+              exit 0
+            fi
+
+            if (( attempt < 12 )); then
+              sleep 10
+            fi
+          done
+
+          echo "already_current=false" >>"${GITHUB_OUTPUT}"
+
+      - name: Trigger the exact main commit through Render
+        if: steps.native-deploy.outputs.already_current != 'true'
+        shell: bash
+        env:
+          DEPLOY_HOOK_URL: ${{ secrets.RENDER_MONITORING_DEPLOY_HOOK_URL }}
+        run: |
+          set -euo pipefail
+
+          if [[ -z "${DEPLOY_HOOK_URL}" ]]; then
+            echo "::error title=Missing Render deploy hook::Configure the RENDER_MONITORING_DEPLOY_HOOK_URL Actions secret."
+            exit 1
+          fi
+
+          # Render hook URLs already contain a secret `key` query parameter.
+          # Adding `ref` makes the requested production revision unambiguous.
+          curl --fail --silent --show-error \
+            --request POST \
+            --retry 3 \
+            --retry-all-errors \
+            --connect-timeout 10 \
+            --max-time 30 \
+            --output /tmp/render-deploy-response.json \
+            "${DEPLOY_HOOK_URL}&ref=${GITHUB_SHA}"
+
+          echo "Render accepted the deployment request for ${GITHUB_SHA}."
+
+      - name: Verify the deployed commit and liveness
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          for attempt in {1..48}; do
+            status_json="$(
+              curl --silent --show-error \
+                --connect-timeout 10 \
+                --max-time 20 \
+                "${MONITORING_URL}/api/status" || true
+            )"
+            deployed_sha="$(
+              jq --raw-output '.deployedCommit.sha // empty' \
+                <<<"${status_json}" 2>/dev/null || true
+            )"
+            live_status="$(
+              curl --silent --show-error \
+                --output /dev/null \
+                --write-out '%{http_code}' \
+                --connect-timeout 10 \
+                --max-time 20 \
+                "${MONITORING_URL}/livez" || true
+            )"
+
+            if [[ "${deployed_sha}" == "${GITHUB_SHA}" && "${live_status}" == "200" ]]; then
+              echo "Verified ${GITHUB_SHA} at ${MONITORING_URL}."
+              exit 0
+            fi
+
+            echo "Waiting for Render (attempt ${attempt}/48, deployed=${deployed_sha:-unknown}, live=${live_status:-unknown})..."
+            if (( attempt < 48 )); then
+              sleep 10
+            fi
+          done
+
+          echo "::error title=Render deployment verification timed out::Expected ${GITHUB_SHA} at ${MONITORING_URL}."
+          exit 1

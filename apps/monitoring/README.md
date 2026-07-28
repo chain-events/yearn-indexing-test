@@ -29,6 +29,17 @@ Open <http://localhost:4100>. The page auto-refreshes every 5 seconds.
 | `PORT` | `4100` | Dashboard port |
 | `HEALTH_MAX_DATA_AGE_DAYS` | `30` | Max age (days) of the newest deposit/withdraw for the `/healthz` canary vaults before the endpoint reports `not ok` (503) |
 
+## Production deploys
+
+`.github/workflows/deploy-monitoring-on-main.yml` verifies that every commit
+pushed to `main` reaches the production monitoring service. It first allows
+Render's native auto-deploy to complete, then uses a service-scoped deploy hook
+as a fallback and verifies both the deployed SHA and `/livez`.
+
+Create the `RENDER_MONITORING_DEPLOY_HOOK_URL` Actions secret from the
+monitoring service's **Settings → Deploy Hook** URL. Keep the complete URL
+secret: its `key` query parameter authorizes deployments.
+
 ## How sync % is computed
 
 For each chain in `chain_metadata`:
