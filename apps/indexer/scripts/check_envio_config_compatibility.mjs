@@ -95,15 +95,9 @@ try {
     }
   }
 
-  try {
-    Config.throwIfIncompatible(
-      changedPaths,
-      "envio start -r",
-      "envio start",
-      proposedConfig.storage?.clickhouse === true,
-    );
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
+  if (changedPaths.length > 0) {
+    const message =
+      "Persisted Envio configuration changes are blocked because production has no automatic database-reset path.";
     if (process.env.GITHUB_ACTIONS === "true") {
       console.error(`::error title=Incompatible Envio configuration::${message}`);
     }
@@ -112,11 +106,7 @@ try {
   }
 
   if (process.exitCode !== 1) {
-    console.log(
-      changedPaths.length === 0
-        ? "Envio compatibility check passed."
-        : "Envio accepts these changes without resetting indexed data.",
-    );
+    console.log("Envio compatibility check passed.");
   }
 } catch (error) {
   const message = error instanceof Error ? error.stack || error.message : String(error);
