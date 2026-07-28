@@ -345,6 +345,14 @@ async function runHealthChecks() {
 
 const server = createServer(async (req, res) => {
   try {
+    // Render needs a process-liveness probe that stays independent of indexer
+    // catch-up state. Using the freshness-sensitive /healthz endpoint here
+    // prevents a healthy monitoring process from deploying during a reindex.
+    if (req.url === "/livez") {
+      res.writeHead(200, { "Content-Type": "text/plain" });
+      res.end("ok");
+      return;
+    }
     if (req.url === "/api/status") {
       const status = await getStatus();
       res.writeHead(200, { "Content-Type": "application/json" });
