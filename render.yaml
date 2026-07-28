@@ -181,7 +181,9 @@ services:
     autoDeployTrigger: commit
     buildCommand: echo "no build step"
     startCommand: node apps/monitoring/server.js
-    healthCheckPath: /healthz
+    # Deployment liveness must not depend on index freshness: /healthz is the
+    # canary-data check and intentionally fails while the indexer is catching up.
+    healthCheckPath: /livez
     envVars:
       - key: NODE_VERSION
         value: "20"

@@ -1,0 +1,210 @@
+previews:
+  generation: off
+
+# Persistent, production-shaped staging stack. Create this as a separate
+# Blueprint in Render and set its Blueprint file path to render.staging.yaml.
+# Git-backed services follow main and deploy every commit; the database remains
+# isolated from production and persists between deploys.
+projects:
+  - name: envio-indexer-staging
+    environments:
+      - name: Staging
+        databases:
+          - name: envio-db-staging
+            plan: basic-1gb
+            region: virginia
+            databaseName: envio_indexer_staging
+            user: envio_ix_staging
+            postgresMajorVersion: "18"
+
+        envVarGroups:
+          # Shared only by Hasura and the indexer. Use a staging-specific value.
+          - name: envio-staging-hasura-admin
+            envVars:
+              - key: HASURA_GRAPHQL_ADMIN_SECRET
+                sync: false
+
+          # Generate this bearer token from the staging Hasura JWT secret.
+          # Both read-only clients use the same token.
+          - name: envio-staging-readonly-jwt
+            envVars:
+              - key: HASURA_GRAPHQL_JWT
+                sync: false
+
+          # The monitor needs the same RPC endpoints to compare durable
+          # progress against live chain heads.
+          - name: envio-staging-rpc
+            envVars:
+              - key: ENVIO_RPC_URL_ETHEREUM
+                sync: false
+              - key: ENVIO_RPC_URL_OPTIMISM
+                sync: false
+              - key: ENVIO_RPC_URL_GNOSIS
+                sync: false
+              - key: ENVIO_RPC_URL_BASE
+                sync: false
+              - key: ENVIO_RPC_URL_ARBITRUM
+                sync: false
+              - key: ENVIO_RPC_URL_POLYGON
+                sync: false
+              - key: ENVIO_RPC_URL_BERACHAIN
+                sync: false
+              - key: ENVIO_RPC_URL_KATANA
+                sync: false
+
+        services:
+          - type: web
+            name: graphql-engine-staging
+            runtime: image
+            region: virginia
+            image:
+              url: hasura/graphql-engine:v2.43.0
+            plan: starter
+            healthCheckPath: /healthz
+            envVars:
+              - fromGroup: envio-staging-hasura-admin
+              - key: HASURA_GRAPHQL_DATABASE_URL
+                fromDatabase:
+                  name: envio-db-staging
+                  property: connectionString
+              - key: HASURA_GRAPHQL_ENABLE_CONSOLE
+                value: "true"
+              - key: HASURA_GRAPHQL_ENABLED_LOG_TYPES
+                value: "startup, http-log, webhook-log, websocket-log, query-log"
+              - key: HASURA_GRAPHQL_NO_OF_RETRIES
+                value: "10"
+              - key: HASURA_GRAPHQL_JWT_SECRET
+                sync: false
+              - key: HASURA_GRAPHQL_STRINGIFY_NUMERIC_TYPES
+                value: "true"
+              - key: PORT
+                value: "8080"
+              - key: HASURA_GRAPHQL_UNAUTHORIZED_ROLE
+                value: "public"
+
+          - type: worker
+            name: envio-indexer-staging
+            runtime: docker
+            region: virginia
+            plan: standard
+            numInstances: 1
+            branch: main
+            autoDeployTrigger: commit
+            dockerfilePath: ./apps/indexer/Dockerfile
+            envVars:
+              - fromGroup: envio-staging-hasura-admin
+              - fromGroup: envio-staging-rpc
+              - key: ENVIO_API_TOKEN
+                sync: false
+              - key: ENVIO_DATABASE_URL
+                fromDatabase:
+                  name: envio-db-staging
+                  property: connectionString
+              - key: ENVIO_PG_HOST
+                fromDatabase:
+                  name: envio-db-staging
+                  property: host
+              - key: ENVIO_PG_PORT
+                fromDatabase:
+                  name: envio-db-staging
+                  property: port
+              - key: ENVIO_PG_USER
+                fromDatabase:
+                  name: envio-db-staging
+                  property: user
+              - key: ENVIO_POSTGRES_PASSWORD
+                fromDatabase:
+                  name: envio-db-staging
+                  property: password
+              - key: ENVIO_PG_DATABASE
+                fromDatabase:
+                  name: envio-db-staging
+                  property: database
+              - key: ENVIO_PG_SSL_MODE
+                value: "false"
+              - key: ENVIO_PG_PUBLIC_SCHEMA
+                value: "envio"
+              - key: ENVIO_INDEXER_HOST
+                value: "0.0.0.0"
+              - key: ENVIO_INDEXER_PORT
+                value: "9898"
+              - key: CONFIG_FILE
+                value: "config.yaml"
+              - key: LOG_LEVEL
+                value: "trace"
+              - key: LOG_STRATEGY
+                value: "console-pretty"
+              - key: HASURA_GRAPHQL_ROLE
+                value: "admin"
+              - key: HASURA_SERVICE_HOST
+                fromService:
+                  name: graphql-engine-staging
+                  type: web
+                  envVarKey: RENDER_INTERNAL_HOSTNAME
+              - key: HASURA_SERVICE_PORT
+                value: "8080"
+              - key: ENVIO_THROTTLE_CHAIN_METADATA_INTERVAL_MILLIS
+                value: "500"
+              - key: ENVIO_THROTTLE_PRUNE_STALE_DATA_INTERVAL_MILLIS
+                value: "30000"
+              - key: ENVIO_THROTTLE_LIVE_METRICS_BENCHMARK_INTERVAL_MILLIS
+                value: "1000"
+              - key: ENVIO_THROTTLE_JSON_FILE_BENCHMARK_INTERVAL_MILLIS
+                value: "500"
+              - key: ENVIO_STALL_WATCHDOG_INTERVAL_MILLIS
+                value: "60000"
+              - key: ENVIO_STALL_WATCHDOG_TIMEOUT_MILLIS
+                value: "1800000"
+              - key: ENVIO_STALL_WATCHDOG_MIN_BLOCK_LAG
+                value: "10000"
+              - key: TUI_OFF
+                value: "true"
+
+          - type: web
+            name: graphiql-staging
+            runtime: node
+            region: virginia
+            plan: starter
+            branch: main
+            autoDeployTrigger: commit
+            buildCommand: echo "no build step"
+            startCommand: node apps/indexer/graphiql/server.js
+            healthCheckPath: /healthz
+            envVars:
+              - fromGroup: envio-staging-readonly-jwt
+              - key: NODE_VERSION
+                value: "20"
+              - key: PORT
+                value: "4000"
+              - key: HASURA_GRAPHQL_ENDPOINT
+                fromService:
+                  name: graphql-engine-staging
+                  type: web
+                  envVarKey: RENDER_EXTERNAL_HOSTNAME
+
+          - type: web
+            name: envio-monitoring-staging
+            runtime: node
+            region: virginia
+            plan: starter
+            branch: main
+            autoDeployTrigger: commit
+            buildCommand: echo "no build step"
+            startCommand: node apps/monitoring/server.js
+            # Staging begins with an empty database, so freshness-sensitive
+            # /healthz will fail until the historical backfill reaches canaries.
+            healthCheckPath: /livez
+            envVars:
+              - fromGroup: envio-staging-readonly-jwt
+              - fromGroup: envio-staging-rpc
+              - key: NODE_VERSION
+                value: "20"
+              - key: PORT
+                value: "4100"
+              - key: INDEXER_PROJECT_PATH
+                value: "../indexer"
+              - key: GRAPHQL_HOST
+                fromService:
+                  name: graphql-engine-staging
+                  type: web
+                  envVarKey: RENDER_INTERNAL_HOSTNAME
