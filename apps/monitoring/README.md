@@ -17,6 +17,11 @@ node server.js
 
 Open <http://localhost:4100>. The page auto-refreshes every 5 seconds.
 
+`/livez` reports whether the monitoring process can serve HTTP and is used by
+Render for deployment health checks. `/healthz` separately checks whether the
+configured canary vaults have fresh indexed data, so it can intentionally
+return 503 while an otherwise healthy service is catching up after a reindex.
+
 ## Env vars
 
 | Var | Default | Purpose |
