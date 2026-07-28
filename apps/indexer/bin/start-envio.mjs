@@ -57,30 +57,6 @@ if (!env.HASURA_GRAPHQL_ENDPOINT && env.HASURA_SERVICE_HOST) {
   console.log(`Derived HASURA_GRAPHQL_ENDPOINT: ${env.HASURA_GRAPHQL_ENDPOINT}`);
 }
 
-// Both `envio local db-migrate up` and `envio start` independently check
-// config.yaml/schema.graphql against the already-indexed data and refuse to
-// resume when the change is incompatible (e.g. a new contract/event, not
-// just an address-list tweak). Normally that just crashes the process forever
-// until someone manually reruns with the reset variant of the command. Detect
-// that specific failure per-command and reset automatically instead.
-//
-// envio's compatibility check doesn't flag *removing* a chain from
-// config.yaml as incompatible, but a later startup step still crashes trying
-// to resume the removed chain's leftover progress row ("No chain with id N
-// found in config.yaml") — treat that the same way: it only clears up with a
-// full reset, since a fresh init builds chain state from config.yaml alone.
-const RESET_TRIGGER_PATTERNS = [
-  /config changes are incompatible with the existing indexer data/,
-  /No chain with id \d+ found in config\.yaml/,
-];
-const needsReset = (output) =>
-  RESET_TRIGGER_PATTERNS.some((pattern) => pattern.test(output));
-
-// `envio start` runs for the life of the deploy, so accumulating its full
-// output here would leak memory. Only the tail matters — reset-trigger errors
-// appear right before the process exits — so keep a bounded window instead.
-const OUTPUT_TAIL_CHARS = 16_000;
-
 let activeIndexerChild;
 let watchdogRestartRequested = false;
 
@@ -119,7 +95,7 @@ const runPnpm = (args) =>
     const startsIndexer = isIndexerStart(args);
     const child = spawn("pnpm", args, {
       env,
-      stdio: ["inherit", "pipe", "pipe"],
+      stdio: "inherit",
       // Give the long-running pnpm/envio process tree its own group so the
       // watchdog can terminate both processes. Killing only pnpm can orphan
       // the actual indexer and leave two workers writing to the same database.
@@ -130,67 +106,26 @@ const runPnpm = (args) =>
       watchdogRestartRequested = false;
     }
 
-    let output = "";
-    // The incompatible-config error prints its trigger line *first* and then
-    // dumps a diff of every changed entity/property — often hundreds of lines,
-    // far larger than OUTPUT_TAIL_CHARS. If we only test the bounded tail after
-    // the process closes, that diff has already pushed the trigger line out of
-    // the window and the reset never fires (exactly the production regression
-    // this guards against). Latch the match as it streams past instead: test
-    // both the raw chunk (in case the whole error arrives in one write) and the
-    // rolling tail (in case the trigger line spans a chunk boundary), while the
-    // trigger line is still visible.
-    let sawResetTrigger = false;
-    const relay = (source, dest) => {
-      source.on("data", (chunk) => {
-        dest.write(chunk);
-        const text = chunk.toString();
-        output = (output + text).slice(-OUTPUT_TAIL_CHARS);
-        if (!sawResetTrigger && (needsReset(text) || needsReset(output))) {
-          sawResetTrigger = true;
-        }
-      });
-    };
-    relay(child.stdout, process.stdout);
-    relay(child.stderr, process.stderr);
-
     child.on("close", (code) => {
       if (activeIndexerChild === child) {
         activeIndexerChild = undefined;
       }
-      resolve({
-        code: watchdogRestartRequested ? 1 : code,
-        output,
-        sawResetTrigger,
-      });
+      resolve(watchdogRestartRequested ? 1 : code);
     });
   });
 
-// Runs `pnpm <args>`; if it fails specifically because envio detected an
-// incompatible config change, reruns with `resetArgs` (which wipes and
-// reinitializes) instead. Any other failure just exits the process.
-const runPnpmWithReset = async (args, resetArgs) => {
-  const attempt = await runPnpm(args);
-  if (attempt.code === 0) {
-    return;
+// Startup is deliberately fail-closed. Envio performs its own compatibility
+// checks; if migration or startup fails for any reason, preserve PostgreSQL
+// exactly as-is and let the deployment fail for investigation.
+const runPnpmOrExit = async (args) => {
+  const code = await runPnpm(args);
+  if (code !== 0) {
+    process.exit(code ?? 1);
   }
-
-  if (attempt.sawResetTrigger) {
-    console.warn(
-      `config.yaml (or schema.graphql) drifted from the existing indexed data — resetting the database and reindexing from scratch (\`pnpm ${resetArgs.join(" ")}\`).`,
-    );
-    const reset = await runPnpm(resetArgs);
-    if (reset.code !== 0) {
-      process.exit(reset.code ?? 1);
-    }
-    return;
-  }
-
-  process.exit(attempt.code ?? 1);
 };
 
-// envio wipes and rebuilds all Hasura metadata on every startup/reset (clear
-// then re-track), but it only ever grants `select` to the `public` role —
+// Envio can rebuild Hasura metadata during startup (clear then re-track), but
+// it only ever grants `select` to the `public` role —
 // hardcoded in its own Hasura.res.mjs, with no env var to change it. Clients
 // authenticated via HASURA_GRAPHQL_JWT (graphiql, apps/monitoring) are pinned
 // to the `readonly` role instead (see HASURA_GRAPHQL_JWT_SECRET's claims_map),
@@ -205,8 +140,8 @@ const runPnpmWithReset = async (args, resetArgs) => {
 // reconcile against Hasura's actual state: poll its metadata while envio runs
 // and, whenever tables are tracked and `public` has been granted but the
 // readonly inherited role is missing, (re)create it. This self-heals across the
-// initial startup, resets (`envio start -r`), and any later metadata rebuild,
-// with no dependency on log wording.
+// initial startup and any later metadata rebuild, with no dependency on log
+// wording.
 const HASURA_RECONCILE_INTERVAL_MS = 20_000;
 
 const hasuraMetadataUrl = () => {
@@ -399,10 +334,7 @@ const startChainProgressWatchdog = () => {
   setInterval(check, WATCHDOG_INTERVAL_MS).unref();
 };
 
-await runPnpmWithReset(
-  ["envio", "local", "db-migrate", "up"],
-  ["envio", "local", "db-migrate", "setup"],
-);
+await runPnpmOrExit(["envio", "local", "db-migrate", "up"]);
 
 const migrationsDir = join(process.cwd(), "migrations");
 if (existsSync(migrationsDir)) {
@@ -445,9 +377,8 @@ if (existsSync(migrationsDir)) {
 }
 
 // Reconcile the readonly inherited role in the background for the whole life of
-// the indexer — it survives the initial track, resets, and metadata rebuilds.
+// the indexer — it survives the initial track and metadata rebuilds.
 startReadonlyRoleReconciler();
 startChainProgressWatchdog();
 
-await runPnpmWithReset(["envio", "start"], ["envio", "start", "-r"]);
-process.exit(0);
+await runPnpmOrExit(["envio", "start"]);
