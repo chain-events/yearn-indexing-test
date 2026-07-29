@@ -7,7 +7,7 @@ Monorepo containing the Yearn Envio indexer and its supporting services.
 ```
 apps/
   indexer/            # envio indexer — config.yaml, schema.graphql, src/, Dockerfile, graphiql/, ...
-  monitoring/         # sync-status dashboard (envio version, % synced per chain, total events)
+  monitoring/         # live sync/readiness dashboard (RPC heads, per-chain status, total events)
 package.json          # monorepo root (scripts that proxy to workspaces)
 pnpm-workspace.yaml   # workspace definition (apps/*)
 pnpm-lock.yaml        # single lockfile for the whole monorepo

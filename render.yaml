@@ -181,7 +181,10 @@ services:
     autoDeployTrigger: commit
     buildCommand: echo "no build step"
     startCommand: node apps/monitoring/server.js
-    healthCheckPath: /healthz
+    # Liveness must not depend on the indexer's data freshness. /healthz is the
+    # separate vault-event semantic canary and can intentionally fail while
+    # the indexer catches up.
+    healthCheckPath: /livez
     envVars:
       - key: NODE_VERSION
         value: "20"
