@@ -1,24 +1,2 @@
-packages:
-  - "apps/*"
-  # envio codegen writes a nested package here with its own dependencies
-  # (rescript, pino, etc.). Listing it as a workspace project makes pnpm
-  # install those deps when envio runs `pnpm install` from inside generated/.
-  - "apps/indexer/generated"
-
-savePrefix: ""
-minimumReleaseAge: 10080
-minimumReleaseAgeIgnoreMissingTime: true
-minimumReleaseAgeExclude:
-  - envio
-
-# Fail installation when a dependency requests a lifecycle script unless it is
-# explicitly approved below.
-strictDepBuilds: true
-
-onlyBuiltDependencies:
-  - esbuild
-  - rescript
-
 allowBuilds:
   esbuild: true
-  rescript: true

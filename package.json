@@ -1,15 +1,35 @@
 {
-  "name": "yearn-indexing-monorepo",
-  "private": true,
-  "version": "0.0.0",
-  "engines": {
-    "node": ">=22.0.0",
-    "pnpm": ">=10.16.0"
-  },
+  "name": "envio-indexer",
+  "version": "0.1.0",
+  "type": "module",
   "scripts": {
-    "indexer:dev": "pnpm --filter envio-indexer dev",
-    "indexer:start": "pnpm --filter envio-indexer start",
-    "monitoring:start": "pnpm --filter envio-monitoring start"
+    "clean": "tsc --clean",
+    "build": "tsc --build",
+    "check:config": "node scripts/check_envio_config_compatibility.mjs",
+    "watch": "tsc --watch",
+    "mocha": "vitest run",
+    "codegen": "envio codegen",
+    "dev": "envio dev",
+    "migrate": "envio local db-migrate up",
+    "start": "node bin/start-envio.mjs",
+    "start:envio": "envio start",
+    "sync:vaults": "node scripts/update_kong_vaults.js",
+    "test": "vitest run",
+    "calc-fees": "tsc -p tsconfig.calc.json && node build/calc/calculate-depositor-fees.js",
+    "jwt:generate": "node scripts/generate_hasura_jwt.js"
   },
-  "packageManager": "pnpm@11.1.1+sha512.d1fdf5f73c617b64fa1a56a81c3c8dfe0e966e33a6010aa256b517ae77be21d93e05affc0de1a83b0e4f29d569f68b446ae8f068cd7247c0bb3df0fb4d7bdf9a"
+  "devDependencies": {
+    "@types/node": "20.17.0",
+    "dotenv": "17.4.1",
+    "postgres": "3.4.9",
+    "typescript": "5.9.3",
+    "vitest": "3.2.6"
+  },
+  "dependencies": {
+    "envio": "3.4.0",
+    "viem": "2.47.11"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  }
 }
