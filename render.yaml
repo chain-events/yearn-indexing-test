@@ -125,6 +125,10 @@ services:
         value: "1800000"
       - key: ENVIO_STALL_WATCHDOG_MIN_BLOCK_LAG
         value: "10000"
+      # Start in diagnostic-only mode. Switch to restart after observing stable
+      # production diagnostics; restarts only terminate the child process tree.
+      - key: ENVIO_STALL_WATCHDOG_MODE
+        value: "observe"
       - key: ENVIO_RPC_URL_ETHEREUM
         sync: false
       - key: ENVIO_RPC_URL_OPTIMISM

@@ -64,13 +64,27 @@ The indexer is pinned to Envio 3.3, which includes upstream multichain and
 factory-indexer scheduler/stability improvements.
 
 On Render, the same start script monitors `chain_metadata` while Envio runs.
-If a chain is at least 10,000 blocks behind and its processed block, fetched
-block, and event count all remain unchanged for 30 minutes, it terminates the
-single worker process. Render then restarts it from the existing checkpoint;
-the watchdog does not reset or modify the database. The interval, timeout, and
-minimum lag are configured by `ENVIO_STALL_WATCHDOG_INTERVAL_MILLIS`,
-`ENVIO_STALL_WATCHDOG_TIMEOUT_MILLIS`, and
-`ENVIO_STALL_WATCHDOG_MIN_BLOCK_LAG`.
+It gets an independent `eth_blockNumber` head through the corresponding
+`ENVIO_RPC_URL_<CHAIN>` variable, so `chain_metadata.block_height` is never
+mistaken for a live chain head. If a chain is materially behind that head and
+its processed block, fetched block, and event count all remain unchanged, the
+watchdog emits structured diagnostics with the chain, head, source, lag, and
+reason. Render defaults to `ENVIO_STALL_WATCHDOG_MODE=observe`; set the mode to
+`restart` only after reviewing those diagnostics. Restart mode terminates only
+the indexer child process group, so Render resumes from the existing database
+checkpoint without resetting or modifying it. `off` disables the watchdog.
+
+The interval, timeout, minimum lag, startup grace, cooldown, required
+consecutive observations, restart budget, RPC timeout, and RPC concurrency are
+configured by `ENVIO_STALL_WATCHDOG_INTERVAL_MILLIS`,
+`ENVIO_STALL_WATCHDOG_TIMEOUT_MILLIS`,
+`ENVIO_STALL_WATCHDOG_MIN_BLOCK_LAG`,
+`ENVIO_STALL_WATCHDOG_STARTUP_GRACE_MILLIS`,
+`ENVIO_STALL_WATCHDOG_COOLDOWN_MILLIS`,
+`ENVIO_STALL_WATCHDOG_CONSECUTIVE_OBSERVATIONS`,
+`ENVIO_STALL_WATCHDOG_RESTART_BUDGET`,
+`ENVIO_STALL_WATCHDOG_RPC_TIMEOUT_MILLIS`, and
+`ENVIO_STALL_WATCHDOG_RPC_CONCURRENCY`.
 
 - `ENVIO_API_TOKEN`
 - `HASURA_GRAPHQL_ADMIN_SECRET`
