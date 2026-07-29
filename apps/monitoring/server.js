@@ -46,11 +46,14 @@ const INDEXER_PROJECT_PATH = resolve(
   __dirname,
   process.env.INDEXER_PROJECT_PATH || "../indexer",
 );
-
-if (!GRAPHQL_URL) {
-  console.error("GRAPHQL_URL (or GRAPHQL_HOST) is required");
-  process.exit(1);
-}
+// A chain can be a handful of blocks behind its current target without being
+// operationally behind (for example, while its final fetch is in flight). Keep
+// that allowance explicit and small; it must never be inferred from Envio's
+// historical caught-up timestamp.
+const SYNC_BLOCK_TOLERANCE = nonNegativeInteger(
+  process.env.SYNC_BLOCK_TOLERANCE,
+  2,
+);
 
 const CHAIN_NAMES = {
   1: "Ethereum",
@@ -96,6 +99,11 @@ const HEALTH_CHECK_VAULTS = [
 const HEALTH_MAX_DATA_AGE_DAYS = Number(process.env.HEALTH_MAX_DATA_AGE_DAYS || 30);
 const HEALTH_MAX_DATA_AGE_MS = HEALTH_MAX_DATA_AGE_DAYS * 24 * 60 * 60 * 1000;
 const ADDRESS_RE = /^0x[0-9a-fA-F]{40}$/;
+
+function nonNegativeInteger(value, fallback) {
+  const parsed = Number(value);
+  return Number.isInteger(parsed) && parsed >= 0 ? parsed : fallback;
+}
 
 function rpcUrlForChain(chainId) {
   const named = RPC_NAME_BY_CHAIN[chainId];
@@ -205,6 +213,7 @@ function readEnvioVersion() {
 }
 
 async function queryGraphQL(query) {
+  if (!GRAPHQL_URL) throw new Error("GRAPHQL_URL (or GRAPHQL_HOST) is required");
   const headers = { "Content-Type": "application/json" };
   if (GRAPHQL_BEARER_TOKEN) headers["Authorization"] = `Bearer ${GRAPHQL_BEARER_TOKEN}`;
   const res = await fetch(GRAPHQL_URL, {
@@ -218,8 +227,15 @@ async function queryGraphQL(query) {
   return body.data;
 }
 
-async function getStatus() {
-  const data = await queryGraphQL(`
+export async function getStatus({
+  queryGraphQLFn = queryGraphQL,
+  fetchChainHeadFn = fetchChainHead,
+  rpcUrlForChainFn = rpcUrlForChain,
+  now = () => new Date(),
+  blockTolerance = SYNC_BLOCK_TOLERANCE,
+} = {}) {
+  const observedAt = now().toISOString();
+  const data = await queryGraphQLFn(`
     {
       chain_metadata {
         chain_id
@@ -239,27 +255,46 @@ async function getStatus() {
   const metas = data.chain_metadata ?? [];
   const rpcHeads = await Promise.all(
     metas.map((c) => {
-      const url = rpcUrlForChain(c.chain_id);
-      return url ? fetchChainHead(url) : Promise.resolve(null);
+      const url = rpcUrlForChainFn(c.chain_id);
+      return url ? fetchChainHeadFn(url) : Promise.resolve(null);
     }),
   );
 
   const chains = metas.map((c, i) => {
     const syncStart = c.first_event_block_number ?? c.start_block ?? 0;
-    const envioHead = Math.max(c.block_height ?? 0, c.latest_fetched_block_number ?? 0);
-    const head = rpcHeads[i] != null ? Math.max(rpcHeads[i], envioHead) : envioHead;
-    const target = c.end_block ?? head;
+    const metadataHead = Math.max(c.block_height ?? 0, c.latest_fetched_block_number ?? 0);
+    const rpcHead = rpcHeads[i];
+    // An explicit end block is a complete target by itself. For an open-ended
+    // chain, only the independently observed RPC head is trustworthy enough to
+    // claim current readiness; metadata is diagnostic, never a fallback target.
+    const hasEndBlock = c.end_block != null;
+    const targetBlock = hasEndBlock ? c.end_block : rpcHead;
+    const headSource = hasEndBlock ? "end_block" : rpcHead != null ? "rpc" : "unknown";
     const processed = c.latest_processed_block ?? 0;
-    const totalRange = Math.max(0, target - syncStart);
+    const knownTarget = targetBlock != null;
+    const totalRange = knownTarget ? Math.max(0, targetBlock - syncStart) : null;
     const doneRange = Math.max(0, processed - syncStart);
-    const caughtUp = c.timestamp_caught_up_to_head_or_endblock != null;
-    let percent = 0;
-    if (caughtUp) percent = 100;
-    else if (totalRange > 0) percent = Math.min(100, (doneRange / totalRange) * 100);
+    const blocksBehind = knownTarget ? Math.max(0, targetBlock - processed) : null;
+    const status = !knownTarget
+      ? "unknown"
+      : blocksBehind <= blockTolerance
+        ? "caught_up"
+        : "behind";
+    const caughtUp = status === "caught_up";
+    let percent = null;
+    if (knownTarget) {
+      percent = caughtUp
+        ? 100
+        : totalRange > 0
+          ? Math.min(100, (doneRange / totalRange) * 100)
+          : 0;
+    }
     return {
       chainId: c.chain_id,
       chainName: CHAIN_NAMES[c.chain_id] ?? `Chain ${c.chain_id}`,
-      blockHeight: head,
+      // blockHeight is retained for existing API consumers. New consumers
+      // should use the explicitly sourced fields below.
+      blockHeight: targetBlock,
       startBlock: c.start_block,
       endBlock: c.end_block,
       firstEventBlock: c.first_event_block_number,
@@ -267,31 +302,44 @@ async function getStatus() {
       latestFetchedBlock: c.latest_fetched_block_number,
       numEventsProcessed: Number(c.num_events_processed ?? 0),
       isHyperSync: c.is_hyper_sync,
+      rpcHead,
+      metadataHead,
+      targetBlock,
+      headSource,
+      observedAt,
+      status,
       caughtUp,
-      caughtUpAt: c.timestamp_caught_up_to_head_or_endblock,
+      metadataCaughtUpAt: c.timestamp_caught_up_to_head_or_endblock,
       percentSynced: percent,
-      blocksBehind: Math.max(0, target - processed),
+      blocksBehind,
     };
   });
 
   chains.sort((a, b) => a.chainId - b.chainId);
 
   const totalEvents = chains.reduce((acc, c) => acc + c.numEventsProcessed, 0);
-  const avgPercent = chains.length
+  const knownChains = chains.filter((c) => c.status !== "unknown");
+  const avgPercent = knownChains.length === chains.length && chains.length
     ? chains.reduce((acc, c) => acc + c.percentSynced, 0) / chains.length
-    : 0;
+    : null;
+  const caughtUpChainCount = chains.filter((c) => c.status === "caught_up").length;
+  const behindChainCount = chains.filter((c) => c.status === "behind").length;
+  const unknownChainCount = chains.filter((c) => c.status === "unknown").length;
 
   return {
     envioVersion: readEnvioVersion(),
     deployedCommit: readDeployedCommit(),
     indexerProjectPath: INDEXER_PROJECT_PATH,
-    fetchedAt: new Date().toISOString(),
+    fetchedAt: observedAt,
     chains,
     totals: {
       chainCount: chains.length,
+      caughtUpChainCount,
+      behindChainCount,
+      unknownChainCount,
       totalEvents,
       averagePercentSynced: avgPercent,
-      allCaughtUp: chains.length > 0 && chains.every((c) => c.caughtUp),
+      allCaughtUp: chains.length > 0 && caughtUpChainCount === chains.length,
     },
   };
 }
@@ -343,24 +391,57 @@ async function runHealthChecks() {
   return { ok: results.every((r) => r.ok), maxAgeDays: HEALTH_MAX_DATA_AGE_DAYS, results };
 }
 
-const server = createServer(async (req, res) => {
+export function createMonitoringServer({
+  getStatusFn = getStatus,
+  runHealthChecksFn = runHealthChecks,
+} = {}) {
+  return createServer(async (req, res) => {
   try {
-    // Render needs a process-liveness probe that stays independent of indexer
-    // catch-up state. Using the freshness-sensitive /healthz endpoint here
-    // prevents a healthy monitoring process from deploying during a reindex.
+    // This intentionally stays independent of GraphQL, RPC, and canary data.
+    // Render uses it to determine whether the monitoring process itself lives.
     if (req.url === "/livez") {
       res.writeHead(200, { "Content-Type": "text/plain" });
       res.end("ok");
       return;
     }
     if (req.url === "/api/status") {
-      const status = await getStatus();
+      const status = await getStatusFn();
       res.writeHead(200, { "Content-Type": "application/json" });
       res.end(JSON.stringify(status));
       return;
     }
+    if (req.url === "/readyz") {
+      try {
+        const status = await getStatusFn();
+        const failingChains = status.chains
+          .filter((chain) => chain.status !== "caught_up")
+          .map(({ chainId, chainName, status: chainStatus, blocksBehind, headSource, observedAt }) => ({
+            chainId,
+            chainName,
+            status: chainStatus,
+            blocksBehind,
+            headSource,
+            observedAt,
+          }));
+        const ready = failingChains.length === 0 && status.chains.length > 0;
+        res.writeHead(ready ? 200 : 503, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({
+          status: ready ? "ready" : "not_ready",
+          observedAt: status.fetchedAt,
+          failingChains,
+        }));
+      } catch (err) {
+        res.writeHead(503, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({
+          status: "not_ready",
+          error: err.message,
+          failingChains: [],
+        }));
+      }
+      return;
+    }
     if (req.url === "/healthz") {
-      const health = await runHealthChecks();
+      const health = await runHealthChecksFn();
       if (health.ok) {
         res.writeHead(200, { "Content-Type": "text/plain" });
         res.end("ok");
@@ -382,16 +463,34 @@ const server = createServer(async (req, res) => {
       res.end(html);
       return;
     }
+    if (req.url === "/status.js") {
+      const script = await readFile(join(__dirname, "public", "status.js"));
+      res.writeHead(200, { "Content-Type": "text/javascript; charset=utf-8" });
+      res.end(script);
+      return;
+    }
     res.writeHead(404, { "Content-Type": "text/plain" });
     res.end("not found");
   } catch (err) {
     res.writeHead(500, { "Content-Type": "application/json" });
     res.end(JSON.stringify({ error: err.message }));
   }
-});
+  });
+}
 
-server.listen(PORT, () => {
-  console.log(`envio-monitoring dashboard: http://localhost:${PORT}`);
-  console.log(`  GraphQL: ${GRAPHQL_URL}`);
-  console.log(`  Indexer project: ${INDEXER_PROJECT_PATH}`);
-});
+function startServer() {
+  if (!GRAPHQL_URL) {
+    console.error("GRAPHQL_URL (or GRAPHQL_HOST) is required");
+    process.exit(1);
+  }
+  const server = createMonitoringServer();
+  server.listen(PORT, () => {
+    console.log(`envio-monitoring dashboard: http://localhost:${PORT}`);
+    console.log(`  GraphQL: ${GRAPHQL_URL}`);
+    console.log(`  Indexer project: ${INDEXER_PROJECT_PATH}`);
+  });
+}
+
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  startServer();
+}

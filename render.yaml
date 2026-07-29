@@ -125,6 +125,10 @@ services:
         value: "1800000"
       - key: ENVIO_STALL_WATCHDOG_MIN_BLOCK_LAG
         value: "10000"
+      # Start in diagnostic-only mode. Switch to restart after observing stable
+      # production diagnostics; restarts only terminate the child process tree.
+      - key: ENVIO_STALL_WATCHDOG_MODE
+        value: "observe"
       - key: ENVIO_RPC_URL_ETHEREUM
         sync: false
       - key: ENVIO_RPC_URL_OPTIMISM
@@ -181,8 +185,9 @@ services:
     autoDeployTrigger: commit
     buildCommand: echo "no build step"
     startCommand: node apps/monitoring/server.js
-    # Deployment liveness must not depend on index freshness: /healthz is the
-    # canary-data check and intentionally fails while the indexer is catching up.
+    # Liveness must not depend on the indexer's data freshness. /healthz is the
+    # separate vault-event semantic canary and can intentionally fail while
+    # the indexer catches up.
     healthCheckPath: /livez
     envVars:
       - key: NODE_VERSION
@@ -202,6 +207,29 @@ services:
       # readonly role via claims_map). Sent as `Authorization: Bearer <token>`.
       - key: HASURA_GRAPHQL_JWT
         sync: false
+      # Independent chain heads make current readiness authoritative. These
+      # are monitoring inputs only; they do not alter Envio's persisted config
+      # and cannot trigger a database reset.
+      - key: ENVIO_RPC_URL_ETHEREUM
+        sync: false
+      - key: ENVIO_RPC_URL_OPTIMISM
+        sync: false
+      - key: ENVIO_RPC_URL_GNOSIS
+        sync: false
+      - key: ENVIO_RPC_URL_BASE
+        sync: false
+      - key: ENVIO_RPC_URL_ARBITRUM
+        sync: false
+      - key: ENVIO_RPC_URL_POLYGON
+        sync: false
+      - key: ENVIO_RPC_URL_BERACHAIN
+        sync: false
+      - key: ENVIO_RPC_URL_KATANA
+        sync: false
+      # Ignore ordinary cursor jitter while still surfacing material stalls.
+      # The external one-hour alert remains the slower paging threshold.
+      - key: SYNC_BLOCK_TOLERANCE
+        value: "100"
       # Path to the indexer project inside the deployed rootDir (relative to apps/monitoring).
       - key: INDEXER_PROJECT_PATH
         value: "../indexer"

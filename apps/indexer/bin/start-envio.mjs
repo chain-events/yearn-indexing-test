@@ -3,6 +3,8 @@ import { existsSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import postgres from "postgres";
 import { ChainProgressTracker } from "./chain-progress-tracker.mjs";
+import { observeLiveHeads } from "./live-head-source.mjs";
+import { resolveWatchdogMode } from "./watchdog-mode.mjs";
 
 const env = { ...process.env };
 const databaseUrlSource = env.ENVIO_DATABASE_URL
@@ -244,27 +246,79 @@ const startReadonlyRoleReconciler = () => {
 // otherwise-invisible partial stall into a normal process restart, preserving
 // the existing checkpoint. It deliberately considers all three durable
 // progress counters so a slow handler or a fetch-heavy phase is not mistaken
-// for a stall, and ignores chains close to their observed head.
+// for a stall. The target comes from an independent eth_blockNumber query;
+// chain_metadata.block_height is never used as a live-head proxy.
+const { requestedMode: requestedWatchdogMode, mode: WATCHDOG_MODE } =
+  resolveWatchdogMode(env.ENVIO_STALL_WATCHDOG_MODE);
 const WATCHDOG_INTERVAL_MS = Number(
-  env.ENVIO_STALL_WATCHDOG_INTERVAL_MILLIS || 60_000,
+  env.ENVIO_STALL_WATCHDOG_INTERVAL_MILLIS ?? 60_000,
 );
 const WATCHDOG_TIMEOUT_MS = Number(
-  env.ENVIO_STALL_WATCHDOG_TIMEOUT_MILLIS || 0,
+  env.ENVIO_STALL_WATCHDOG_TIMEOUT_MILLIS ?? 0,
 );
 const WATCHDOG_MIN_BLOCK_LAG = Number(
-  env.ENVIO_STALL_WATCHDOG_MIN_BLOCK_LAG || 10_000,
+  env.ENVIO_STALL_WATCHDOG_MIN_BLOCK_LAG ?? 10_000,
+);
+const WATCHDOG_STARTUP_GRACE_MS = Number(
+  env.ENVIO_STALL_WATCHDOG_STARTUP_GRACE_MILLIS ?? WATCHDOG_TIMEOUT_MS,
+);
+const WATCHDOG_COOLDOWN_MS = Number(
+  env.ENVIO_STALL_WATCHDOG_COOLDOWN_MILLIS ?? WATCHDOG_TIMEOUT_MS,
+);
+const WATCHDOG_CONSECUTIVE_OBSERVATIONS = Number(
+  env.ENVIO_STALL_WATCHDOG_CONSECUTIVE_OBSERVATIONS ?? 2,
+);
+const WATCHDOG_RESTART_BUDGET = Number(
+  env.ENVIO_STALL_WATCHDOG_RESTART_BUDGET ?? 1,
+);
+const WATCHDOG_RPC_TIMEOUT_MS = Number(
+  env.ENVIO_STALL_WATCHDOG_RPC_TIMEOUT_MILLIS ?? 10_000,
+);
+const WATCHDOG_RPC_CONCURRENCY = Number(
+  env.ENVIO_STALL_WATCHDOG_RPC_CONCURRENCY ?? 4,
 );
 
+const validPositiveNumber = (value) => Number.isFinite(value) && value > 0;
+const validNonNegativeNumber = (value) => Number.isFinite(value) && value >= 0;
+const validPositiveInteger = (value) => Number.isSafeInteger(value) && value > 0;
+const validNonNegativeInteger = (value) =>
+  Number.isSafeInteger(value) && value >= 0;
+const validWatchdogConfiguration = () =>
+  validPositiveNumber(WATCHDOG_INTERVAL_MS) &&
+  validPositiveNumber(WATCHDOG_TIMEOUT_MS) &&
+  validNonNegativeNumber(WATCHDOG_MIN_BLOCK_LAG) &&
+  validNonNegativeNumber(WATCHDOG_STARTUP_GRACE_MS) &&
+  validNonNegativeNumber(WATCHDOG_COOLDOWN_MS) &&
+  validPositiveInteger(WATCHDOG_CONSECUTIVE_OBSERVATIONS) &&
+  validNonNegativeInteger(WATCHDOG_RESTART_BUDGET) &&
+  validPositiveNumber(WATCHDOG_RPC_TIMEOUT_MS) &&
+  validPositiveInteger(WATCHDOG_RPC_CONCURRENCY);
+
+const watchdogLog = (level, details) => {
+  console[level](`chain_progress_watchdog ${JSON.stringify(details)}`);
+};
+
 const startChainProgressWatchdog = () => {
-  if (!Number.isFinite(WATCHDOG_TIMEOUT_MS) || WATCHDOG_TIMEOUT_MS <= 0) {
+  if (requestedWatchdogMode !== WATCHDOG_MODE) {
+    watchdogLog("warn", {
+      mode: "off",
+      reason: "invalid_mode",
+      requestedMode: requestedWatchdogMode,
+    });
+  }
+  if (WATCHDOG_MODE === "off") return;
+
+  if (!validWatchdogConfiguration()) {
+    // Do not coerce invalid values into an aggressive watchdog. Failing open
+    // here avoids a deployment typo turning a monitoring feature into a
+    // restart loop.
+    watchdogLog("warn", { mode: WATCHDOG_MODE, reason: "invalid_configuration" });
     return;
   }
 
   const schema = env.ENVIO_PG_PUBLIC_SCHEMA || "envio";
   if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(schema)) {
-    console.warn(
-      `Chain progress watchdog disabled: invalid ENVIO_PG_PUBLIC_SCHEMA ${JSON.stringify(schema)}.`,
-    );
+    watchdogLog("warn", { mode: WATCHDOG_MODE, reason: "invalid_schema" });
     return;
   }
 
@@ -283,6 +337,10 @@ const startChainProgressWatchdog = () => {
   const tracker = new ChainProgressTracker({
     timeoutMs: WATCHDOG_TIMEOUT_MS,
     minBlockLag: WATCHDOG_MIN_BLOCK_LAG,
+    startupGraceMs: WATCHDOG_STARTUP_GRACE_MS,
+    cooldownMs: WATCHDOG_COOLDOWN_MS,
+    consecutiveObservations: WATCHDOG_CONSECUTIVE_OBSERVATIONS,
+    restartBudget: WATCHDOG_RESTART_BUDGET,
   });
   let checking = false;
 
@@ -295,42 +353,95 @@ const startChainProgressWatchdog = () => {
       const rows = await sql`
         SELECT
           chain_id,
-          block_height,
           latest_processed_block,
           latest_fetched_block_number,
-          num_events_processed
-        FROM ${sql(schema)}.${sql("chain_metadata")}
+          num_events_processed,
+          to_jsonb(chain_metadata)->>'end_block' AS end_block
+        FROM ${sql(schema)}.${sql("chain_metadata")} AS chain_metadata
       `;
-      for (const {
-        chainId,
-        lag,
-        processed,
-        fetched,
-        events,
-        stalledFor,
-      } of tracker.observe(rows)) {
+      const heads = await observeLiveHeads({
+        rows,
+        env,
+        timeoutMs: WATCHDOG_RPC_TIMEOUT_MS,
+        concurrency: WATCHDOG_RPC_CONCURRENCY,
+      });
+      const observations = rows.map((row) => {
+        const head = heads.get(Number(row.chain_id));
+        if (!Number.isSafeInteger(head?.head)) {
+          // Never include RPC URLs or provider errors in logs: URLs commonly
+          // contain credentials/API keys. An unavailable source is unknown,
+          // not evidence of an indexer failure.
+          watchdogLog("warn", {
+            chain: Number(row.chain_id),
+            head: null,
+            source: head?.source ?? "rpc",
+            lag: null,
+            reason: head?.reason ?? "unknown_head",
+          });
+        }
+        return {
+          ...row,
+          liveHead: head?.head,
+          headSource: head?.source,
+        };
+      });
+
+      for (const stalled of tracker.observe(observations)) {
+        watchdogLog(WATCHDOG_MODE === "restart" ? "error" : "warn", {
+          mode: WATCHDOG_MODE,
+          chain: stalled.chainId,
+          head: stalled.head,
+          target: stalled.target,
+          source: stalled.source,
+          lag: stalled.lag,
+          reason: stalled.reason,
+          processed: stalled.processed,
+          fetched: stalled.fetched,
+          events: stalled.events,
+          stalledForMs: stalled.stalledFor,
+          restartBudgetRemaining: stalled.restartBudgetRemaining,
+        });
+        if (WATCHDOG_MODE !== "restart") continue;
+        if (!tracker.consumeRestartBudget()) {
+          watchdogLog("warn", {
+            mode: WATCHDOG_MODE,
+            chain: stalled.chainId,
+            head: stalled.head,
+            source: stalled.source,
+            lag: stalled.lag,
+            reason: "restart_budget_exhausted",
+          });
+          continue;
+        }
+
+        // This intentionally terminates only the detached pnpm/envio process
+        // group. No reset, migration, truncate, or checkpoint mutation occurs.
         watchdogRestartRequested = true;
-        console.error(
-          `Chain ${chainId} is ${lag} blocks behind and made no durable progress for ${Math.round(stalledFor / 60_000)} minutes ` +
-            `(processed=${processed}, fetched=${fetched}, events=${events}). Restarting Envio from its existing checkpoint.`,
-        );
         terminateIndexerProcessGroup(child);
         return;
       }
     } catch (error) {
       // Database maintenance and short connection failures must never take the
       // indexer down. A successful later pass resumes the same observations.
-      console.warn(
-        `Chain progress watchdog could not read chain_metadata: ${error.message}`,
-      );
+      watchdogLog("warn", {
+        mode: WATCHDOG_MODE,
+        reason: "chain_metadata_unavailable",
+      });
     } finally {
       checking = false;
     }
   };
 
-  console.log(
-    `Chain progress watchdog enabled: restart after ${Math.round(WATCHDOG_TIMEOUT_MS / 60_000)} minutes without progress while at least ${WATCHDOG_MIN_BLOCK_LAG} blocks behind.`,
-  );
+  watchdogLog("log", {
+    mode: WATCHDOG_MODE,
+    reason: "enabled",
+    timeoutMs: WATCHDOG_TIMEOUT_MS,
+    minBlockLag: WATCHDOG_MIN_BLOCK_LAG,
+    startupGraceMs: WATCHDOG_STARTUP_GRACE_MS,
+    cooldownMs: WATCHDOG_COOLDOWN_MS,
+    consecutiveObservations: WATCHDOG_CONSECUTIVE_OBSERVATIONS,
+    restartBudget: WATCHDOG_RESTART_BUDGET,
+  });
   setInterval(check, WATCHDOG_INTERVAL_MS).unref();
 };
 

@@ -3,7 +3,7 @@
 Minimal dashboard for a self-hosted Envio indexer. Shows:
 
 - **Envio version** — read from the indexer project (`generated/persisted_state.envio.json`, falling back to `package.json`)
-- **% synced per chain** — computed from `chain_metadata.latest_processed_block` vs `block_height`
+- **Live readiness per chain** — computed from `chain_metadata.latest_processed_block` against an independent RPC head (or an explicit Envio `end_block`)
 - **Total events processed** — summed from `chain_metadata.num_events_processed`
 
 ## Setup
@@ -17,10 +17,10 @@ node server.js
 
 Open <http://localhost:4100>. The page auto-refreshes every 5 seconds.
 
-`/livez` reports whether the monitoring process can serve HTTP and is used by
-Render for deployment health checks. `/healthz` separately checks whether the
-configured canary vaults have fresh indexed data, so it can intentionally
-return 503 while an otherwise healthy service is catching up after a reindex.
+`/livez` is the process-liveness endpoint for Render: it does not depend on
+GraphQL, RPC, or indexed data. `/healthz` remains the vault-event semantic
+canary and may return 503 when canary data is stale. `/readyz` reports current
+per-chain sync readiness and returns 503 with every behind or unknown chain.
 
 ## Env vars
 
@@ -32,15 +32,22 @@ return 503 while an otherwise healthy service is catching up after a reindex.
 | `GRAPHQL_HOST` | — | Alternative to `GRAPHQL_URL`; bare hostname combined with `:8080/v1/graphql` (used by Render's `fromService` wiring) |
 | `INDEXER_PROJECT_PATH` | `../indexer` | Path to the indexer app (used to read the envio version) |
 | `PORT` | `4100` | Dashboard port |
+| `SYNC_BLOCK_TOLERANCE` | `2` | A chain is `caught_up` only when it is within this many blocks of its current RPC/end-block target. Set `0` for exact-block readiness. |
 | `HEALTH_MAX_DATA_AGE_DAYS` | `30` | Max age (days) of the newest deposit/withdraw for the `/healthz` canary vaults before the endpoint reports `not ok` (503) |
 
 ## How sync % is computed
 
-For each chain in `chain_metadata`:
+For each chain in `chain_metadata`, the API exposes `rpcHead`, `metadataHead`,
+`targetBlock`, `headSource`, and `observedAt`. For an open-ended chain, an RPC
+head is required; an unavailable RPC makes its status `unknown` rather than
+falling back to Envio metadata. An explicit `end_block` remains a valid target
+even if that RPC is unavailable.
 
 ```
 percent = (latest_processed_block - first_event_block_number)
-        / ((end_block ?? block_height) - first_event_block_number)
+        / ((end_block ?? rpc_head) - first_event_block_number)
 ```
 
-If `timestamp_caught_up_to_head_or_endblock` is set, the chain is reported as 100% / "caught up" regardless.
+`caught_up` and 100% are assigned only when the current target is within
+`SYNC_BLOCK_TOLERANCE`. `timestamp_caught_up_to_head_or_endblock` is returned
+only as historical `metadataCaughtUpAt`; it never changes current readiness.
