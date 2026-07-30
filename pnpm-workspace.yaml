@@ -1,2 +1,9 @@
 allowBuilds:
   esbuild: true
+minimumReleaseAgeExclude:
+  - envio-darwin-arm64@3.5.0-rc.0
+  - envio-darwin-x64@3.5.0-rc.0
+  - envio-linux-arm64@3.5.0-rc.0
+  - envio-linux-x64-musl@3.5.0-rc.0
+  - envio-linux-x64@3.5.0-rc.0
+  - envio@3.5.0-rc.0
