@@ -1,4 +1,4 @@
-type Deposit {
+type Deposit @index(fields: ["chainId", "transactionHash"]) {
   id: ID!
   vaultAddress: String! @index
   chainId: Int! @index
@@ -15,7 +15,7 @@ type Deposit {
   shares: BigInt!
 }
 
-type Withdraw {
+type Withdraw @index(fields: ["chainId", "transactionHash"]) {
   id: ID!
   vaultAddress: String! @index
   chainId: Int! @index
@@ -33,7 +33,7 @@ type Withdraw {
   shares: BigInt!
 }
 
-type Transfer {
+type Transfer @index(fields: ["chainId", "transactionHash"]) {
   id: ID!
   vaultAddress: String! @index
   chainId: Int! @index
@@ -452,7 +452,7 @@ type V2Registry2NewVault {
 
 # ─── Yearn V2 Vault Events ────────────────────────────────────────────────────
 
-type V2Deposit {
+type V2Deposit @index(fields: ["chainId", "transactionHash"]) {
   id: ID!
   vaultAddress: String! @index
   chainId: Int! @index
@@ -468,7 +468,7 @@ type V2Deposit {
   amount: BigInt!
 }
 
-type V2Withdraw {
+type V2Withdraw @index(fields: ["chainId", "transactionHash"]) {
   id: ID!
   vaultAddress: String! @index
   chainId: Int! @index
