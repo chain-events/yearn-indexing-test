@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: envio-monitoring
+    runtime: node
+    rootDir: monitoring
+    buildCommand: "true"
+    startCommand: node server.js
+    healthCheckPath: /healthz
+    envVars:
+      - key: ENVIO_GRAPHQL_URL
+        sync: false
+      - key: ENVIO_PASSWORD
+        sync: false
+      - key: INDEXER_PROJECT_PATH
+        value: ..
+      - key: SYNC_BLOCK_TOLERANCE
+        value: "2"
