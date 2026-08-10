@@ -7,3 +7,9 @@ minimumReleaseAgeExclude:
   - envio-linux-x64-musl@3.5.0-rc.0
   - envio-linux-x64@3.5.0-rc.0
   - envio@3.5.0-rc.0
+  - envio-darwin-arm64@3.6.1
+  - envio-darwin-x64@3.6.1
+  - envio-linux-arm64@3.6.1
+  - envio-linux-x64-musl@3.6.1
+  - envio-linux-x64@3.6.1
+  - envio@3.6.1
