@@ -1,9 +1,9 @@
-import { createServer } from "node:http";
-import { readFile } from "node:fs/promises";
-import { existsSync, readFileSync } from "node:fs";
-import { resolve, dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
 import { execSync } from "node:child_process";
+import { existsSync, readFileSync } from "node:fs";
+import { readFile } from "node:fs/promises";
+import { createServer } from "node:http";
+import { dirname, join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -34,30 +34,16 @@ loadDotEnv(join(__dirname, "..", ".env"));
 const PORT = Number(process.env.PORT || 4100);
 
 // Default = Envio cloud HyperIndex instance for this project.
-export const DEFAULT_GRAPHQL_URL =
-  "https://indexer.hyperindex.xyz/3fec0a4/v1/graphql";
+export const DEFAULT_GRAPHQL_URL = "https://indexer.hyperindex.xyz/5a089e4/v1/graphql";
 
-// Cloud-first GraphQL config: ENVIO_GRAPHQL_URL + ENVIO_PASSWORD (Bearer),
-// then legacy self-hosted / Render names, then the cloud default.
-export function resolveGraphQLConfig(env = process.env) {
-  const url =
-    env.ENVIO_GRAPHQL_URL ||
-    env.GRAPHQL_URL ||
-    (env.GRAPHQL_HOST ? `http://${env.GRAPHQL_HOST}:8080/v1/graphql` : null) ||
-    DEFAULT_GRAPHQL_URL;
-  const bearerToken =
-    env.ENVIO_PASSWORD ||
-    env.GRAPHQL_BEARER_TOKEN ||
-    env.HASURA_GRAPHQL_JWT ||
-    null;
-  return { url, bearerToken };
-}
-
-export function resolveIndexerProjectPath(env = process.env, baseDir = __dirname) {
+export function resolveIndexerProjectPath(
+  env = process.env,
+  baseDir = __dirname,
+) {
   return resolve(baseDir, env.INDEXER_PROJECT_PATH || "..");
 }
 
-const { url: GRAPHQL_URL, bearerToken: GRAPHQL_BEARER_TOKEN } = resolveGraphQLConfig();
+const GRAPHQL_URL = DEFAULT_GRAPHQL_URL;
 const INDEXER_PROJECT_PATH = resolveIndexerProjectPath();
 // A chain can be a handful of blocks behind its current target without being
 // operationally behind (for example, while its final fetch is in flight). Keep
@@ -104,12 +90,30 @@ const RPC_NAME_BY_CHAIN = {
 // provably fresh. Addresses are EIP-55 checksummed to match how the indexer stores
 // vaultAddress (viem getAddress). Edit the list to add more canary vaults.
 const HEALTH_CHECK_VAULTS = [
-  { vaultAddress: "0xBe53A109B494E5c9f97b9Cd39Fe969BE68BF6204", chainId: 1, label: "yvUSDC-1" },
-  { vaultAddress: "0x9F4330700a36B29952869fac9b33f45EEdd8A3d8", chainId: 1, label: "yBOLD" },
-  { vaultAddress: "0x80c34BD3A3569E126e7055831036aa7b212cB159", chainId: 747474, label: "yvvbUSDC" },
-  { vaultAddress: "0xc3BD0A2193c8F027B82ddE3611D18589ef3f62a9", chainId: 8453, label: "yvUSDC-H" },
+  {
+    vaultAddress: "0xBe53A109B494E5c9f97b9Cd39Fe969BE68BF6204",
+    chainId: 1,
+    label: "yvUSDC-1",
+  },
+  {
+    vaultAddress: "0x9F4330700a36B29952869fac9b33f45EEdd8A3d8",
+    chainId: 1,
+    label: "yBOLD",
+  },
+  {
+    vaultAddress: "0x80c34BD3A3569E126e7055831036aa7b212cB159",
+    chainId: 747474,
+    label: "yvvbUSDC",
+  },
+  {
+    vaultAddress: "0xc3BD0A2193c8F027B82ddE3611D18589ef3f62a9",
+    chainId: 8453,
+    label: "yvUSDC-H",
+  },
 ];
-const HEALTH_MAX_DATA_AGE_DAYS = Number(process.env.HEALTH_MAX_DATA_AGE_DAYS || 30);
+const HEALTH_MAX_DATA_AGE_DAYS = Number(
+  process.env.HEALTH_MAX_DATA_AGE_DAYS || 30,
+);
 const HEALTH_MAX_DATA_AGE_MS = HEALTH_MAX_DATA_AGE_DAYS * 24 * 60 * 60 * 1000;
 const ADDRESS_RE = /^0x[0-9a-fA-F]{40}$/;
 
@@ -132,7 +136,12 @@ async function fetchChainHead(url) {
     const res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "eth_blockNumber", params: [] }),
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        id: 1,
+        method: "eth_blockNumber",
+        params: [],
+      }),
       signal: AbortSignal.timeout(4000),
     });
     if (!res.ok) return null;
@@ -174,7 +183,8 @@ function readDeployedCommit() {
 
   try {
     const opts = { cwd: __dirname, stdio: ["ignore", "pipe", "ignore"] };
-    if (!sha) sha = execSync("git rev-parse HEAD", opts).toString().trim() || null;
+    if (!sha)
+      sha = execSync("git rev-parse HEAD", opts).toString().trim() || null;
     if (sha) {
       const fmt = execSync(`git show -s --format=%s%n%an%n%cI ${sha}`, opts)
         .toString()
@@ -184,7 +194,9 @@ function readDeployedCommit() {
       date = fmt[2] || null;
     }
     if (!branch) {
-      branch = execSync("git rev-parse --abbrev-ref HEAD", opts).toString().trim() || null;
+      branch =
+        execSync("git rev-parse --abbrev-ref HEAD", opts).toString().trim() ||
+        null;
     }
   } catch {}
 
@@ -206,12 +218,17 @@ function readDeployedCommit() {
 function readEnvioVersion() {
   const candidates = [
     {
-      path: join(INDEXER_PROJECT_PATH, "generated", "persisted_state.envio.json"),
+      path: join(
+        INDEXER_PROJECT_PATH,
+        "generated",
+        "persisted_state.envio.json",
+      ),
       extract: (json) => json.envio_version,
     },
     {
       path: join(INDEXER_PROJECT_PATH, "package.json"),
-      extract: (json) => json?.dependencies?.envio ?? json?.devDependencies?.envio,
+      extract: (json) =>
+        json?.dependencies?.envio ?? json?.devDependencies?.envio,
     },
   ];
   for (const { path, extract } of candidates) {
@@ -227,18 +244,21 @@ function readEnvioVersion() {
 
 async function queryGraphQL(query) {
   if (!GRAPHQL_URL) {
-    throw new Error("ENVIO_GRAPHQL_URL (or GRAPHQL_URL / GRAPHQL_HOST) is required");
+    throw new Error(
+      "ENVIO_GRAPHQL_URL (or GRAPHQL_URL / GRAPHQL_HOST) is required",
+    );
   }
   const headers = { "Content-Type": "application/json" };
-  if (GRAPHQL_BEARER_TOKEN) headers["Authorization"] = `Bearer ${GRAPHQL_BEARER_TOKEN}`;
   const res = await fetch(GRAPHQL_URL, {
     method: "POST",
     headers,
     body: JSON.stringify({ query }),
   });
-  if (!res.ok) throw new Error(`GraphQL request failed: ${res.status} ${res.statusText}`);
+  if (!res.ok)
+    throw new Error(`GraphQL request failed: ${res.status} ${res.statusText}`);
   const body = await res.json();
-  if (body.errors) throw new Error(`GraphQL errors: ${JSON.stringify(body.errors)}`);
+  if (body.errors)
+    throw new Error(`GraphQL errors: ${JSON.stringify(body.errors)}`);
   return body.data;
 }
 
@@ -277,19 +297,30 @@ export async function getStatus({
 
   const chains = metas.map((c, i) => {
     const syncStart = c.first_event_block_number ?? c.start_block ?? 0;
-    const metadataHead = Math.max(c.block_height ?? 0, c.latest_fetched_block_number ?? 0);
+    const metadataHead = Math.max(
+      c.block_height ?? 0,
+      c.latest_fetched_block_number ?? 0,
+    );
     const rpcHead = rpcHeads[i];
     // An explicit end block is a complete target by itself. For an open-ended
     // chain, only the independently observed RPC head is trustworthy enough to
     // claim current readiness; metadata is diagnostic, never a fallback target.
     const hasEndBlock = c.end_block != null;
     const targetBlock = hasEndBlock ? c.end_block : rpcHead;
-    const headSource = hasEndBlock ? "end_block" : rpcHead != null ? "rpc" : "unknown";
+    const headSource = hasEndBlock
+      ? "end_block"
+      : rpcHead != null
+        ? "rpc"
+        : "unknown";
     const processed = c.latest_processed_block ?? 0;
     const knownTarget = targetBlock != null;
-    const totalRange = knownTarget ? Math.max(0, targetBlock - syncStart) : null;
+    const totalRange = knownTarget
+      ? Math.max(0, targetBlock - syncStart)
+      : null;
     const doneRange = Math.max(0, processed - syncStart);
-    const blocksBehind = knownTarget ? Math.max(0, targetBlock - processed) : null;
+    const blocksBehind = knownTarget
+      ? Math.max(0, targetBlock - processed)
+      : null;
     const status = !knownTarget
       ? "unknown"
       : blocksBehind <= blockTolerance
@@ -334,10 +365,13 @@ export async function getStatus({
 
   const totalEvents = chains.reduce((acc, c) => acc + c.numEventsProcessed, 0);
   const knownChains = chains.filter((c) => c.status !== "unknown");
-  const avgPercent = knownChains.length === chains.length && chains.length
-    ? chains.reduce((acc, c) => acc + c.percentSynced, 0) / chains.length
-    : null;
-  const caughtUpChainCount = chains.filter((c) => c.status === "caught_up").length;
+  const avgPercent =
+    knownChains.length === chains.length && chains.length
+      ? chains.reduce((acc, c) => acc + c.percentSynced, 0) / chains.length
+      : null;
+  const caughtUpChainCount = chains.filter(
+    (c) => c.status === "caught_up",
+  ).length;
   const behindChainCount = chains.filter((c) => c.status === "behind").length;
   const unknownChainCount = chains.filter((c) => c.status === "unknown").length;
 
@@ -370,10 +404,9 @@ async function latestVaultEventTimestamp(vaultAddress, chainId) {
     Deposit(where: { ${filter} }, order_by: { blockTimestamp: desc }, limit: 1) { blockTimestamp }
     Withdraw(where: { ${filter} }, order_by: { blockTimestamp: desc }, limit: 1) { blockTimestamp }
   }`);
-  const timestamps = [
-    ...(data.Deposit ?? []),
-    ...(data.Withdraw ?? []),
-  ].map((row) => Number(row.blockTimestamp));
+  const timestamps = [...(data.Deposit ?? []), ...(data.Withdraw ?? [])].map(
+    (row) => Number(row.blockTimestamp),
+  );
   return timestamps.length ? Math.max(...timestamps) : null;
 }
 
@@ -382,7 +415,10 @@ async function latestVaultEventTimestamp(vaultAddress, chainId) {
 async function runHealthChecks() {
   const results = await Promise.all(
     HEALTH_CHECK_VAULTS.map(async (vault) => {
-      const latest = await latestVaultEventTimestamp(vault.vaultAddress, vault.chainId);
+      const latest = await latestVaultEventTimestamp(
+        vault.vaultAddress,
+        vault.chainId,
+      );
       let ok;
       let detail;
       if (latest == null) {
@@ -403,7 +439,11 @@ async function runHealthChecks() {
       };
     }),
   );
-  return { ok: results.every((r) => r.ok), maxAgeDays: HEALTH_MAX_DATA_AGE_DAYS, results };
+  return {
+    ok: results.every((r) => r.ok),
+    maxAgeDays: HEALTH_MAX_DATA_AGE_DAYS,
+    results,
+  };
 }
 
 export function createMonitoringServer({
@@ -411,91 +451,113 @@ export function createMonitoringServer({
   runHealthChecksFn = runHealthChecks,
 } = {}) {
   return createServer(async (req, res) => {
-  try {
-    // This intentionally stays independent of GraphQL, RPC, and canary data.
-    // Render uses it to determine whether the monitoring process itself lives.
-    if (req.url === "/livez") {
-      res.writeHead(200, { "Content-Type": "text/plain" });
-      res.end("ok");
-      return;
-    }
-    if (req.url === "/api/status") {
-      const status = await getStatusFn();
-      res.writeHead(200, { "Content-Type": "application/json" });
-      res.end(JSON.stringify(status));
-      return;
-    }
-    if (req.url === "/readyz") {
-      try {
-        const status = await getStatusFn();
-        const failingChains = status.chains
-          .filter((chain) => chain.status !== "caught_up")
-          .map(({ chainId, chainName, status: chainStatus, blocksBehind, headSource, observedAt }) => ({
-            chainId,
-            chainName,
-            status: chainStatus,
-            blocksBehind,
-            headSource,
-            observedAt,
-          }));
-        const ready = failingChains.length === 0 && status.chains.length > 0;
-        res.writeHead(ready ? 200 : 503, { "Content-Type": "application/json" });
-        res.end(JSON.stringify({
-          status: ready ? "ready" : "not_ready",
-          observedAt: status.fetchedAt,
-          failingChains,
-        }));
-      } catch (err) {
-        res.writeHead(503, { "Content-Type": "application/json" });
-        res.end(JSON.stringify({
-          status: "not_ready",
-          error: err.message,
-          failingChains: [],
-        }));
-      }
-      return;
-    }
-    if (req.url === "/healthz") {
-      const health = await runHealthChecksFn();
-      if (health.ok) {
+    try {
+      // This intentionally stays independent of GraphQL, RPC, and canary data.
+      // Render uses it to determine whether the monitoring process itself lives.
+      if (req.url === "/livez") {
         res.writeHead(200, { "Content-Type": "text/plain" });
         res.end("ok");
-      } else {
-        const failing = health.results
-          .filter((r) => !r.ok)
-          .map((r) => `- ${r.label} (${r.vaultAddress}, chain ${r.chainId}): ${r.detail}`)
-          .join("\n");
-        res.writeHead(503, { "Content-Type": "text/plain" });
-        res.end(
-          `not ok: vault data not fresh within ${health.maxAgeDays} days\n${failing}\n`,
-        );
+        return;
       }
-      return;
+      if (req.url === "/api/status") {
+        const status = await getStatusFn();
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify(status));
+        return;
+      }
+      if (req.url === "/readyz") {
+        try {
+          const status = await getStatusFn();
+          const failingChains = status.chains
+            .filter((chain) => chain.status !== "caught_up")
+            .map(
+              ({
+                chainId,
+                chainName,
+                status: chainStatus,
+                blocksBehind,
+                headSource,
+                observedAt,
+              }) => ({
+                chainId,
+                chainName,
+                status: chainStatus,
+                blocksBehind,
+                headSource,
+                observedAt,
+              }),
+            );
+          const ready = failingChains.length === 0 && status.chains.length > 0;
+          res.writeHead(ready ? 200 : 503, {
+            "Content-Type": "application/json",
+          });
+          res.end(
+            JSON.stringify({
+              status: ready ? "ready" : "not_ready",
+              observedAt: status.fetchedAt,
+              failingChains,
+            }),
+          );
+        } catch (err) {
+          res.writeHead(503, { "Content-Type": "application/json" });
+          res.end(
+            JSON.stringify({
+              status: "not_ready",
+              error: err.message,
+              failingChains: [],
+            }),
+          );
+        }
+        return;
+      }
+      if (req.url === "/healthz") {
+        const health = await runHealthChecksFn();
+        if (health.ok) {
+          res.writeHead(200, { "Content-Type": "text/plain" });
+          res.end("ok");
+        } else {
+          const failing = health.results
+            .filter((r) => !r.ok)
+            .map(
+              (r) =>
+                `- ${r.label} (${r.vaultAddress}, chain ${r.chainId}): ${r.detail}`,
+            )
+            .join("\n");
+          res.writeHead(503, { "Content-Type": "text/plain" });
+          res.end(
+            `not ok: vault data not fresh within ${health.maxAgeDays} days\n${failing}\n`,
+          );
+        }
+        return;
+      }
+      if (req.url === "/" || req.url === "/index.html") {
+        const html = await readFile(join(__dirname, "public", "index.html"));
+        res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
+        res.end(html);
+        return;
+      }
+      if (req.url === "/status.js") {
+        const script = await readFile(join(__dirname, "public", "status.js"));
+        res.writeHead(200, {
+          "Content-Type": "text/javascript; charset=utf-8",
+        });
+        res.end(script);
+        return;
+      }
+      res.writeHead(404, { "Content-Type": "text/plain" });
+      res.end("not found");
+    } catch (err) {
+      res.writeHead(500, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: err.message }));
     }
-    if (req.url === "/" || req.url === "/index.html") {
-      const html = await readFile(join(__dirname, "public", "index.html"));
-      res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
-      res.end(html);
-      return;
-    }
-    if (req.url === "/status.js") {
-      const script = await readFile(join(__dirname, "public", "status.js"));
-      res.writeHead(200, { "Content-Type": "text/javascript; charset=utf-8" });
-      res.end(script);
-      return;
-    }
-    res.writeHead(404, { "Content-Type": "text/plain" });
-    res.end("not found");
-  } catch (err) {
-    res.writeHead(500, { "Content-Type": "application/json" });
-    res.end(JSON.stringify({ error: err.message }));
-  }
   });
 }
 
 function startServer() {
   if (!GRAPHQL_URL) {
-    console.error("ENVIO_GRAPHQL_URL (or GRAPHQL_URL / GRAPHQL_HOST) is required");
+    console.error(
+      "ENVIO_GRAPHQL_URL (or GRAPHQL_URL / GRAPHQL_HOST) is required",
+    );
     process.exit(1);
   }
   const server = createMonitoringServer();
@@ -506,6 +568,9 @@ function startServer() {
   });
 }
 
-if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+if (
+  process.argv[1] &&
+  resolve(process.argv[1]) === fileURLToPath(import.meta.url)
+) {
   startServer();
 }

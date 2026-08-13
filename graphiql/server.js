@@ -15,9 +15,6 @@ const HASURA_ENDPOINT = (() => {
   return `https://${raw}/v1/graphql`;
 })();
 
-// Pre-generated JWT token for Hasura authentication
-const HASURA_JWT = process.env.HASURA_GRAPHQL_JWT || "";
-
 // ---------------------------------------------------------------------------
 // HTML – GraphiQL served from CDN
 // ---------------------------------------------------------------------------
@@ -54,13 +51,12 @@ function buildHtml(endpoint, token) {
   <script crossorigin src="https://unpkg.com/graphiql@3/graphiql.min.js"></script>
 
   <script>
-    function createFetcher(endpoint, token) {
+    function createFetcher(endpoint) {
       return function graphQLFetcher(graphQLParams) {
         return fetch(endpoint, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "Authorization": "Bearer " + token,
           },
           body: JSON.stringify(graphQLParams),
         }).then(function (response) { return response.json(); });
@@ -69,7 +65,7 @@ function buildHtml(endpoint, token) {
 
     ReactDOM.createRoot(document.getElementById("graphiql")).render(
       React.createElement(GraphiQL, {
-        fetcher: createFetcher(${JSON.stringify(endpoint)}, ${JSON.stringify(token)}),
+        fetcher: createFetcher(${JSON.stringify(endpoint)}),
         defaultEditorToolsVisibility: true,
       }),
     );

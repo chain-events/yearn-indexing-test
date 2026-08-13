@@ -6,8 +6,22 @@ services:
     buildCommand: "true"
     startCommand: node server.js
     healthCheckPath: /healthz
+
+  - type: web
+    name: graphiql
+    runtime: node
+    region: virginia
+    plan: starter
+    rootDir: ./graphiql
+    buildCommand: echo "no build step"
+    startCommand: node server.js
+    healthCheckPath: /healthz
+    domains:
+      - envio-explorer.yearn.dev
     envVars:
-      - key: ENVIO_GRAPHQL_URL
-        sync: false
-      - key: ENVIO_PASSWORD
-        sync: false
+      - key: NODE_VERSION
+        value: "20"
+      - key: PORT
+        value: "4000"
+      - key: HASURA_ENDPOINT
+        value: https://indexer.hyperindex.xyz/5a089e4/v1/graphql
