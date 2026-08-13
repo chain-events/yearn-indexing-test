@@ -18,7 +18,7 @@ const HASURA_ENDPOINT = (() => {
 // ---------------------------------------------------------------------------
 // HTML – GraphiQL served from CDN
 // ---------------------------------------------------------------------------
-function buildHtml(endpoint, token) {
+function buildHtml(endpoint) {
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -84,13 +84,7 @@ const server = http.createServer((req, res) => {
     return res.end("ok");
   }
 
-  // Serve GraphiQL
-  if (!HASURA_JWT) {
-    res.writeHead(500, { "Content-Type": "text/plain" });
-    return res.end("HASURA_GRAPHQL_JWT is not set");
-  }
-
-  const html = buildHtml(HASURA_ENDPOINT, HASURA_JWT);
+  const html = buildHtml(HASURA_ENDPOINT);
   res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
   return res.end(html);
 });
