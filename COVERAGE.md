@@ -34,6 +34,7 @@ Configured chains include Kong's current Yearn chains:
 | `yearn/2/vault/StrategyAdded` | `StrategyMigrated(address,address)` | `YearnV2Vault` | `V2StrategyMigrated` | Covered |
 | `yearn/2/vault/StrategyRevoked` | `StrategyRevoked(address)` | `YearnV2Vault` | `V2StrategyRevoked` | Covered |
 | `yearn/2/vault/StrategyReported` | `StrategyReported(address,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256)` | `YearnV2Vault` | `V2StrategyReported` | Covered |
+| `yearn/2/vault/StrategyReported` | `StrategyReported(address,uint256,uint256,uint256,uint256,uint256,uint256,uint256)` | `YearnV2Vault` | `V2StrategyReported` (`StrategyReportedLegacy`) | Covered |
 | `yearn/3/registry` | `NewEndorsedVault(address,address,uint256,uint256)` | `YearnV3Registry` | `V3RegistryNewEndorsedVault` | Covered |
 | `yearn/3/registry2` | `NewEndorsedVault(address,address,uint256,uint256)` | `YearnV3Registry` | `V3RegistryNewEndorsedVault` | Covered |
 | `yearn/3/registry3` | `NewEndorsedVault(address,address,uint256,uint256)` | `YearnV3Registry` | `V3RegistryNewEndorsedVault` | Covered |

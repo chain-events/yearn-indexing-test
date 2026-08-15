@@ -1085,6 +1085,31 @@ indexer.onEvent({ contract: "YearnV2Vault", event: "StrategyReported" }, async (
   context.V2StrategyReported.set(entity);
 });
 
+indexer.onEvent({ contract: "YearnV2Vault", event: "StrategyReportedLegacy" }, async ({ event, context }) => {
+  const entity: V2StrategyReported = {
+    id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
+    vaultAddress: getAddress(event.srcAddress),
+    chainId: event.chainId,
+    blockNumber: event.block.number,
+    blockTimestamp: event.block.timestamp,
+    blockHash: event.block.hash,
+    transactionHash: event.transaction.hash,
+    transactionIndex: event.transaction.transactionIndex,
+    transactionFrom: addr(event.transaction.from),
+    logIndex: event.logIndex,
+    strategy: getAddress(event.params.strategy),
+    gain: event.params.gain,
+    loss: event.params.loss,
+    debtPaid: 0n,
+    totalGain: event.params.totalGain,
+    totalLoss: event.params.totalLoss,
+    totalDebt: event.params.totalDebt,
+    debtAdded: event.params.debtAdded,
+    debtRatio: event.params.debtRatio,
+  };
+  context.V2StrategyReported.set(entity);
+});
+
 indexer.onEvent({ contract: "YearnV2Vault", event: "FeeReport" }, async ({ event, context }) => {
   const entity: V2FeeReport = {
     ...eventCore(event),
