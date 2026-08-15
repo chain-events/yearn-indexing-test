@@ -3,9 +3,9 @@
 // =============================================================================
 // This file is NOT part of the production Yearn indexer. It exists solely for a
 // research project enumerating Gnosis Safe deployments on Ethereum mainnet, and
-// is wired to the SafeProxyFactory contract entries marked TEMPORARY / RESEARCH
+// is wired to the SafeProxyFactory* contract entries marked TEMPORARY / RESEARCH
 // ONLY in config.yaml. Nothing in src/EventHandlers.ts depends on it. Remove
-// this file (plus the SafeProxyFactory config entries and the SafeProxy entity
+// this file (plus the SafeProxyFactory* config entries and the SafeProxy entity
 // in schema.graphql) to fully drop the research additions.
 // =============================================================================
 
@@ -13,13 +13,12 @@ import { indexer } from "envio";
 import type { SafeProxy } from "envio";
 import { getAddress } from "viem";
 
-// Every Safe is deployed by a SafeProxyFactory, which always emits
-// ProxyCreation(proxy, singleton). The factory is permissionless, so any
-// contract can be passed as the singleton; the map below resolves the known
-// Safe singletons (masterCopies) to their version. An undefined version means an
-// unrecognized singleton (arbitrary contract, or a Safe version newer than this map).
-// Sources: safe-global/safe-deployments (canonical + eip155 variants) and
-// empirically verified via the Safe tx-service /creation/ endpoint.
+// Known Safe singletons (masterCopies) resolved to their version. The factory is
+// permissionless, so any contract can be passed as the singleton; an undefined
+// version means an unrecognized singleton (arbitrary contract, or a Safe version
+// newer than this map). Sources: safe-global/safe-deployments (canonical +
+// eip155 variants), empirically verified via the Safe tx-service /creation/
+// endpoint and eth_getLogs.
 const SAFE_SINGLETON_VERSIONS: Record<string, string> = Object.fromEntries(
   (
     [
@@ -36,15 +35,36 @@ const SAFE_SINGLETON_VERSIONS: Record<string, string> = Object.fromEntries(
   ).map(([checksummed, version]) => [getAddress(checksummed), version]),
 );
 
-indexer.onEvent({ contract: "SafeProxyFactory", event: "ProxyCreation" }, async ({ event, context }) => {
+// Shared writer. The ProxyCreation event ABI differs per factory generation
+// (verified on-chain via eth_getLogs):
+//   v1.1.1:          ProxyCreation(address proxy)                    — proxy in data, no singleton
+//   v1.3.0 (both):   ProxyCreation(address proxy, address singleton) — BOTH in data (proxy NOT indexed)
+//   v1.4.1 / v1.5.0: ProxyCreation(address indexed proxy, address singleton)
+// envio keys events by name within a contract, so each generation is a separate
+// config contract (SafeProxyFactory / SafeProxyFactoryV130 / SafeProxyFactoryV111)
+// sharing this handler file. envio delivers params by NAME regardless of
+// indexed-ness, so all three decode to { proxy, singleton? }.
+type ProxyCreationEvent = {
+  chainId: number;
+  block: { number: number; timestamp: number; hash: string };
+  transaction: { hash: string; transactionIndex: number; from: string | undefined };
+  logIndex: number;
+  srcAddress: string;
+  params: { proxy: string; singleton?: string };
+};
+
+const saveSafeProxy = async (
+  event: ProxyCreationEvent,
+  context: { SafeProxy: { set: (e: SafeProxy) => void } },
+): Promise<void> => {
   const proxy = getAddress(event.params.proxy);
-  const singleton = getAddress(event.params.singleton);
+  const singleton = event.params.singleton ? getAddress(event.params.singleton) : undefined;
   const entity: SafeProxy = {
     id: `${event.chainId}_${proxy}`, // one row per Safe; overwrite on re-creation
     chainId: event.chainId,
     proxy,
     singleton,
-    singletonVersion: SAFE_SINGLETON_VERSIONS[singleton],
+    singletonVersion: singleton ? SAFE_SINGLETON_VERSIONS[singleton] : undefined,
     factoryAddress: getAddress(event.srcAddress),
     blockNumber: event.block.number,
     blockTimestamp: event.block.timestamp,
@@ -54,5 +74,20 @@ indexer.onEvent({ contract: "SafeProxyFactory", event: "ProxyCreation" }, async 
     transactionFrom: event.transaction.from ? getAddress(event.transaction.from) : undefined,
     logIndex: event.logIndex,
   };
-  context.SafeProxy.set(entity);
+  await context.SafeProxy.set(entity);
+};
+
+// v1.4.1 + v1.5.0 factories
+indexer.onEvent({ contract: "SafeProxyFactory", event: "ProxyCreation" }, async ({ event, context }) => {
+  await saveSafeProxy(event, context);
+});
+
+// v1.3.0 canonical + eip155 factories (proxy NOT indexed)
+indexer.onEvent({ contract: "SafeProxyFactoryV130", event: "ProxyCreation" }, async ({ event, context }) => {
+  await saveSafeProxy(event, context);
+});
+
+// v1.1.1 factory (no singleton in the event)
+indexer.onEvent({ contract: "SafeProxyFactoryV111", event: "ProxyCreation" }, async ({ event, context }) => {
+  await saveSafeProxy(event, context);
 });

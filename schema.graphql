@@ -1285,7 +1285,7 @@ type SafeProxy @index(fields: ["chainId", "proxy"]) {
   id: ID!
   chainId: Int! @index
   proxy: String! @index
-  singleton: String!
+  singleton: String               # null for v1.1.1-era events (no singleton in ProxyCreation(address))
   singletonVersion: String
   factoryAddress: String! @index
   blockNumber: Int! @index
