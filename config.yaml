@@ -31,6 +31,7 @@ contracts:
     handler: src/EventHandlers.ts
     events:
       - event: "NewVault(address indexed vault_address, address indexed asset)"
+      - event: "NewTokenizedStrategy(address indexed strategy, address indexed asset, string apiVersion)"
   - name: YearnV3RoleManagerFactory
     handler: src/EventHandlers.ts
     events:
@@ -47,6 +48,7 @@ contracts:
     handler: src/EventHandlers.ts
     events:
       - event: "Reported(uint256 profit, uint256 loss, uint256 protocolFees, uint256 performanceFees)"
+      - event: "StrategyShutdown()"
   - name: YearnV3SplitterFactory
     handler: src/EventHandlers.ts
     events:
