@@ -39,6 +39,8 @@ Configured chains include Kong's current Yearn chains:
 | `yearn/3/registry2` | `NewEndorsedVault(address,address,uint256,uint256)` | `YearnV3Registry` | `V3RegistryNewEndorsedVault` | Covered |
 | `yearn/3/registry3` | `NewEndorsedVault(address,address,uint256,uint256)` | `YearnV3Registry` | `V3RegistryNewEndorsedVault` | Covered |
 | `yearn/3/strategy` | `Reported(uint256,uint256,uint256,uint256)` | `YearnV3Strategy` | `V3StrategyReported` | Covered |
+| `yearn/3/strategy` | `NewTokenizedStrategy(address,address,string)` | `YearnV3VaultFactory` | `V3TokenizedStrategyDeployed` | Covered |
+| `yearn/3/strategy` | `StrategyShutdown()` | `YearnV3Strategy` | `V3StrategyShutdown` | Covered |
 | `yearn/3/vaultFactory` | `NewVault(address,address)` | `YearnV3VaultFactory` | `V3VaultFactoryNewVault` | Covered |
 | `yearn/3/roleManager` | `AddedNewVault(address,address,uint256)` | `YearnV3RoleManager` | `V3RoleManagerAddedNewVault` | Covered |
 | `yearn/3/roleManagerFactory` | `NewProject(bytes32,address)` | `YearnV3RoleManagerFactory` | `V3RoleManagerFactoryNewProject` | Covered |
@@ -80,7 +82,7 @@ an evmlog-equivalence backfill that requires every ABI-declared log:
 | Kong abiPath | RPC-only events |
 | --- | --- |
 | `yearn/2/strategy` | `Cloned`, `EmergencyExitEnabled`, `ForcedHarvestTrigger`, `SetDoHealthCheck`, `SetHealthCheck`, `UpdatedBaseFeeOracle`, `UpdatedCreditThreshold`, `UpdatedKeeper`, `UpdatedMaxReportDelay`, `UpdatedMetadataURI`, `UpdatedMinReportDelay`, `UpdatedRewards`, `UpdatedStrategist` |
-| `yearn/3/strategy` | `NewTokenizedStrategy`, `StrategyShutdown`, `UpdateKeeper`, `UpdatePendingManagement`, `UpdatePerformanceFee`, `UpdatePerformanceFeeRecipient` |
+| `yearn/3/strategy` | `UpdateKeeper`, `UpdatePendingManagement`, `UpdatePerformanceFee`, `UpdatePerformanceFeeRecipient` |
 | `yearn/2/registry` | `NewRelease`, `NewGovernance`, `VaultTagged` |
 | `yearn/2/registry2` | `ApprovedVaultEndorser`, `ApprovedVaultOwnerUpdated`, `OwnershipTransferred`, `ReleaseRegistryUpdated` |
 | `yearn/3/registry` | `RemovedVault` |
